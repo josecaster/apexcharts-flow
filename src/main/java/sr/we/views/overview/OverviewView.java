@@ -1,10 +1,11 @@
 package sr.we.views.overview;
 
 
+import com.storedobject.chart.SOChart;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.board.Board;
-import com.vaadin.flow.component.charts.Chart;
-import com.vaadin.flow.component.charts.model.*;
+//import com.vaadin.flow.component.board.Board;
+//import com.vaadin.flow.component.charts.Chart;
+//import com.vaadin.flow.component.charts.model.*;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -20,6 +21,7 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
 import javax.annotation.security.RolesAllowed;
 import sr.we.views.MainLayout;
 import sr.we.views.overview.ServiceHealth.Status;
@@ -32,12 +34,12 @@ public class OverviewView extends Main {
     public OverviewView() {
         addClassName("overview-view");
 
-        Board board = new Board();
-        board.addRow(createHighlight("Current users", "745", 33.7), createHighlight("View events", "54.6k", -112.45),
-                createHighlight("Conversion rate", "18%", 3.9), createHighlight("Custom metric", "-123.45", 0.0));
-        board.addRow(createViewEvents());
-        board.addRow(createServiceHealth(), createResponseTimes());
-        add(board);
+//        Board board = new Board();
+//        board.addRow(createHighlight("Current users", "745", 33.7), createHighlight("View events", "54.6k", -112.45),
+//                createHighlight("Conversion rate", "18%", 3.9), createHighlight("Custom metric", "-123.45", 0.0));
+//        board.addRow(createViewEvents());
+//        board.addRow(createServiceHealth(), createResponseTimes());
+//        add(board);
     }
 
     private Component createHighlight(String title, String value, Double percentage) {
@@ -85,24 +87,24 @@ public class OverviewView extends Main {
         header.add(year);
 
         // Chart
-        Chart chart = new Chart(ChartType.AREA);
-        Configuration conf = chart.getConfiguration();
-        conf.getChart().setStyledMode(true);
-
-        XAxis xAxis = new XAxis();
-        xAxis.setCategories("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec");
-        conf.addxAxis(xAxis);
-
-        conf.getyAxis().setTitle("Values");
-
-        PlotOptionsArea plotOptions = new PlotOptionsArea();
-        plotOptions.setPointPlacement(PointPlacement.ON);
-        conf.addPlotOptions(plotOptions);
-
-        conf.addSeries(new ListSeries("Berlin", 189, 191, 191, 196, 201, 203, 209, 212, 229, 242, 244, 247));
-        conf.addSeries(new ListSeries("London", 138, 146, 148, 148, 152, 153, 163, 173, 178, 179, 185, 187));
-        conf.addSeries(new ListSeries("New York", 65, 65, 66, 71, 93, 102, 108, 117, 127, 129, 135, 136));
-        conf.addSeries(new ListSeries("Tokyo", 0, 11, 17, 23, 30, 42, 48, 49, 52, 54, 58, 62));
+        SOChart chart = new SOChart();
+//        Configuration conf = chart.getConfiguration();
+//        conf.getChart().setStyledMode(true);
+//
+//        XAxis xAxis = new XAxis();
+//        xAxis.setCategories("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec");
+//        conf.addxAxis(xAxis);
+//
+//        conf.getyAxis().setTitle("Values");
+//
+//        PlotOptionsArea plotOptions = new PlotOptionsArea();
+//        plotOptions.setPointPlacement(PointPlacement.ON);
+//        conf.addPlotOptions(plotOptions);
+//
+//        conf.addSeries(new ListSeries("Berlin", 189, 191, 191, 196, 201, 203, 209, 212, 229, 242, 244, 247));
+//        conf.addSeries(new ListSeries("London", 138, 146, 148, 148, 152, 153, 163, 173, 178, 179, 185, 187));
+//        conf.addSeries(new ListSeries("New York", 65, 65, 66, 71, 93, 102, 108, 117, 127, 129, 135, 136));
+//        conf.addSeries(new ListSeries("Tokyo", 0, 11, 17, 23, 30, 42, 48, 49, 52, 54, 58, 62));
 
         // Add it all together
         VerticalLayout viewEvents = new VerticalLayout(header, chart);
@@ -118,7 +120,7 @@ public class OverviewView extends Main {
         HorizontalLayout header = createHeader("Service health", "Input / output");
 
         // Grid
-        Grid<ServiceHealth> grid = new Grid();
+        Grid<sr.we.views.overview.ServiceHealth> grid = new Grid();
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
         grid.setAllRowsVisible(true);
 
@@ -130,14 +132,14 @@ public class OverviewView extends Main {
             status.getElement().getThemeList().add(getStatusTheme(serviceHealth));
             return status;
         })).setHeader("").setFlexGrow(0).setAutoWidth(true);
-        grid.addColumn(ServiceHealth::getCity).setHeader("City").setFlexGrow(1);
-        grid.addColumn(ServiceHealth::getInput).setHeader("Input").setAutoWidth(true).setTextAlign(ColumnTextAlign.END);
-        grid.addColumn(ServiceHealth::getOutput).setHeader("Output").setAutoWidth(true)
+        grid.addColumn(sr.we.views.overview.ServiceHealth::getCity).setHeader("City").setFlexGrow(1);
+        grid.addColumn(sr.we.views.overview.ServiceHealth::getInput).setHeader("Input").setAutoWidth(true).setTextAlign(ColumnTextAlign.END);
+        grid.addColumn(sr.we.views.overview.ServiceHealth::getOutput).setHeader("Output").setAutoWidth(true)
                 .setTextAlign(ColumnTextAlign.END);
 
-        grid.setItems(new ServiceHealth(Status.EXCELLENT, "Münster", 324, 1540),
-                new ServiceHealth(Status.OK, "Cluj-Napoca", 311, 1320),
-                new ServiceHealth(Status.FAILING, "Ciudad Victoria", 300, 1219));
+        grid.setItems(new sr.we.views.overview.ServiceHealth(sr.we.views.overview.ServiceHealth.Status.EXCELLENT, "Münster", 324, 1540),
+                new sr.we.views.overview.ServiceHealth(sr.we.views.overview.ServiceHealth.Status.OK, "Cluj-Napoca", 311, 1320),
+                new sr.we.views.overview.ServiceHealth(sr.we.views.overview.ServiceHealth.Status.FAILING, "Ciudad Victoria", 300, 1219));
 
         // Add it all together
         VerticalLayout serviceHealth = new VerticalLayout(header, grid);
@@ -152,18 +154,18 @@ public class OverviewView extends Main {
         HorizontalLayout header = createHeader("Response times", "Average across all systems");
 
         // Chart
-        Chart chart = new Chart(ChartType.PIE);
-        Configuration conf = chart.getConfiguration();
-        conf.getChart().setStyledMode(true);
-
-        DataSeries series = new DataSeries();
-        series.add(new DataSeriesItem("System 1", 12.5));
-        series.add(new DataSeriesItem("System 2", 12.5));
-        series.add(new DataSeriesItem("System 3", 12.5));
-        series.add(new DataSeriesItem("System 4", 12.5));
-        series.add(new DataSeriesItem("System 5", 12.5));
-        series.add(new DataSeriesItem("System 6", 12.5));
-        conf.addSeries(series);
+        SOChart chart = new SOChart();
+//        Configuration conf = chart.getConfiguration();
+//        conf.getChart().setStyledMode(true);
+//
+//        DataSeries series = new DataSeries();
+//        series.add(new DataSeriesItem("System 1", 12.5));
+//        series.add(new DataSeriesItem("System 2", 12.5));
+//        series.add(new DataSeriesItem("System 3", 12.5));
+//        series.add(new DataSeriesItem("System 4", 12.5));
+//        series.add(new DataSeriesItem("System 5", 12.5));
+//        series.add(new DataSeriesItem("System 6", 12.5));
+//        conf.addSeries(series);
 
         // Add it all together
         VerticalLayout serviceHealth = new VerticalLayout(header, chart);
@@ -192,25 +194,25 @@ public class OverviewView extends Main {
         return header;
     }
 
-    private String getStatusDisplayName(ServiceHealth serviceHealth) {
-        Status status = serviceHealth.getStatus();
-        if (status == Status.OK) {
+    private String getStatusDisplayName(sr.we.views.overview.ServiceHealth serviceHealth) {
+        sr.we.views.overview.ServiceHealth.Status status = serviceHealth.getStatus();
+        if (status == sr.we.views.overview.ServiceHealth.Status.OK) {
             return "Ok";
-        } else if (status == Status.FAILING) {
+        } else if (status == sr.we.views.overview.ServiceHealth.Status.FAILING) {
             return "Failing";
-        } else if (status == Status.EXCELLENT) {
+        } else if (status == sr.we.views.overview.ServiceHealth.Status.EXCELLENT) {
             return "Excellent";
         } else {
             return status.toString();
         }
     }
 
-    private String getStatusTheme(ServiceHealth serviceHealth) {
-        Status status = serviceHealth.getStatus();
+    private String getStatusTheme(sr.we.views.overview.ServiceHealth serviceHealth) {
+        sr.we.views.overview.ServiceHealth.Status status = serviceHealth.getStatus();
         String theme = "badge primary small";
-        if (status == Status.EXCELLENT) {
+        if (status == sr.we.views.overview.ServiceHealth.Status.EXCELLENT) {
             theme += " success";
-        } else if (status == Status.FAILING) {
+        } else if (status == sr.we.views.overview.ServiceHealth.Status.FAILING) {
             theme += " error";
         }
         return theme;

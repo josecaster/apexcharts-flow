@@ -1,8 +1,8 @@
 package sr.we.views.athenticationauthorization;
 
-import com.vaadin.collaborationengine.CollaborationAvatarGroup;
-import com.vaadin.collaborationengine.CollaborationBinder;
-import com.vaadin.collaborationengine.UserInfo;
+//import com.vaadin.collaborationengine.CollaborationAvatarGroup;
+//import com.vaadin.collaborationengine.CollaborationBinder;
+//import com.vaadin.collaborationengine.UserInfo;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -46,7 +46,7 @@ public class AthenticationAuthorizationView extends Div implements BeforeEnterOb
 
     private Grid<SamplePerson> grid = new Grid<>(SamplePerson.class, false);
 
-    CollaborationAvatarGroup avatarGroup;
+//    CollaborationAvatarGroup avatarGroup;
 
     private TextField firstName;
     private TextField lastName;
@@ -59,7 +59,7 @@ public class AthenticationAuthorizationView extends Div implements BeforeEnterOb
     private Button cancel = new Button("Cancel");
     private Button save = new Button("Save");
 
-    private CollaborationBinder<SamplePerson> binder;
+//    private CollaborationBinder<SamplePerson> binder;
 
     private SamplePerson samplePerson;
 
@@ -76,13 +76,13 @@ public class AthenticationAuthorizationView extends Div implements BeforeEnterOb
         // identifier, and the user's real name. You can also provide the users
         // avatar by passing an url to the image as a third parameter, or by
         // configuring an `ImageProvider` to `avatarGroup`.
-        UserInfo userInfo = new UserInfo(UUID.randomUUID().toString(), "Steve Lange");
+//        UserInfo userInfo = new UserInfo(UUID.randomUUID().toString(), "Steve Lange");
 
         // Create UI
         SplitLayout splitLayout = new SplitLayout();
 
-        avatarGroup = new CollaborationAvatarGroup(userInfo, null);
-        avatarGroup.getStyle().set("visibility", "hidden");
+//        avatarGroup = new CollaborationAvatarGroup(userInfo, null);
+//        avatarGroup.getStyle().set("visibility", "hidden");
 
         createGridLayout(splitLayout);
         createEditorLayout(splitLayout);
@@ -121,11 +121,11 @@ public class AthenticationAuthorizationView extends Div implements BeforeEnterOb
         });
 
         // Configure Form
-        binder = new CollaborationBinder<>(SamplePerson.class, userInfo);
+//        binder = new CollaborationBinder<>(SamplePerson.class, userInfo);
 
         // Bind fields. This is where you'd define e.g. validation rules
 
-        binder.bindInstanceFields(this);
+//        binder.bindInstanceFields(this);
 
         cancel.addClickListener(e -> {
             clearForm();
@@ -133,20 +133,16 @@ public class AthenticationAuthorizationView extends Div implements BeforeEnterOb
         });
 
         save.addClickListener(e -> {
-            try {
-                if (this.samplePerson == null) {
-                    this.samplePerson = new SamplePerson();
-                }
-                binder.writeBean(this.samplePerson);
-
-                samplePersonService.update(this.samplePerson);
-                clearForm();
-                refreshGrid();
-                Notification.show("SamplePerson details stored.");
-                UI.getCurrent().navigate(AthenticationAuthorizationView.class);
-            } catch (ValidationException validationException) {
-                Notification.show("An exception happened while trying to store the samplePerson details.");
+            if (this.samplePerson == null) {
+                this.samplePerson = new SamplePerson();
             }
+//                binder.writeBean(this.samplePerson);
+
+            samplePersonService.update(this.samplePerson);
+            clearForm();
+            refreshGrid();
+            Notification.show("SamplePerson details stored.");
+            UI.getCurrent().navigate(AthenticationAuthorizationView.class);
         });
     }
 
@@ -188,7 +184,7 @@ public class AthenticationAuthorizationView extends Div implements BeforeEnterOb
         Component[] fields = new Component[]{firstName, lastName, email, phone, dateOfBirth, occupation, important};
 
         formLayout.add(fields);
-        editorDiv.add(avatarGroup, formLayout);
+        editorDiv.add(/*avatarGroup,*/ formLayout);
         createButtonLayout(editorLayoutDiv);
 
         splitLayout.addToSecondary(editorLayoutDiv);
@@ -224,12 +220,12 @@ public class AthenticationAuthorizationView extends Div implements BeforeEnterOb
         String topic = null;
         if (this.samplePerson != null && this.samplePerson.getId() != null) {
             topic = "samplePerson/" + this.samplePerson.getId();
-            avatarGroup.getStyle().set("visibility", "visible");
+//            avatarGroup.getStyle().set("visibility", "visible");
         } else {
-            avatarGroup.getStyle().set("visibility", "hidden");
+//            avatarGroup.getStyle().set("visibility", "hidden");
         }
-        binder.setTopic(topic, () -> this.samplePerson);
-        avatarGroup.setTopic(topic);
+//        binder.setTopic(topic, () -> this.samplePerson);
+//        avatarGroup.setTopic(topic);
 
     }
 }

@@ -1,8 +1,8 @@
 package sr.we.views.communication;
 
-import com.vaadin.collaborationengine.CollaborationMessageInput;
-import com.vaadin.collaborationengine.CollaborationMessageList;
-import com.vaadin.collaborationengine.UserInfo;
+//import com.vaadin.collaborationengine.CollaborationMessageInput;
+//import com.vaadin.collaborationengine.CollaborationMessageList;
+//import com.vaadin.collaborationengine.UserInfo;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
@@ -26,7 +26,7 @@ public class CommunicationView extends VerticalLayout {
         // identifier, and the user's real name. You can also provide the users
         // avatar by passing an url to the image as a third parameter, or by
         // configuring an `ImageProvider` to `avatarGroup`.
-        UserInfo userInfo = new UserInfo(UUID.randomUUID().toString(), "Steve Lange");
+//        UserInfo userInfo = new UserInfo(UUID.randomUUID().toString(), "Steve Lange");
 
         // Tabs allow us to change chat rooms.
         Tabs tabs = new Tabs(new Tab("#general"), new Tab("#support"), new Tab("#casual"));
@@ -40,27 +40,27 @@ public class CommunicationView extends VerticalLayout {
         // https://vaadin.com/docs/latest/ce/collaboration-message-list/#persisting-messages
         // for information on how to persisting are retrieving messages over
         // server restarts.
-        CollaborationMessageList list = new CollaborationMessageList(userInfo, "chat/#general");
-        list.setWidthFull();
-        list.addClassNames("chat-view-message-list");
+//        CollaborationMessageList list = new CollaborationMessageList(userInfo, "chat/#general");
+//        list.setWidthFull();
+//        list.addClassNames("chat-view-message-list");
 
         // `CollaborationMessageInput is a textfield and button, to be able to
         // submit new messages. To avoid having to set the same info into both
         // the message list and message input, the input takes in the list as an
         // constructor argument to get the information from there.
-        CollaborationMessageInput input = new CollaborationMessageInput(list);
-        input.addClassNames("chat-view-message-input");
-        input.setWidthFull();
+//        CollaborationMessageInput input = new CollaborationMessageInput(list);
+//        input.addClassNames("chat-view-message-input");
+//        input.setWidthFull();
 
         // Layouting
-        add(tabs, list, input);
+        add(tabs/*, list, input*/);
         setSizeFull();
-        expand(list);
+//        expand(list);
 
         // Change the topic id of the chat when a new tab is selected
         tabs.addSelectedChangeListener(event -> {
             String channelName = event.getSelectedTab().getLabel();
-            list.setTopic("chat/" + channelName);
+//            list.setTopic("chat/" + channelName);
         });
     }
 
