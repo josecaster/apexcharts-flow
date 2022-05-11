@@ -1,10 +1,30 @@
 package sr.we.data.service;
 
-import java.util.UUID;
-import org.springframework.data.jpa.repository.JpaRepository;
-import sr.we.data.entity.User;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.support.BasicAuthorizationInterceptor;
+import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import sr.we.shekelflowcore.entity.ThisUser;
 
-public interface UserRepository extends JpaRepository<User, UUID> {
+import java.util.ArrayList;
+import java.util.Arrays;
 
-    User findByUsername(String username);
+@Controller
+public class UserRepository {
+
+    public ThisUser findByUsername(String username, String password){
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.getInterceptors().add(
+                new BasicAuthorizationInterceptor(username, password));
+        String fooResourceUrl
+                = "http://localhost:9090/user/rest/me";
+        ThisUser response
+                = restTemplate.getForObject(fooResourceUrl , ThisUser.class);
+//        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
+        if(response != null && response.getRoles() != null){
+        }
+        return response;
+    }
 }

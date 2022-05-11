@@ -10,8 +10,8 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Component;
-import sr.we.data.entity.User;
 import sr.we.data.service.UserRepository;
+import sr.we.shekelflowcore.entity.ThisUser;
 
 @Component
 public class AuthenticatedUser {
@@ -29,8 +29,8 @@ public class AuthenticatedUser {
                 .filter(authentication -> !(authentication instanceof AnonymousAuthenticationToken));
     }
 
-    public Optional<User> get() {
-        return getAuthentication().map(authentication -> userRepository.findByUsername(authentication.getName()));
+    public Optional<ThisUser> get() {
+        return getAuthentication().map(authentication -> (ThisUser) authentication.getPrincipal());
     }
 
     public void logout() {

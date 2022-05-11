@@ -20,8 +20,9 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import java.util.Optional;
-import sr.we.data.entity.User;
+
 import sr.we.security.AuthenticatedUser;
+import sr.we.shekelflowcore.entity.ThisUser;
 import sr.we.views.about.AboutView;
 import sr.we.views.athenticationauthorization.AthenticationAuthorizationView;
 import sr.we.views.communication.CommunicationView;
@@ -174,11 +175,11 @@ public class MainLayout extends AppLayout {
         Footer layout = new Footer();
         layout.addClassNames("footer");
 
-        Optional<User> maybeUser = authenticatedUser.get();
+        Optional<ThisUser> maybeUser = authenticatedUser.get();
         if (maybeUser.isPresent()) {
-            User user = maybeUser.get();
+            ThisUser user = maybeUser.get();
 
-            Avatar avatar = new Avatar(user.getName(), user.getProfilePictureUrl());
+            Avatar avatar = new Avatar(user.getUsername()/*, user.getProfilePictureUrl()*/);
             avatar.addClassNames("me-xs");
 
             ContextMenu userMenu = new ContextMenu(avatar);
@@ -187,7 +188,7 @@ public class MainLayout extends AppLayout {
                 authenticatedUser.logout();
             });
 
-            Span name = new Span(user.getName());
+            Span name = new Span(user.getUsername());
             name.addClassNames("font-medium", "text-s", "text-secondary");
 
             layout.add(avatar, name);

@@ -9,8 +9,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import sr.we.data.entity.User;
 import sr.we.data.service.UserRepository;
+import sr.we.shekelflowcore.entity.ThisUser;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -24,17 +24,16 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username);
+        ThisUser user = userRepository.findByUsername(username, "");
         if (user == null) {
             throw new UsernameNotFoundException("No user present with username: " + username);
         } else {
-            return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getHashedPassword(),
-                    getAuthorities(user));
+            return user;
         }
     }
 
-    private static List<GrantedAuthority> getAuthorities(User user) {
-        return user.getRoles().stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+    private static List<GrantedAuthority> getAuthorities(ThisUser user) {
+        return user.getRoles().stream().map(role -> new SimpleGrantedAuthority( role.getName()))
                 .collect(Collectors.toList());
 
     }

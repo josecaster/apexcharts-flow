@@ -14,7 +14,7 @@ import sr.we.views.MainLayout;
 
 @PageTitle("Communication")
 @Route(value = "communication", layout = MainLayout.class)
-@RolesAllowed("ADMIN")
+@RolesAllowed("ROLE_ADMIN")
 public class CommunicationView extends VerticalLayout {
 
     public CommunicationView() {
