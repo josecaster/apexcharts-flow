@@ -8,6 +8,7 @@ import com.vaadin.flow.theme.Theme;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.system.ApplicationHome;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
@@ -24,6 +25,7 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 @PWA(name = "ShekelFlow", shortName = "ShekelFlow", offlineResources = {})
 @Push
 @NpmPackage(value = "line-awesome", version = "1.3.0")
+@EnableConfigurationProperties(ConfigProperties.class)
 public class Application extends SpringBootServletInitializer implements AppShellConfigurator {
 
     public static final String CUSTOM_BUNDLE_PREFIX = "custom_messages";

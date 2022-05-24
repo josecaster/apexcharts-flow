@@ -9,19 +9,16 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.AfterNavigationEvent;
-import com.vaadin.flow.router.AfterNavigationObserver;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.*;
+
 import java.util.Arrays;
 import java.util.List;
 import javax.annotation.security.RolesAllowed;
 import sr.we.views.MainLayout;
 
-@PageTitle("Loans")
 @Route(value = "loans", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
-public class LoansView extends Div implements AfterNavigationObserver {
+public class LoansView extends Div implements AfterNavigationObserver, HasDynamicTitle {
 
     Grid<Person> grid = new Grid<>();
 
@@ -156,4 +153,9 @@ public class LoansView extends Div implements AfterNavigationObserver {
         return p;
     }
 
+
+    @Override
+    public String getPageTitle() {
+        return getTranslation("sr.we.loans");
+    }
 }

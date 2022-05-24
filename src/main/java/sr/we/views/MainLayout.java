@@ -1,35 +1,52 @@
 package sr.we.views;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ItemLabelGenerator;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.Footer;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Header;
-import com.vaadin.flow.component.html.ListItem;
-import com.vaadin.flow.component.html.Nav;
-import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.html.UnorderedList;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.dialog.DialogVariant;
+import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.listbox.ListBox;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.data.SelectListDataView;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.router.*;
+import com.vaadin.flow.router.internal.AfterNavigationHandler;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
+
+import java.util.List;
 import java.util.Optional;
 
+import com.vaadin.flow.spring.SpringVaadinSession;
+import com.vaadin.flow.spring.security.VaadinSavedRequestAwareAuthenticationSuccessHandler;
+import org.apache.commons.lang3.StringUtils;
+import sr.we.ContextProvider;
+import sr.we.data.controller.BusinessService;
 import sr.we.security.AuthenticatedUser;
+import sr.we.shekelflowcore.entity.Business;
 import sr.we.shekelflowcore.entity.ThisUser;
+import sr.we.shekelflowcore.entity.helper.Token;
 import sr.we.views.about.AboutView;
 import sr.we.views.athenticationauthorization.AthenticationAuthorizationView;
+import sr.we.views.business.CreateBusinessView;
 import sr.we.views.communication.CommunicationView;
 import sr.we.views.customers.CustomersView;
 import sr.we.views.dashboard.DashboardView;
 import sr.we.views.flow.FlowView;
 import sr.we.views.loans.LoansView;
+import sr.we.views.login.LoginView;
+import sr.we.views.logout.LogoutView;
 import sr.we.views.overview.OverviewView;
 import sr.we.views.partners.PartnersView;
 import sr.we.views.products.ProductsView;
@@ -41,6 +58,8 @@ import sr.we.views.reports.ReportsView;
  * The main view is a top-level placeholder for other views.
  */
 public class MainLayout extends AppLayout {
+
+    private Dialog dialog;
 
     /**
      * A simple navigation item component, based on ListItem element.
@@ -66,19 +85,7 @@ public class MainLayout extends AppLayout {
             return view;
         }
 
-        /**
-         * Simple wrapper to create icons using LineAwesome iconset. See
-         * https://icons8.com/line-awesome
-         */
-        @NpmPackage(value = "line-awesome", version = "1.3.0")
-        public static class LineAwesomeIcon extends Span {
-            public LineAwesomeIcon(String lineawesomeClassnames) {
-                addClassNames("menu-item-icon");
-                if (!lineawesomeClassnames.isEmpty()) {
-                    addClassNames(lineawesomeClassnames);
-                }
-            }
-        }
+
 
     }
 
@@ -87,9 +94,23 @@ public class MainLayout extends AppLayout {
     private AuthenticatedUser authenticatedUser;
     private AccessAnnotationChecker accessChecker;
 
+    @Override
+    public void setContent(Component content) {
+        super.setContent(content);
+    }
+
     public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker) {
         this.authenticatedUser = authenticatedUser;
         this.accessChecker = accessChecker;
+
+        AuthenticatedUser bean = ContextProvider.getBean(AuthenticatedUser.class);
+        Optional<ThisUser> thisUser = bean.get();
+        if(thisUser.isPresent()){
+            ThisUser thisUser1 = thisUser.get();
+            Token token = thisUser1.getToken();
+            SpringVaadinSession.getCurrent().setAttribute("Token",token.getToken());
+        }
+
 
         setPrimarySection(Section.DRAWER);
         addToNavbar(true, createHeaderContent());
@@ -111,10 +132,18 @@ public class MainLayout extends AppLayout {
     }
 
     private Component createDrawerContent() {
+        String token = (String) SpringVaadinSession.getCurrent().getAttribute("Token");
+        if(!StringUtils.isEmpty(token)){
+            dialog = new Dialog();
+            com.vaadin.flow.component.html.Section section = new com.vaadin.flow.component.html.Section(new UserCompanyProfile(dialog), dialog,
+                    createNavigation(), createFooter());
+            section.addClassNames("drawer-section");
+            return section;
+        }
         H2 appName = new H2("ShekelFlow");
         appName.addClassNames("app-name");
 
-        com.vaadin.flow.component.html.Section section = new com.vaadin.flow.component.html.Section(appName,
+                com.vaadin.flow.component.html.Section section = new com.vaadin.flow.component.html.Section(appName,
                 createNavigation(), createFooter());
         section.addClassNames("drawer-section");
         return section;
@@ -141,32 +170,33 @@ public class MainLayout extends AppLayout {
 
     private MenuItemInfo[] createMenuItems() {
         return new MenuItemInfo[]{ //
-                new MenuItemInfo("Dashboard", "la la-chart-area", DashboardView.class), //
+                new MenuItemInfo(getTranslation("sr.we.dashboard"), "la la-chart-area", DashboardView.class), //
 
-                new MenuItemInfo("Overview", "la la-chart-area", OverviewView.class), //
+                new MenuItemInfo(getTranslation("sr.we.overview"), "la la-chart-area", OverviewView.class), //
 
-                new MenuItemInfo("Loans", "la la-list", LoansView.class), //
+                new MenuItemInfo(getTranslation("sr.we.loans"), "la la-list", LoansView.class), //
 
-                new MenuItemInfo("Purchases", "la la-list", PurchasesView.class), //
+                new MenuItemInfo(getTranslation("sr.we.purchase"), "la la-list", PurchasesView.class), //
 
-                new MenuItemInfo("Customers", "la la-th-list", CustomersView.class), //
+                new MenuItemInfo(getTranslation("sr.we.customers"), "la la-th-list", CustomersView.class), //
 
-                new MenuItemInfo("Partners", "la la-th-list", PartnersView.class), //
+                new MenuItemInfo(getTranslation("sr.we.partners"), "la la-th-list", PartnersView.class), //
 
-                new MenuItemInfo("Products", "la la-file", ProductsView.class), //
+                new MenuItemInfo(getTranslation("sr.we.products"), "la la-file", ProductsView.class), //
 
-                new MenuItemInfo("Products Components", "la la-file", ProductsComponentsView.class), //
+                new MenuItemInfo(getTranslation("sr.we.products.components"), "la la-file", ProductsComponentsView.class), //
 
-                new MenuItemInfo("Flow", "la la-file", FlowView.class), //
+                new MenuItemInfo(getTranslation("sr.we.flow"), "la la-file", FlowView.class), //
 
-                new MenuItemInfo("Athentication & Authorization", "la la-columns",
+                new MenuItemInfo(getTranslation("sr.we.authentication.authorization"), "la la-columns",
                         AthenticationAuthorizationView.class), //
 
-                new MenuItemInfo("Communication", "la la-comments", CommunicationView.class), //
+                new MenuItemInfo(getTranslation("sr.we.communication"), "la la-comments", CommunicationView.class), //
 
-                new MenuItemInfo("Reports", "la la-th-list", ReportsView.class), //
+                new MenuItemInfo(getTranslation("sr.we.reports"), "la la-th-list", ReportsView.class), //
 
-                new MenuItemInfo("About", "la la-file", AboutView.class), //
+                new MenuItemInfo(getTranslation("sr.we.about"), "la la-file", AboutView.class), //
+
 
         };
     }
@@ -204,9 +234,18 @@ public class MainLayout extends AppLayout {
     protected void afterNavigation() {
         super.afterNavigation();
         viewTitle.setText(getCurrentPageTitle());
+        if(dialog != null && dialog.isOpened()){
+            dialog.close();
+        }
     }
 
     private String getCurrentPageTitle() {
+        Component content = getContent();
+        Class aClass = content.getClass();
+        if(HasDynamicTitle.class.isAssignableFrom(aClass)){
+            HasDynamicTitle hasDynamicTitle = (HasDynamicTitle) content;
+            return hasDynamicTitle.getPageTitle();
+        }
         PageTitle title = getContent().getClass().getAnnotation(PageTitle.class);
         return title == null ? "" : title.value();
     }

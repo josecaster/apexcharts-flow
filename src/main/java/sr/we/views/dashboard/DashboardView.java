@@ -6,6 +6,7 @@ import com.vaadin.flow.component.Component;
 //import com.vaadin.flow.component.board.Board;
 //import com.vaadin.flow.component.charts.Chart;
 //import com.vaadin.flow.component.charts.model.*;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -23,17 +24,22 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import javax.annotation.security.RolesAllowed;
+
+import sr.we.ContextProvider;
+import sr.we.data.controller.BusinessService;
 import sr.we.views.MainLayout;
 import sr.we.views.dashboard.ServiceHealth.Status;
 
 @PageTitle("Dashboard")
 @Route(value = "dashboard", layout = MainLayout.class)
-@RouteAlias(value = "", layout = MainLayout.class)
+@RouteAlias(value = "dashboard", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
 public class DashboardView extends Main {
 
     public DashboardView() {
         addClassName("dashboard-view");
+
+
 
 //        Board board = new Board();
 //        board.addRow(createHighlight("Current users", "745", 33.7), createHighlight("View events", "54.6k", -112.45),

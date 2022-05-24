@@ -22,7 +22,7 @@ public class TranslationProvider implements I18NProvider {
 	 */
 	private static final long serialVersionUID = -6977664443080163524L;
 
-	public static final String BUNDLE_PREFIX = "messages";
+	public static final String BUNDLE_PREFIX = "custom_messages";
 
 	public final Locale LOCALE_NL = new Locale("nl");
 	public final Locale LOCALE_EN = new Locale("en");

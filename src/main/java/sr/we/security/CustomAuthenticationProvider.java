@@ -6,13 +6,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import sr.we.ContextProvider;
-import sr.we.data.service.UserRepository;
+import sr.we.data.controller.UserService;
 import sr.we.shekelflowcore.entity.ThisUser;
 
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Override
     public Authentication authenticate(Authentication authentication)
@@ -20,10 +20,10 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         String name = authentication.getName();
         // You can get the password here
         String password = authentication.getCredentials().toString();
-        userRepository = ContextProvider.getBean(UserRepository.class);
-            ThisUser byUsername = userRepository.findByUsername(name, password);
+        userService = ContextProvider.getBean(UserService.class);
+            ThisUser byUsername = userService.authenticate(name, password);
             Authentication auth = new UsernamePasswordAuthenticationToken(byUsername,
-                    password, byUsername.getAuthorities());
+                    password, UserDetailsServiceImpl.getAuthorities(byUsername));
             return auth;
     }
 

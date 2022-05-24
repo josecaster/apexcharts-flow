@@ -1,5 +1,7 @@
 package sr.we.views.about;
 
+import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
@@ -7,6 +9,10 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.flow.spring.SpringVaadinSession;
+import org.apache.commons.lang3.StringUtils;
+import sr.we.ContextProvider;
+import sr.we.data.controller.BusinessService;
 import sr.we.views.MainLayout;
 
 @PageTitle("About")
@@ -16,6 +22,20 @@ public class AboutView extends VerticalLayout {
 
     public AboutView() {
         setSpacing(false);
+
+        String token = (String) SpringVaadinSession.getCurrent().getAttribute("Token");
+
+        if(StringUtils.isNotEmpty(token)) {
+            add(new Text(token));
+        }
+
+        Button title = new Button("Test");
+        title.addClickListener(f -> {
+            BusinessService businessService = ContextProvider.getBean(BusinessService.class);
+            businessService.list(token);
+        });
+
+        add(title);
 
         Image img = new Image("images/empty-plant.png", "placeholder plant");
         img.setWidth("200px");

@@ -1,5 +1,7 @@
 package sr.we;
 
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.spring.SpringVaadinSession;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -20,6 +22,11 @@ public class ContextProvider implements ApplicationContextAware {
 	@SuppressWarnings("unchecked")
 	public static <T> T getBean(Class<?> cl) {
 		return (T) ctx.getBean(cl);
+	}
+
+	public static <T> T getBearerBean(Class<?> cl, VaadinSession session) {
+		String token = (String) session.getAttribute("Token");
+		return (T) ctx.getBean(cl, token);
 	}
 
 	@SuppressWarnings("unchecked")

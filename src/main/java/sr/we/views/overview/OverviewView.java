@@ -23,12 +23,14 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import javax.annotation.security.RolesAllowed;
+
+import sr.we.shekelflowcore.entity.Role;
 import sr.we.views.MainLayout;
 import sr.we.views.overview.ServiceHealth.Status;
 
 @PageTitle("Overview")
 @Route(value = "overview", layout = MainLayout.class)
-@RolesAllowed("USER")
+@RolesAllowed({Role.user,Role.staff,Role.owner,Role.admin})
 public class OverviewView extends Main {
 
     public OverviewView() {

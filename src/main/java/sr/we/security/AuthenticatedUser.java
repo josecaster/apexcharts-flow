@@ -10,17 +10,17 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Component;
-import sr.we.data.service.UserRepository;
+import sr.we.data.controller.UserService;
 import sr.we.shekelflowcore.entity.ThisUser;
 
 @Component
 public class AuthenticatedUser {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @Autowired
-    public AuthenticatedUser(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public AuthenticatedUser(UserService userService) {
+        this.userService = userService;
     }
 
     private Optional<Authentication> getAuthentication() {
