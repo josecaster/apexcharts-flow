@@ -45,4 +45,24 @@ public abstract class MyController {
         return httpEntity;
     }
 
+    protected HttpEntity<String> getHttpEntity(String body) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> httpEntity = new HttpEntity<>(body,headers);
+        return httpEntity;
+    }
+
+    public <T> T encapsulate(Build<T> build) {
+        try {
+            return build.build();
+        } catch (HttpStatusCodeException e) {
+            String responseBodyAsString = e.getResponseBodyAsString();
+            Error error = new Gson().fromJson(responseBodyAsString, Error.class);
+            if(error != null && error.getCode() != null && !error.getCode().isEmpty()){
+                throw ExceptionService.initByCode(error);
+            }
+            throw e;
+        }
+    }
+
 }

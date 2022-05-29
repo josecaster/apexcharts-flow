@@ -25,8 +25,10 @@ public class UserService extends MyController {
         String fooResourceUrl
                 = configProperties.getRest() + Services.USER_ME;
 
-        ResponseEntity<ThisUser> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, getHttpEntity(), ThisUser.class);
-        return exchange.getBody();
+        return encapsulate(() -> {
+            ResponseEntity<ThisUser> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, getHttpEntity(), ThisUser.class);
+            return exchange.getBody();
+        });
     }
 
 
