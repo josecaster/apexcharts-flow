@@ -1,52 +1,34 @@
 package sr.we.views;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ItemLabelGenerator;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
-import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.dialog.DialogVariant;
 import com.vaadin.flow.component.html.*;
-import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.listbox.ListBox;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.select.data.SelectListDataView;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.router.*;
-import com.vaadin.flow.router.internal.AfterNavigationHandler;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
-
-import java.util.List;
-import java.util.Optional;
-
 import com.vaadin.flow.spring.SpringVaadinSession;
-import com.vaadin.flow.spring.security.VaadinSavedRequestAwareAuthenticationSuccessHandler;
 import org.apache.commons.lang3.StringUtils;
 import sr.we.ContextProvider;
-import sr.we.data.controller.BusinessService;
+import sr.we.CustomErrorHandler;
 import sr.we.security.AuthenticatedUser;
-import sr.we.shekelflowcore.entity.Business;
 import sr.we.shekelflowcore.entity.ThisUser;
 import sr.we.shekelflowcore.entity.helper.Token;
 import sr.we.views.about.AboutView;
 import sr.we.views.athenticationauthorization.AthenticationAuthorizationView;
-import sr.we.views.business.CreateBusinessView;
 import sr.we.views.communication.CommunicationView;
 import sr.we.views.customers.CustomersView;
 import sr.we.views.dashboard.DashboardView;
 import sr.we.views.flow.FlowView;
 import sr.we.views.loans.LoansView;
-import sr.we.views.login.LoginView;
-import sr.we.views.logout.LogoutView;
+import sr.we.views.login.DetailInfoView;
+import sr.we.views.login.MainInfoView;
+import sr.we.views.login.NotActiveDialog;
 import sr.we.views.overview.OverviewView;
 import sr.we.views.partners.PartnersView;
 import sr.we.views.products.ProductsView;
@@ -54,67 +36,72 @@ import sr.we.views.productscomponents.ProductsComponentsView;
 import sr.we.views.purchases.PurchasesView;
 import sr.we.views.reports.ReportsView;
 
+import java.util.Optional;
+
 /**
  * The main view is a top-level placeholder for other views.
  */
-public class MainLayout extends AppLayout {
+public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
+    boolean constructed = false;
     private Dialog dialog;
+    private H1 viewTitle;
+    private AuthenticatedUser authenticatedUser;
+    private AccessAnnotationChecker accessChecker;
+    public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker) {
+        this.authenticatedUser = authenticatedUser;
+        this.accessChecker = accessChecker;
 
-    /**
-     * A simple navigation item component, based on ListItem element.
-     */
-    public static class MenuItemInfo extends ListItem {
+        dialog = new Dialog();
+        viewTitle = new H1();
 
-        private final Class<? extends Component> view;
-
-        public MenuItemInfo(String menuTitle, String iconClass, Class<? extends Component> view) {
-            this.view = view;
-            RouterLink link = new RouterLink();
-            link.addClassNames("menu-item-link");
-            link.setRoute(view);
-
-            Span text = new Span(menuTitle);
-            text.addClassNames("menu-item-text");
-
-            link.add(new LineAwesomeIcon(iconClass), text);
-            add(link);
-        }
-
-        public Class<?> getView() {
-            return view;
-        }
-
+        VaadinSession.getCurrent().setErrorHandler(new CustomErrorHandler());
 
 
     }
 
-    private H1 viewTitle;
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        AuthenticatedUser bean = ContextProvider.getBean(AuthenticatedUser.class);
+        Optional<ThisUser> thisUser = bean.get();
+        if (thisUser.isPresent()) {
+            ThisUser thisUser1 = thisUser.get();
+            Token token = thisUser1.getToken();
+            SpringVaadinSession.getCurrent().setAttribute("Token", token.getToken());
 
-    private AuthenticatedUser authenticatedUser;
-    private AccessAnnotationChecker accessChecker;
+            // basic details
+            if (thisUser1.getPerson() == null) {
+                event.forwardTo(MainInfoView.class);
+                return;
+            }
+
+            // basic details
+            if (thisUser1.getPerson().getDefaultForms() == null) {
+                event.forwardTo(DetailInfoView.class);
+                return;
+            }
+
+            // inactive user
+            if (thisUser1.getActive() == null || !thisUser1.getActive()) {
+                new NotActiveDialog().open();
+                return;
+            }
+        }
+        if (!constructed) {
+            construct();
+        }
+    }
 
     @Override
     public void setContent(Component content) {
         super.setContent(content);
     }
 
-    public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker) {
-        this.authenticatedUser = authenticatedUser;
-        this.accessChecker = accessChecker;
-
-        AuthenticatedUser bean = ContextProvider.getBean(AuthenticatedUser.class);
-        Optional<ThisUser> thisUser = bean.get();
-        if(thisUser.isPresent()){
-            ThisUser thisUser1 = thisUser.get();
-            Token token = thisUser1.getToken();
-            SpringVaadinSession.getCurrent().setAttribute("Token",token.getToken());
-        }
-
-
+    public void construct() throws RuntimeException {
         setPrimarySection(Section.DRAWER);
         addToNavbar(true, createHeaderContent());
         addToDrawer(createDrawerContent());
+        constructed = true;
     }
 
     private Component createHeaderContent() {
@@ -123,7 +110,7 @@ public class MainLayout extends AppLayout {
         toggle.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
         toggle.getElement().setAttribute("aria-label", "Menu toggle");
 
-        viewTitle = new H1();
+
         viewTitle.addClassNames("view-title");
 
         Header header = new Header(toggle, viewTitle);
@@ -133,8 +120,8 @@ public class MainLayout extends AppLayout {
 
     private Component createDrawerContent() {
         String token = (String) SpringVaadinSession.getCurrent().getAttribute("Token");
-        if(!StringUtils.isEmpty(token)){
-            dialog = new Dialog();
+        if (!StringUtils.isEmpty(token)) {
+
             com.vaadin.flow.component.html.Section section = new com.vaadin.flow.component.html.Section(new UserCompanyProfile(dialog), dialog,
                     createNavigation(), createFooter());
             section.addClassNames("drawer-section");
@@ -143,7 +130,7 @@ public class MainLayout extends AppLayout {
         H2 appName = new H2("ShekelFlow");
         appName.addClassNames("app-name");
 
-                com.vaadin.flow.component.html.Section section = new com.vaadin.flow.component.html.Section(appName,
+        com.vaadin.flow.component.html.Section section = new com.vaadin.flow.component.html.Section(appName,
                 createNavigation(), createFooter());
         section.addClassNames("drawer-section");
         return section;
@@ -172,7 +159,7 @@ public class MainLayout extends AppLayout {
         return new MenuItemInfo[]{ //
                 new MenuItemInfo(getTranslation("sr.we.dashboard"), "la la-chart-area", DashboardView.class), //
 
-                new MenuItemInfo(getTranslation("sr.we.overview"), "la la-chart-area", OverviewView.class), //
+                //new MenuItemInfo(getTranslation("sr.we.overview"), "la la-chart-area", OverviewView.class), //
 
                 new MenuItemInfo(getTranslation("sr.we.loans"), "la la-list", LoansView.class), //
 
@@ -234,7 +221,7 @@ public class MainLayout extends AppLayout {
     protected void afterNavigation() {
         super.afterNavigation();
         viewTitle.setText(getCurrentPageTitle());
-        if(dialog != null && dialog.isOpened()){
+        if (dialog != null && dialog.isOpened()) {
             dialog.close();
         }
     }
@@ -242,11 +229,38 @@ public class MainLayout extends AppLayout {
     private String getCurrentPageTitle() {
         Component content = getContent();
         Class aClass = content.getClass();
-        if(HasDynamicTitle.class.isAssignableFrom(aClass)){
+        if (HasDynamicTitle.class.isAssignableFrom(aClass)) {
             HasDynamicTitle hasDynamicTitle = (HasDynamicTitle) content;
             return hasDynamicTitle.getPageTitle();
         }
         PageTitle title = getContent().getClass().getAnnotation(PageTitle.class);
         return title == null ? "" : title.value();
+    }
+
+    /**
+     * A simple navigation item component, based on ListItem element.
+     */
+    public static class MenuItemInfo extends ListItem {
+
+        private final Class<? extends Component> view;
+
+        public MenuItemInfo(String menuTitle, String iconClass, Class<? extends Component> view) {
+            this.view = view;
+            RouterLink link = new RouterLink();
+            link.addClassNames("menu-item-link");
+            link.setRoute(view);
+
+            Span text = new Span(menuTitle);
+            text.addClassNames("menu-item-text");
+
+            link.add(new LineAwesomeIcon(iconClass), text);
+            add(link);
+        }
+
+        public Class<?> getView() {
+            return view;
+        }
+
+
     }
 }

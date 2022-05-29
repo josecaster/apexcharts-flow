@@ -1,11 +1,17 @@
 package sr.we.data.controller;
 
+import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpStatusCodeException;
 import sr.we.ConfigProperties;
+import sr.we.shekelflowcore.entity.helper.Build;
+import sr.we.shekelflowcore.entity.helper.Error;
+import sr.we.shekelflowcore.exception.ExceptionService;
 
 @Component
 public abstract class MyController {
@@ -25,6 +31,8 @@ public abstract class MyController {
         HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
         return httpEntity;
     }
+
+
 
     protected HttpHeaders getAuthHttpHeaders(String accessToken) {
         HttpHeaders headers = new HttpHeaders();

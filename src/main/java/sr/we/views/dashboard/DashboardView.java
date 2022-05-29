@@ -27,13 +27,14 @@ import javax.annotation.security.RolesAllowed;
 
 import sr.we.ContextProvider;
 import sr.we.data.controller.BusinessService;
+import sr.we.shekelflowcore.entity.Role;
 import sr.we.views.MainLayout;
 import sr.we.views.dashboard.ServiceHealth.Status;
 
 @PageTitle("Dashboard")
 @Route(value = "dashboard", layout = MainLayout.class)
 @RouteAlias(value = "dashboard", layout = MainLayout.class)
-@RolesAllowed("ADMIN")
+@RolesAllowed({Role.user,Role.staff,Role.owner,Role.admin})
 public class DashboardView extends Main {
 
     public DashboardView() {

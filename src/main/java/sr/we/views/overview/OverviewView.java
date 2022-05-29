@@ -28,13 +28,13 @@ import sr.we.shekelflowcore.entity.Role;
 import sr.we.views.MainLayout;
 import sr.we.views.overview.ServiceHealth.Status;
 
-@PageTitle("Overview")
-@Route(value = "overview", layout = MainLayout.class)
-@RolesAllowed({Role.user,Role.staff,Role.owner,Role.admin})
-public class OverviewView extends Main {
+//@PageTitle("Overview")
+//@Route(value = "overview", layout = MainLayout.class)
+//@RolesAllowed({Role.user,Role.staff,Role.owner,Role.admin})
+public class OverviewView /*extends Main*/ {
 
     public OverviewView() {
-        addClassName("overview-view");
+        //addClassName("overview-view");
 
 //        Board board = new Board();
 //        board.addRow(createHighlight("Current users", "745", 33.7), createHighlight("View events", "54.6k", -112.45),

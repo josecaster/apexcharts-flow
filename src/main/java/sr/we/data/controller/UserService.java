@@ -1,47 +1,85 @@
 package sr.we.data.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import com.google.gson.GsonBuilder;
+import org.springframework.http.*;
 import org.springframework.http.client.support.BasicAuthorizationInterceptor;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import sr.we.ConfigProperties;
+import org.springframework.web.util.UriComponentsBuilder;
+import sr.we.shekelflowcore.entity.ApplicationUserVerification;
+import sr.we.shekelflowcore.entity.Business;
 import sr.we.shekelflowcore.entity.ThisUser;
+import sr.we.shekelflowcore.entity.helper.vo.BusinessVO;
+import sr.we.shekelflowcore.entity.helper.vo.UserVO;
 import sr.we.shekelflowcore.settings.Services;
 
 @Controller
-public class UserService extends MyController{
+public class UserService extends MyController {
 
 
-    public ThisUser authenticate(String username, String password){
+    public ThisUser authenticate(String username, String password) {
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.getInterceptors().add(
                 new BasicAuthorizationInterceptor(username, password));
         String fooResourceUrl
-                = configProperties.getRest()+ Services.USER_ME;
+                = configProperties.getRest() + Services.USER_ME;
 
         ResponseEntity<ThisUser> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, getHttpEntity(), ThisUser.class);
         return exchange.getBody();
     }
 
 
-
-    public ThisUser verify(String username, String password, String token){
+    public void publishVerify(String token) {
         RestTemplate restTemplate = new RestTemplate();
-        restTemplate.getInterceptors().add(
-                new BasicAuthorizationInterceptor(username, password));
+        String fooResourceUrl
+                = configProperties.getRest() + Services.USER_PUBLISH_VERIFY;
+        HttpEntity<String> httpEntity = getAuthHttpEntity(token);
+
+
+        encapsulate(() -> {
+            ResponseEntity<String> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, String.class);
+            return exchange.getBody();
+        });
+
+    }
+
+    public ThisUser verify(String token, String verify) {
+        ApplicationUserVerification vo = new ApplicationUserVerification();
+        vo.setToken(verify);
+        String body = new GsonBuilder().create().toJson(vo);
+        RestTemplate restTemplate = new RestTemplate();
         String fooResourceUrl
                 = configProperties.getRest()+ Services.USER_VERIFY;
-        MultiValueMap<String, String> map= new LinkedMultiValueMap<String, String>();
-        map.add("token", token);
-        ThisUser response
-                = restTemplate.getForObject(fooResourceUrl , ThisUser.class, map);
-        return response;
+
+        return encapsulate(() -> {
+            HttpEntity<String> httpEntity = getAuthHttpEntity(body,token);
+            ResponseEntity<ThisUser> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.POST, httpEntity, ThisUser.class);
+            return exchange.getBody();
+        });
+
+    }
+
+    protected HttpEntity<String> getAuthHttpEntitya(String verify, String accessToken) {
+        HttpHeaders headers = getAuthHttpHeaders(accessToken);
+        headers.set("token", verify);
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        HttpEntity<String> httpEntity = new HttpEntity<>(headers);
+        return httpEntity;
+    }
+
+    public ThisUser create(UserVO vo) {
+        String body = new GsonBuilder().create().toJson(vo);
+        RestTemplate restTemplate = new RestTemplate();
+        String fooResourceUrl
+                = configProperties.getRest() + Services.USER_CREATE;
+        HttpEntity<String> httpEntity = getHttpEntity(body);
+
+
+        return encapsulate(() -> {
+            ResponseEntity<ThisUser> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.POST, httpEntity, ThisUser.class);
+            return exchange.getBody();
+        });
+
     }
 }

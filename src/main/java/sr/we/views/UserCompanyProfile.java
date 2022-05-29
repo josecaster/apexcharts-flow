@@ -1,6 +1,7 @@
 package sr.we.views;
 
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -18,6 +19,7 @@ import com.vaadin.flow.spring.SpringVaadinSession;
 import sr.we.ContextProvider;
 import sr.we.data.controller.BusinessService;
 import sr.we.shekelflowcore.entity.Business;
+import sr.we.shekelflowcore.exception.SecurityException;
 import sr.we.views.about.AboutView;
 import sr.we.views.business.CreateBusinessView;
 import sr.we.views.logout.LogoutView;
@@ -103,7 +105,7 @@ public class UserCompanyProfile extends Button {
         addClickListener(e -> {
             clear = true;
             listBox.clear();
-clear = false;
+            clear = false;
 
             setValues(listBox);
             dialog.open();
@@ -148,9 +150,14 @@ clear = false;
     }
 
     private void setValues(ListBox<Long> listBox) {
-        BusinessService businessService = ContextProvider.getBean(BusinessService.class);
         String token = (String) SpringVaadinSession.getCurrent().getAttribute("Token");
+        BusinessService businessService = ContextProvider.getBean(BusinessService.class);
+        UI current = UI.getCurrent();
+
         businesses = businessService.list(token);
+        if(businesses == null){
+            businesses=new ArrayList<>();
+        }
         if(businesses == null){
             businesses=new ArrayList<>();
         }
@@ -164,5 +171,6 @@ clear = false;
         } else{
             listBox.setValue(0L);
         }
+
     }
 }

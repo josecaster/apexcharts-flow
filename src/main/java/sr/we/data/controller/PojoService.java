@@ -24,8 +24,11 @@ public class PojoService extends MyController{
         String fooResourceUrl
                 = configProperties.getRest()+ Services.COUNTRY_LIST;
         HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
-        ResponseEntity<Country[]> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, Country[].class);
-        return Arrays.asList(exchange.getBody());
+
+        return encapsulate(() -> {
+            ResponseEntity<Country[]> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, Country[].class);
+            return Arrays.asList(exchange.getBody());
+        });
     }
 
     public List<Currency> listCurrency(String accessToken){
@@ -33,8 +36,11 @@ public class PojoService extends MyController{
         String fooResourceUrl
                 = configProperties.getRest()+ Services.CURRENCY_LIST;
         HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
-        ResponseEntity<Currency[]> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, Currency[].class);
-        return Arrays.asList(exchange.getBody());
+
+        return encapsulate(() -> {
+            ResponseEntity<Currency[]> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, Currency[].class);
+            return Arrays.asList(exchange.getBody());
+        });
     }
 
     public List<BusinessType> listBusinessType(String accessToken){
@@ -42,8 +48,11 @@ public class PojoService extends MyController{
         String fooResourceUrl
                 = configProperties.getRest()+ Services.BUSINESS_TYPE_LIST;
         HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
-        ResponseEntity<BusinessType[]> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, BusinessType[].class);
-        return Arrays.asList(exchange.getBody());
+
+        return encapsulate(() -> {
+            ResponseEntity<BusinessType[]> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, BusinessType[].class);
+            return Arrays.asList(exchange.getBody());
+        });
     }
 
     public List<BusinessOrganisationType> listBusinessOrganisationType(String accessToken){
@@ -51,8 +60,11 @@ public class PojoService extends MyController{
         String fooResourceUrl
                 = configProperties.getRest()+ Services.BUSINESS_ORGANISATION_TYPE_LIST;
         HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
-        ResponseEntity<BusinessOrganisationType[]> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, BusinessOrganisationType[].class);
-        return Arrays.asList(exchange.getBody());
+
+        return encapsulate(() -> {
+            ResponseEntity<BusinessOrganisationType[]> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, BusinessOrganisationType[].class);
+            return Arrays.asList(exchange.getBody());
+        });
     }
 
 

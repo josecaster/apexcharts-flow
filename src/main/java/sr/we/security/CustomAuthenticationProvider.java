@@ -2,6 +2,7 @@ package sr.we.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -21,8 +22,13 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         // You can get the password here
         String password = authentication.getCredentials().toString();
         userService = ContextProvider.getBean(UserService.class);
-            ThisUser byUsername = userService.authenticate(name, password);
-            Authentication auth = new UsernamePasswordAuthenticationToken(byUsername,
+        ThisUser byUsername = null;
+        try {
+            byUsername = userService.authenticate(name, password);
+        } catch (Exception e) {
+            throw new AuthenticationServiceException("Invalid Login");
+        }
+        Authentication auth = new UsernamePasswordAuthenticationToken(byUsername,
                     password, UserDetailsServiceImpl.getAuthorities(byUsername));
             return auth;
     }
