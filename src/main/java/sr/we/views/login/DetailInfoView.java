@@ -61,7 +61,7 @@ public class DetailInfoView extends StateListenerLayout implements BeforeEnterOb
         fLayout.getElement().getStyle().set("align-self", "center");
         add(fLayout);
         fLayout.setResponsiveSteps(
-                // Use one column by default
+                // Use one column by defaultabc
                 new FormLayout.ResponsiveStep("0", 1),
                 // Use two columns, if layout's width exceeds 500px
                 new FormLayout.ResponsiveStep("500px", 2)
