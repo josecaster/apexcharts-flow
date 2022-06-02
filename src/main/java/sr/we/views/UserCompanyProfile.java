@@ -4,11 +4,11 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Footer;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -18,11 +18,12 @@ import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.spring.SpringVaadinSession;
 import sr.we.ContextProvider;
 import sr.we.data.controller.BusinessService;
+import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Business;
-import sr.we.shekelflowcore.exception.SecurityException;
+import sr.we.shekelflowcore.entity.ThisUser;
 import sr.we.views.about.AboutView;
-import sr.we.views.business.CreateBusinessView;
-import sr.we.views.logout.LogoutView;
+import sr.we.views.business.BusinessView;
+import sr.we.views.business.BusinessViewCreate;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -77,7 +78,7 @@ public class UserCompanyProfile extends Button {
         dialog.add(listBox);
 
 
-        RouterLink createBusinessLink = new RouterLink("Create a new business", CreateBusinessView.class);
+        RouterLink createBusinessLink = new RouterLink("Create a new business", BusinessViewCreate.class);
         HorizontalLayout businessLayout = new HorizontalLayout(new LineAwesomeIcon("las la-feather"), createBusinessLink);
         businessLayout.setWidthFull();
         dialog.add(businessLayout);
@@ -86,15 +87,31 @@ public class UserCompanyProfile extends Button {
 
         new Text("You are singed in as ");
 
-        RouterLink manageProfileLink = new RouterLink("Manage your profile",AboutView.class);
+        RouterLink manageProfileLink = new RouterLink("Manage your profile", BusinessView.class);
         HorizontalLayout profileLayout = new HorizontalLayout(new LineAwesomeIcon("la la-user-circle"), manageProfileLink);
         profileLayout.setWidthFull();
         dialog.add(profileLayout);
 
-        RouterLink logoutLink = new RouterLink("Sign out", LogoutView.class);
-        HorizontalLayout signOutLayout = new HorizontalLayout(new LineAwesomeIcon("la la-sign-out-alt"), logoutLink);
-        signOutLayout.setWidthFull();
-        dialog.add(signOutLayout);
+        AuthenticatedUser authenticatedUser = ContextProvider.getBean(AuthenticatedUser.class);
+        Optional<ThisUser> maybeUser = authenticatedUser.get();
+        ThisUser thisUser = maybeUser.get();
+        Avatar avatar = new Avatar(thisUser.getUsername()/*, user.getProfilePictureUrl()*/);
+        avatar.addClassNames("me-xs");
+
+        Span name = new Span(thisUser.getUsername());
+        name.addClassNames("font-medium", "text-s", "text-secondary");
+
+
+
+
+        Footer footer = new Footer(avatar, name);
+        footer.addClassNames("footer");
+//        dialog.add(footer);
+        ContextMenu userMenu = new ContextMenu(footer);
+        userMenu.setOpenOnClick(true);
+        userMenu.addItem("Logout", e -> {
+            authenticatedUser.logout();
+        });
 
         dialog.add(new Hr());
 

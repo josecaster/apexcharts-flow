@@ -5,6 +5,7 @@ import com.google.gson.FieldAttributes;
 import com.google.gson.GsonBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.RestTemplate;
@@ -18,6 +19,16 @@ import java.util.List;
 
 @Controller
 public class BusinessService extends MyController{
+
+    public Business get(Long id, String accessToken){
+        RestTemplate restTemplate = new RestTemplate();
+
+        return encapsulate(() -> {
+            ResponseEntity<Business> exchange = restTemplate.exchange(configProperties.getRest() + Services.BUSINESS_GET + "?id=" + id, HttpMethod.GET, getAuthHttpEntity(accessToken), Business.class);
+            Business body = exchange.getBody();
+            return body;
+        });
+    }
 
     public List<Business> list(String accessToken){
         RestTemplate restTemplate = new RestTemplate();
@@ -36,6 +47,19 @@ public class BusinessService extends MyController{
         RestTemplate restTemplate = new RestTemplate();
         String fooResourceUrl
                 = configProperties.getRest()+ Services.BUSINESS_CREATE;
+        HttpEntity<String> httpEntity = getAuthHttpEntity(body,accessToken);
+
+        return encapsulate(() -> {
+            ResponseEntity<Business> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.POST, httpEntity, Business.class);
+            return exchange.getBody();
+        });
+    }
+
+    public Business edit(String accessToken, BusinessVO vo){
+        String body = new GsonBuilder().create().toJson(vo);
+        RestTemplate restTemplate = new RestTemplate();
+        String fooResourceUrl
+                = configProperties.getRest()+ Services.BUSINESS_EDIT;
         HttpEntity<String> httpEntity = getAuthHttpEntity(body,accessToken);
 
         return encapsulate(() -> {

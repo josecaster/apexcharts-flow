@@ -4,13 +4,9 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.HasDynamicTitle;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.spring.SpringVaadinSession;
 import sr.we.ContextProvider;
 import sr.we.data.controller.BusinessService;
@@ -20,12 +16,13 @@ import sr.we.shekelflowcore.entity.helper.vo.BusinessVO;
 import sr.we.views.MainLayout;
 import sr.we.views.StateListenerLayout;
 import sr.we.views.dashboard.DashboardView;
+import sr.we.views.settings.SettingsLayout;
 
 import javax.annotation.security.RolesAllowed;
 
-@Route(value = "createbusiness", layout = MainLayout.class)
+@Route(value = "createbusiness", layout = SettingsLayout.class)
 @RolesAllowed({Role.user,Role.staff,Role.owner,Role.admin})
-public class CreateBusinessView extends StateListenerLayout implements HasDynamicTitle {
+public class BusinessViewCreate extends StateListenerLayout implements HasDynamicTitle {
 
     private final TextField companyName;
     private final BusinessTypeSelect typeOfBusiness;
@@ -33,7 +30,7 @@ public class CreateBusinessView extends StateListenerLayout implements HasDynami
     private final CurrencySelect businessCurrency;
     private final BusinessOrganisationTypeSelect typeOfOrganization;
 
-    public CreateBusinessView() {
+    public BusinessViewCreate() {
         companyName = new TextField(getTranslation("sr.we.company.name"));
         companyName.setRequired(true);
         companyName.setRequiredIndicatorVisible(true);
@@ -89,7 +86,7 @@ public class CreateBusinessView extends StateListenerLayout implements HasDynami
         notification.setPosition(Notification.Position.MIDDLE);
         notification.open();
 
-        UI.getCurrent().navigate(DashboardView.class);
+        UI.getCurrent().navigate(BusinessView.class);
 
 
     }
