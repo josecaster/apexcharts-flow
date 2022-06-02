@@ -113,6 +113,10 @@ public class UserCompanyProfile extends Button {
             authenticatedUser.logout();
         });
 
+        LanguageSelect languageSelect = new LanguageSelect();
+        languageSelect.setWidthFull();
+        dialog.add(languageSelect);
+
         dialog.add(new Hr());
 
         com.vaadin.flow.component.button.Button cancelButton = new com.vaadin.flow.component.button.Button("Cancel", e -> dialog.close());

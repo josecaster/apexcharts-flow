@@ -24,8 +24,8 @@ public class TranslationProvider implements I18NProvider {
 
 	public static final String BUNDLE_PREFIX = "custom_messages";
 
-	public final Locale LOCALE_NL = new Locale("nl");
-	public final Locale LOCALE_EN = new Locale("en");
+	public final static Locale LOCALE_NL = new Locale("nl");
+	public final static Locale LOCALE_EN = new Locale("en");
 
 	private List<Locale> locales = Collections.unmodifiableList(Arrays.asList(LOCALE_NL, LOCALE_EN));
 
