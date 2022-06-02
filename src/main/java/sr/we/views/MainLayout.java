@@ -10,6 +10,7 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.router.*;
+import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.spring.SpringVaadinSession;
@@ -37,6 +38,7 @@ import sr.we.views.productscomponents.ProductsComponentsView;
 import sr.we.views.purchases.PurchasesView;
 import sr.we.views.reports.ReportsView;
 
+import java.util.Locale;
 import java.util.Optional;
 
 /**

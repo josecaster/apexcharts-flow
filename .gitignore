@@ -21,3 +21,8 @@ error-screenshots/
 webpack.generated.js
 /.mvn/
 /.idea/
+/package.json
+/tsconfig.json
+/types.d.ts
+/webpack.config.js
+/package-lock.json
