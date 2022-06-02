@@ -1,14 +1,15 @@
-package sr.we.views;
+package sr.we.views.settings;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.*;
-import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
@@ -19,6 +20,8 @@ import sr.we.CustomErrorHandler;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.ThisUser;
 import sr.we.shekelflowcore.entity.helper.Token;
+import sr.we.views.LineAwesomeIcon;
+import sr.we.views.UserCompanyProfile;
 import sr.we.views.about.AboutView;
 import sr.we.views.athenticationauthorization.AthenticationAuthorizationView;
 import sr.we.views.business.BusinessView;
@@ -30,7 +33,6 @@ import sr.we.views.loans.LoansView;
 import sr.we.views.login.DetailInfoView;
 import sr.we.views.login.MainInfoView;
 import sr.we.views.login.NotActiveDialog;
-import sr.we.views.overview.OverviewView;
 import sr.we.views.partners.PartnersView;
 import sr.we.views.products.ProductsView;
 import sr.we.views.productscomponents.ProductsComponentsView;
@@ -42,18 +44,18 @@ import java.util.Optional;
 /**
  * The main view is a top-level placeholder for other views.
  */
-public class MainLayout extends AppLayout implements BeforeEnterObserver {
+public class SettingsLayout extends AppLayout implements BeforeEnterObserver {
 
     boolean constructed = false;
-    private Dialog dialog;
+//    private Dialog dialog;
     private H1 viewTitle;
     private AuthenticatedUser authenticatedUser;
     private AccessAnnotationChecker accessChecker;
-    public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker) {
+    public SettingsLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker) {
         this.authenticatedUser = authenticatedUser;
         this.accessChecker = accessChecker;
 
-        dialog = new Dialog();
+//        dialog = new Dialog();
         viewTitle = new H1();
 
         VaadinSession.getCurrent().setErrorHandler(new CustomErrorHandler());
@@ -63,31 +65,31 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        AuthenticatedUser bean = ContextProvider.getBean(AuthenticatedUser.class);
-        Optional<ThisUser> thisUser = bean.get();
-        if (thisUser.isPresent()) {
-            ThisUser thisUser1 = thisUser.get();
-            Token token = thisUser1.getToken();
-            SpringVaadinSession.getCurrent().setAttribute("Token", token.getToken());
-
-            // basic details
-            if (thisUser1.getPerson() == null) {
-                event.forwardTo(MainInfoView.class);
-                return;
-            }
-
-            // basic details
-            if (thisUser1.getPerson().getDefaultForms() == null) {
-                event.forwardTo(DetailInfoView.class);
-                return;
-            }
-
-            // inactive user
-            if (thisUser1.getActive() == null || !thisUser1.getActive()) {
-                new NotActiveDialog().open();
-                return;
-            }
-        }
+//        AuthenticatedUser bean = ContextProvider.getBean(AuthenticatedUser.class);
+//        Optional<ThisUser> thisUser = bean.get();
+//        if (thisUser.isPresent()) {
+//            ThisUser thisUser1 = thisUser.get();
+//            Token token = thisUser1.getToken();
+//            SpringVaadinSession.getCurrent().setAttribute("Token", token.getToken());
+//
+//            // basic details
+//            if (thisUser1.getPerson() == null) {
+//                event.forwardTo(MainInfoView.class);
+//                return;
+//            }
+//
+//            // basic details
+//            if (thisUser1.getPerson().getDefaultForms() == null) {
+//                event.forwardTo(DetailInfoView.class);
+//                return;
+//            }
+//
+//            // inactive user
+//            if (thisUser1.getActive() == null || !thisUser1.getActive()) {
+//                new NotActiveDialog().open();
+//                return;
+//            }
+//        }
         if (!constructed) {
             construct();
         }
@@ -114,25 +116,24 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
         viewTitle.addClassNames("view-title");
 
-        Header header = new Header(toggle, viewTitle);
+        Button home = new Button(getTranslation("sr.we.home"));
+        home.setIcon(new LineAwesomeIcon("la la-home"));
+        home.addThemeVariants(ButtonVariant.LUMO_ICON);
+        home.addClickListener(f -> {
+            UI.getCurrent().navigate(DashboardView.class);
+        });
+        Header header = new Header(home, viewTitle);
         header.addClassNames("view-header");
         return header;
     }
 
     private Component createDrawerContent() {
-        String token = (String) SpringVaadinSession.getCurrent().getAttribute("Token");
-        if (!StringUtils.isEmpty(token)) {
 
-            com.vaadin.flow.component.html.Section section = new com.vaadin.flow.component.html.Section(new UserCompanyProfile(dialog), dialog,
-                    createNavigation(),createSettings(), createFooter());
-            section.addClassNames("drawer-section");
-            return section;
-        }
-        H2 appName = new H2("ShekelFlow");
+        H2 appName = new H2("Settings");
         appName.addClassNames("app-name");
 
         com.vaadin.flow.component.html.Section section = new com.vaadin.flow.component.html.Section(appName,
-                createNavigation(),createSettings(), createFooter());
+                createNavigation());
         section.addClassNames("drawer-section");
         return section;
     }
@@ -156,104 +157,49 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         return nav;
     }
 
-    private Nav createSettings() {
-        Nav nav = new Nav();
-//        nav.addClassNames("menu-item-container");
-        nav.getElement().setAttribute("aria-labelledby", "views");
-
-        // Wrap the links in a list; improves accessibility
-        UnorderedList list = new UnorderedList();
-        list.addClassNames("navigation-list");
-        nav.add(list);
-
-        for (MenuItemInfo menuItem : createSettingItems()) {
-            if (accessChecker.hasAccess(menuItem.getView())) {
-                list.add(menuItem);
-            }
-
-        }
-        return nav;
-    }
-
-    private MenuItemInfo[] createSettingItems() {
-        return new MenuItemInfo[]{ //
-                new MenuItemInfo(getTranslation("sr.we.settings"), "la la-cogs", BusinessView.class)
-
-
-
-
-        };
-    }
-
     private MenuItemInfo[] createMenuItems() {
         return new MenuItemInfo[]{ //
-                new MenuItemInfo(getTranslation("sr.we.dashboard"), "la la-chart-area", DashboardView.class), //
+                new MenuItemInfo(getTranslation("sr.we.business"), "las la-feather", BusinessView.class),
 
-                //new MenuItemInfo(getTranslation("sr.we.overview"), "la la-chart-area", OverviewView.class), //
-
-                new MenuItemInfo(getTranslation("sr.we.loans"), "la la-list", LoansView.class), //
-
-                new MenuItemInfo(getTranslation("sr.we.purchase"), "la la-list", PurchasesView.class), //
-
-                new MenuItemInfo(getTranslation("sr.we.customers"), "la la-th-list", CustomersView.class), //
-
-                new MenuItemInfo(getTranslation("sr.we.partners"), "la la-th-list", PartnersView.class), //
-
-                new MenuItemInfo(getTranslation("sr.we.products"), "la la-file", ProductsView.class), //
-
-                new MenuItemInfo(getTranslation("sr.we.products.components"), "la la-file", ProductsComponentsView.class), //
-
-                new MenuItemInfo(getTranslation("sr.we.flow"), "la la-file", FlowView.class), //
-
-                new MenuItemInfo(getTranslation("sr.we.authentication.authorization"), "la la-columns",
-                        AthenticationAuthorizationView.class), //
-
-                new MenuItemInfo(getTranslation("sr.we.communication"), "la la-comments", CommunicationView.class), //
-
-                new MenuItemInfo(getTranslation("sr.we.reports"), "la la-th-list", ReportsView.class), //
-
-                new MenuItemInfo(getTranslation("sr.we.about"), "la la-file", AboutView.class), //
+                new MenuItemInfo(getTranslation("sr.we.about"), "la la-file", BusinessView.class), //
 
 
         };
     }
 
-    private Footer createFooter() {
-        Footer layout = new Footer();
-        layout.addClassNames("footer");
-
-        Optional<ThisUser> maybeUser = authenticatedUser.get();
-        if (maybeUser.isPresent()) {
-            ThisUser user = maybeUser.get();
-
-            Avatar avatar = new Avatar(user.getUsername()/*, user.getProfilePictureUrl()*/);
-            avatar.addClassNames("me-xs");
-
-            ContextMenu userMenu = new ContextMenu(layout);
-            userMenu.setOpenOnClick(true);
-            userMenu.addItem("Logout", e -> {
-                authenticatedUser.logout();
-            });
-
-            Span name = new Span(user.getUsername());
-            name.addClassNames("font-medium", "text-s", "text-secondary");
-
-            layout.add(avatar, name);
-        } else {
-            Anchor loginLink = new Anchor("login", "Sign in");
-            layout.add(loginLink);
-        }
-
-        return layout;
-    }
+//    private Footer createFooter() {
+//        Footer layout = new Footer();
+//        layout.addClassNames("footer");
+//
+//        Optional<ThisUser> maybeUser = authenticatedUser.get();
+//        if (maybeUser.isPresent()) {
+//            ThisUser user = maybeUser.get();
+//
+//            Avatar avatar = new Avatar(user.getUsername()/*, user.getProfilePictureUrl()*/);
+//            avatar.addClassNames("me-xs");
+//
+//            ContextMenu userMenu = new ContextMenu(avatar);
+//            userMenu.setOpenOnClick(true);
+//            userMenu.addItem("Logout", e -> {
+//                authenticatedUser.logout();
+//            });
+//
+//            Span name = new Span(user.getUsername());
+//            name.addClassNames("font-medium", "text-s", "text-secondary");
+//
+//            layout.add(avatar, name);
+//        } else {
+//            Anchor loginLink = new Anchor("login", "Sign in");
+//            layout.add(loginLink);
+//        }
+//
+//        return layout;
+//    }
 
     @Override
     protected void afterNavigation() {
         super.afterNavigation();
         viewTitle.setText(getCurrentPageTitle());
-        if (dialog != null && dialog.isOpened()) {
-            dialog.close();
-        }
     }
 
     private String getCurrentPageTitle() {
