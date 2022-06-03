@@ -1,47 +1,40 @@
-package sr.we.views.login;
+package sr.we.views.password;
 
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.html.H4;
+import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
-import com.vaadin.flow.router.*;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import com.vaadin.flow.spring.SpringVaadinSession;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
+import org.apache.commons.lang3.StringUtils;
 import sr.we.ContextProvider;
 import sr.we.CustomErrorHandler;
 import sr.we.data.controller.UserService;
-import sr.we.security.CustomAuthenticationProvider;
-import sr.we.shekelflowcore.entity.ThisUser;
-import sr.we.shekelflowcore.entity.helper.vo.UserVO;
-import sr.we.shekelflowcore.exception.ValidationException;
-import sr.we.views.person.PersonView;
+import sr.we.views.login.EmailAddress;
+import sr.we.views.login.IntroView;
+import sr.we.views.login.LoginView;
 
-import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
-/**
- * The main view is a top-level placeholder for other views.
- */
-@PageTitle("Home")
-@Route(value = "")
+@Route(value = "forgot-password/:random")
 @AnonymousAllowed
-public class IntroView extends VerticalLayout implements BeforeEnterObserver{
+public class ForgotPassword extends VerticalLayout implements BeforeEnterObserver {
 
 
+    private String random;
 
-    public IntroView() {
-
+    public ForgotPassword() {
         VaadinSession.getCurrent().setErrorHandler(new CustomErrorHandler());
 
         setSpacing(false);
@@ -54,24 +47,29 @@ public class IntroView extends VerticalLayout implements BeforeEnterObserver{
         verticalLayout.add(img);
 
 
-
-
-        verticalLayout.add(new H2("Register for FREE, today"));
-        verticalLayout.add(new Paragraph("Simple bookkeeping and payment solutions for small business owners 🤗"));
-
+        verticalLayout.add(new H4("Reset password"));
 
         EmailAddress emailField = new EmailAddress();
         emailField.setWidthFull();
         PasswordField passwordField = new PasswordField();
         passwordField.setWidthFull();
-        passwordField.setLabel("Password");
+        passwordField.setLabel("New password");
         passwordField.setPlaceholder("Password");
         passwordField.setHelperText("A password must be at least 8 characters. It has to have at least one letter and one digit.");
         passwordField.setPattern("^(?=.*[0-9])(?=.*[a-zA-Z]).{8}.*$");
         passwordField.setErrorMessage("Not a valid password");
-        verticalLayout.add(new FormLayout(emailField,passwordField));
 
-        Button registerBtn = new Button("Register");
+        PasswordField passwordCField = new PasswordField();
+        passwordCField.setWidthFull();
+        passwordCField.setLabel("Confirm password");
+        passwordCField.setPlaceholder("Password");
+        passwordCField.setHelperText("A password must be at least 8 characters. It has to have at least one letter and one digit.");
+        passwordCField.setPattern("^(?=.*[0-9])(?=.*[a-zA-Z]).{8}.*$");
+        passwordCField.setErrorMessage("Not a valid password");
+
+        verticalLayout.add(new FormLayout(emailField, passwordField, passwordCField));
+
+        Button registerBtn = new Button("Reset");
         registerBtn.setWidthFull();
         registerBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         registerBtn.addClickShortcut(Key.ENTER);
@@ -82,11 +80,12 @@ public class IntroView extends VerticalLayout implements BeforeEnterObserver{
         setDefaultHorizontalComponentAlignment(Alignment.CENTER);
         getStyle().set("text-align", "center");
 
-        verticalLayout. add(new Hr());
+        verticalLayout.add(new Hr());
 
-        ResetPasswordDialog button = new ResetPasswordDialog(new Dialog());
-        button.setText("Forgot password?");
+        Button button = new Button();
+        button.setText("Home");
         button.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
+        button.addClickListener(f -> UI.getCurrent().navigate(IntroView.class));
 
         Button go_to_login = new Button("Login");
         button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -99,42 +98,46 @@ public class IntroView extends VerticalLayout implements BeforeEnterObserver{
 
         HorizontalLayout headerLayout = new HorizontalLayout();
         headerLayout.setWidthFull();
-        headerLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-        headerLayout.add(button,go_to_login);
-        add(headerLayout,verticalLayout);
+        headerLayout.setJustifyContentMode(JustifyContentMode.END);
+        headerLayout.add(button, go_to_login);
+        add(headerLayout, verticalLayout);
 
         registerBtn.addClickListener(f -> {
-            if(emailField.isInvalid()){
+            if (emailField.isInvalid()) {
                 return;
             }
-            if(passwordField.isInvalid()){
+            if (passwordCField.isInvalid()) {
+                return;
+            }
+
+            if (passwordField.isInvalid()) {
                 return;
             }
 
             UserService userService = ContextProvider.getBean(UserService.class);
-            UserVO vo = new UserVO(emailField.getValue(), passwordField.getValue());
-            ThisUser thisUser = userService.create(vo);
-            if(thisUser != null){
-                Authentication authenticate = new CustomAuthenticationProvider().authenticate(new UsernamePasswordAuthenticationToken(emailField.getValue(), passwordField.getValue()));
-                if(!authenticate.isAuthenticated()){
-                    Notification.show("Not Authenticated");
-                } else {
-                    UI.getCurrent().navigate(PersonView.class);
-                }
-            }
+
+            UserService.Auth vo = new UserService.Auth();
+            vo.confirmPassword = passwordCField.getValue();
+            vo.username = emailField.getValue();
+            vo.password = passwordField.getValue();
+            vo.temp = random;
+            userService.reset(vo);
+            Notification.show("Password reset done");
+            UI.getCurrent().navigate(LoginView.class);
+
         });
     }
 
-
-
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        Map<String, List<String>> parameters = event.getLocation().getQueryParameters().getParameters();
-        boolean isVerif = parameters.containsKey("verif");
-        if (isVerif) {
-            String verify = parameters.get("verif").get(0);
-            SpringVaadinSession.getCurrent().setAttribute("Verify",verify);
-            event.forwardTo(LoginView.class);
+        Optional<String> random1 = event.getRouteParameters().get("random");
+        if (random1.isPresent()) {
+            random = random1.get();
+            if (StringUtils.isBlank(random)) {
+                event.forwardTo(IntroView.class);
+            }
+        } else {
+            event.forwardTo(IntroView.class);
         }
     }
 }
