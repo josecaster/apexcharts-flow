@@ -1,4 +1,4 @@
-package sr.we.views.login;
+package sr.we.views.person;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.datepicker.DatePicker;
@@ -6,8 +6,6 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -17,21 +15,17 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.SpringVaadinSession;
 import sr.we.ContextProvider;
-import sr.we.data.controller.BusinessService;
 import sr.we.data.controller.PersonService;
 import sr.we.security.AuthenticatedUser;
-import sr.we.shekelflowcore.entity.Business;
 import sr.we.shekelflowcore.entity.Person;
 import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.entity.ThisUser;
-import sr.we.shekelflowcore.entity.helper.vo.BusinessVO;
 import sr.we.shekelflowcore.entity.helper.vo.PersonVO;
+import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.views.StateListenerLayout;
-import sr.we.views.business.BusinessOrganisationTypeSelect;
-import sr.we.views.business.BusinessTypeSelect;
-import sr.we.views.business.CountrySelect;
-import sr.we.views.business.CurrencySelect;
 import sr.we.views.dashboard.DashboardView;
+import sr.we.views.login.GenderSelect;
+import sr.we.views.personform.PersonFormView;
 
 import javax.annotation.security.RolesAllowed;
 import java.util.Optional;
@@ -39,18 +33,20 @@ import java.util.Optional;
 @PageTitle("Personal info main")
 @Route(value = "main-info", absolute = true)
 @RolesAllowed({Role.user,Role.staff,Role.owner,Role.admin})
-public class MainInfoView extends StateListenerLayout implements BeforeEnterObserver {
+public class PersonView extends StateListenerLayout implements BeforeEnterObserver {
 
 
-    private TextField firstName, lastName,ssn;
+    private final TextField firstName;
+    private final TextField lastName;
+    private final TextField ssn;
     private final GenderSelect genderSelect;
     private final DatePicker birthDate;
     private ThisUser user;
 
-    public MainInfoView() {
+    public PersonView() {
 
         setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
-        setAlignItems(FlexComponent.Alignment.CENTER);
+        setCenterItems();
 
         setSizeFull();
 
@@ -131,17 +127,17 @@ public class MainInfoView extends StateListenerLayout implements BeforeEnterObse
         vo.setGender(genderSelect.getValue());
         Person person = personService.create(token, vo);
 
-        Notification notification = new Notification();
-        notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-        notification.setText(getTranslation("sr.we.success"));
-        notification.setDuration(5000);
-        notification.setPosition(Notification.Position.MIDDLE);
-        notification.open();
+//        Notification notification = new Notification();
+//        notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+//        notification.setText(getTranslation("sr.we.success"));
+//        notification.setDuration(5000);
+//        notification.setPosition(Notification.Position.MIDDLE);
+//        notification.open();
 
 
         user.setPerson(person);
 
-        UI.getCurrent().navigate(DetailInfoView.class);
+        UI.getCurrent().navigate(PersonFormView.class);
 
 
     }
@@ -157,19 +153,16 @@ public class MainInfoView extends StateListenerLayout implements BeforeEnterObse
         if(firstName.isEmpty()){
             return false;
         }
-        if(!genderSelect.getOptionalValue().isPresent()){
+        if(genderSelect.getOptionalValue().isEmpty()){
             return false;
         }
-        if(!birthDate.getOptionalValue().isPresent()){
+        if(birthDate.getOptionalValue().isEmpty()){
             return false;
         }
-        if(!ssn.getOptionalValue().isPresent()){
+        if(ssn.getOptionalValue().isEmpty()){
             return false;
         }
-        if(!lastName.getOptionalValue().isPresent()){
-            return false;
-        }
-        return true;
+        return lastName.getOptionalValue().isPresent();
     }
 
     @Override
@@ -177,6 +170,10 @@ public class MainInfoView extends StateListenerLayout implements BeforeEnterObse
         AuthenticatedUser bean = ContextProvider.getBean(AuthenticatedUser.class);
         Optional<ThisUser> thisUser = bean.get();
         boolean present = thisUser.isPresent();
+        if(!present){
+            bean.logout();
+            throw new ValidationException("Invalid Authentication");
+        }
         user = thisUser.get();
         if(user.getPerson() != null){
             // navigate to profile

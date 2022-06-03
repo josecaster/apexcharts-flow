@@ -5,7 +5,8 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
@@ -18,7 +19,6 @@ public abstract class StateListenerLayout extends Scroller {
     private final VerticalLayout actionLayout;
     private final VerticalLayout layout;
     private final Button saveBtn;
-    private final Button discardBtn;
     private boolean stateChanged;
 
     public StateListenerLayout() {
@@ -28,16 +28,24 @@ public abstract class StateListenerLayout extends Scroller {
         getStyle().set("border-bottom", "1px solid var(--lumo-contrast-20pct)").set("padding", "var(--lumo-space-m)");
         saveBtn = new Button(getTranslation("sr.we.save"));
         saveBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        discardBtn = new Button((getTranslation("sr.we.discard")));
+        Button discardBtn = new Button((getTranslation("sr.we.discard")));
         discardBtn.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
         HorizontalLayout horizontalLayout = new HorizontalLayout(discardBtn, saveBtn);
         horizontalLayout.setWidthFull();
         horizontalLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-        actionLayout = new VerticalLayout(horizontalLayout, new Hr());
+        actionLayout = new VerticalLayout(horizontalLayout);
         add(actionLayout);
         stateChanged(false, false);
 
-        saveBtn.addClickListener(f -> onSave());
+        saveBtn.addClickListener(f -> {
+            onSave();
+            Notification notification = new Notification();
+            notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            notification.setText(getTranslation("sr.we.success"));
+            notification.setDuration(5000);
+            notification.setPosition(Notification.Position.MIDDLE);
+            notification.open();
+        });
         discardBtn.addClickListener(f -> onDiscard());
     }
 
@@ -49,8 +57,8 @@ public abstract class StateListenerLayout extends Scroller {
         layout.setJustifyContentMode(justifyContentMode);
     }
 
-    protected void setAlignItems(FlexComponent.Alignment center) {
-        layout.setAlignItems(center);
+    protected void setCenterItems() {
+        layout.setAlignItems(FlexComponent.Alignment.CENTER);
     }
 
     protected void stateChanged(boolean enable, boolean check) {
@@ -68,8 +76,8 @@ public abstract class StateListenerLayout extends Scroller {
         }
     }
 
-    protected void erase(HasValue... comp) {
-        Arrays.stream(comp).forEach(cl -> cl.clear());
+    protected void erase(@SuppressWarnings("rawtypes") HasValue... comp) {
+        Arrays.stream(comp).forEach(HasValue::clear);
     }
 
     public void state(Component... components) {

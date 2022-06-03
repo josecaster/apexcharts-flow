@@ -12,6 +12,7 @@ import sr.we.data.controller.BusinessService;
 import sr.we.shekelflowcore.entity.Business;
 import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.entity.helper.vo.BusinessVO;
+import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.views.MainLayout;
 import sr.we.views.StateListenerLayout;
 import sr.we.views.dashboard.DashboardView;
@@ -84,12 +85,12 @@ public class BusinessViewEdit extends StateListenerLayout implements HasDynamicT
         vo.setId(business.getId());
         Business business = businessService.edit(token, vo);
 
-        Notification notification = new Notification();
-        notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-        notification.setText(getTranslation("sr.we.success"));
-        notification.setDuration(5000);
-        notification.setPosition(Notification.Position.MIDDLE);
-        notification.open();
+//        Notification notification = new Notification();
+//        notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+//        notification.setText(getTranslation("sr.we.success"));
+//        notification.setDuration(5000);
+//        notification.setPosition(Notification.Position.MIDDLE);
+//        notification.open();
 
         UI.getCurrent().navigate(DashboardView.class);
 
@@ -107,19 +108,16 @@ public class BusinessViewEdit extends StateListenerLayout implements HasDynamicT
         if(companyName.isEmpty()){
             return false;
         }
-        if(!typeOfBusiness.getOptionalValue().isPresent()){
+        if(typeOfBusiness.getOptionalValue().isEmpty()){
             return false;
         }
-        if(!country.getOptionalValue().isPresent()){
+        if(country.getOptionalValue().isEmpty()){
             return false;
         }
-        if(!businessCurrency.getOptionalValue().isPresent()){
+        if(businessCurrency.getOptionalValue().isEmpty()){
             return false;
         }
-        if(!typeOfOrganization.getOptionalValue().isPresent()){
-            return false;
-        }
-        return true;
+        return typeOfOrganization.getOptionalValue().isPresent();
     }
 
     @Override
@@ -133,24 +131,22 @@ public class BusinessViewEdit extends StateListenerLayout implements HasDynamicT
         QueryParameters routeParameters = event.getLocation().getQueryParameters();
         List<String> id1 = routeParameters.getParameters().get("id");
         Optional<String> id = id1.stream().findAny();
-        if(!id.isPresent()){
+        if(id.isEmpty()){
             event.forwardTo(BusinessView.class);
+            throw new ValidationException("Invalid Authentication");
         }
         String token = (String) SpringVaadinSession.getCurrent().getAttribute("Token");
         UI current = UI.getCurrent();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                BusinessService businessService = ContextProvider.getBean(BusinessService.class);
-                business = businessService.get(Long.valueOf(id.get()), token);
-                current.access(() -> {
-                    typeOfBusiness.setValue(business.getBusinessType());
-                    typeOfOrganization.setValue(business.getBusinessOrganisationType());
-                    country.setValue(business.getCountry());
-                    businessCurrency.setValue(business.getCurrency());
-                    companyName.setValue(business.getName());
-                });
-            }
+        new Thread(() -> {
+            BusinessService businessService = ContextProvider.getBean(BusinessService.class);
+            business = businessService.get(Long.valueOf(id.get()), token);
+            current.access(() -> {
+                typeOfBusiness.setValue(business.getBusinessType());
+                typeOfOrganization.setValue(business.getBusinessOrganisationType());
+                country.setValue(business.getCountry());
+                businessCurrency.setValue(business.getCurrency());
+                companyName.setValue(business.getName());
+            });
         }).start();
 
 

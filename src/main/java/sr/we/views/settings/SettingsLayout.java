@@ -4,42 +4,19 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
-import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.contextmenu.ContextMenu;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
-import com.vaadin.flow.spring.SpringVaadinSession;
-import org.apache.commons.lang3.StringUtils;
-import sr.we.ContextProvider;
 import sr.we.CustomErrorHandler;
 import sr.we.security.AuthenticatedUser;
-import sr.we.shekelflowcore.entity.ThisUser;
-import sr.we.shekelflowcore.entity.helper.Token;
 import sr.we.views.LineAwesomeIcon;
-import sr.we.views.UserCompanyProfile;
-import sr.we.views.about.AboutView;
-import sr.we.views.athenticationauthorization.AthenticationAuthorizationView;
 import sr.we.views.business.BusinessView;
-import sr.we.views.communication.CommunicationView;
-import sr.we.views.customers.CustomersView;
 import sr.we.views.dashboard.DashboardView;
-import sr.we.views.flow.FlowView;
-import sr.we.views.loans.LoansView;
-import sr.we.views.login.DetailInfoView;
-import sr.we.views.login.MainInfoView;
-import sr.we.views.login.NotActiveDialog;
-import sr.we.views.partners.PartnersView;
-import sr.we.views.products.ProductsView;
-import sr.we.views.productscomponents.ProductsComponentsView;
-import sr.we.views.purchases.PurchasesView;
-import sr.we.views.reports.ReportsView;
-
-import java.util.Optional;
+import sr.we.views.person.GeneralView;
+import sr.we.views.personform.InfoFormView;
 
 /**
  * The main view is a top-level placeholder for other views.
@@ -47,12 +24,11 @@ import java.util.Optional;
 public class SettingsLayout extends AppLayout implements BeforeEnterObserver {
 
     boolean constructed = false;
-//    private Dialog dialog;
-    private H1 viewTitle;
-    private AuthenticatedUser authenticatedUser;
-    private AccessAnnotationChecker accessChecker;
+    //    private Dialog dialog;
+    private final H1 viewTitle;
+    private final AccessAnnotationChecker accessChecker;
+
     public SettingsLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker) {
-        this.authenticatedUser = authenticatedUser;
         this.accessChecker = accessChecker;
 
 //        dialog = new Dialog();
@@ -116,13 +92,8 @@ public class SettingsLayout extends AppLayout implements BeforeEnterObserver {
 
         viewTitle.addClassNames("view-title");
 
-        Button home = new Button(getTranslation("sr.we.home"));
-        home.setIcon(new LineAwesomeIcon("la la-home"));
-        home.addThemeVariants(ButtonVariant.LUMO_ICON);
-        home.addClickListener(f -> {
-            UI.getCurrent().navigate(DashboardView.class);
-        });
-        Header header = new Header(home, viewTitle);
+
+        Header header = new Header(toggle, viewTitle);
         header.addClassNames("view-header");
         return header;
     }
@@ -132,8 +103,12 @@ public class SettingsLayout extends AppLayout implements BeforeEnterObserver {
         H2 appName = new H2("Settings");
         appName.addClassNames("app-name");
 
-        com.vaadin.flow.component.html.Section section = new com.vaadin.flow.component.html.Section(appName,
-                createNavigation());
+        Button home = new Button(getTranslation("sr.we.home"));
+        home.setIcon(new LineAwesomeIcon("la la-home"));
+        home.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_CONTRAST);
+        home.addClickListener(f -> UI.getCurrent().navigate(DashboardView.class));
+
+        com.vaadin.flow.component.html.Section section = new com.vaadin.flow.component.html.Section(home,appName, createNavigation());
         section.addClassNames("drawer-section");
         return section;
     }
@@ -161,7 +136,9 @@ public class SettingsLayout extends AppLayout implements BeforeEnterObserver {
         return new MenuItemInfo[]{ //
                 new MenuItemInfo(getTranslation("sr.we.business"), "las la-feather", BusinessView.class),
 
-                new MenuItemInfo(getTranslation("sr.we.about"), "la la-file", BusinessView.class), //
+                new MenuItemInfo(getTranslation("sr.we.general"), "la la-user", GeneralView.class), //
+
+                new MenuItemInfo(getTranslation("sr.we.info"), "la la-info-circle", InfoFormView.class)
 
 
         };
@@ -204,7 +181,7 @@ public class SettingsLayout extends AppLayout implements BeforeEnterObserver {
 
     private String getCurrentPageTitle() {
         Component content = getContent();
-        Class aClass = content.getClass();
+        Class<? extends Component> aClass = content.getClass();
         if (HasDynamicTitle.class.isAssignableFrom(aClass)) {
             HasDynamicTitle hasDynamicTitle = (HasDynamicTitle) content;
             return hasDynamicTitle.getPageTitle();
