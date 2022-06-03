@@ -8,9 +8,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.*;
-import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.router.*;
-import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.spring.SpringVaadinSession;
@@ -28,17 +26,15 @@ import sr.we.views.customers.CustomersView;
 import sr.we.views.dashboard.DashboardView;
 import sr.we.views.flow.FlowView;
 import sr.we.views.loans.LoansView;
-import sr.we.views.login.DetailInfoView;
-import sr.we.views.login.MainInfoView;
+import sr.we.views.personform.PersonFormView;
+import sr.we.views.person.PersonView;
 import sr.we.views.login.NotActiveDialog;
-import sr.we.views.overview.OverviewView;
 import sr.we.views.partners.PartnersView;
 import sr.we.views.products.ProductsView;
 import sr.we.views.productscomponents.ProductsComponentsView;
 import sr.we.views.purchases.PurchasesView;
 import sr.we.views.reports.ReportsView;
 
-import java.util.Locale;
 import java.util.Optional;
 
 /**
@@ -47,10 +43,10 @@ import java.util.Optional;
 public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
     boolean constructed = false;
-    private Dialog dialog;
-    private H1 viewTitle;
-    private AuthenticatedUser authenticatedUser;
-    private AccessAnnotationChecker accessChecker;
+    private final Dialog dialog;
+    private final H1 viewTitle;
+    private final AuthenticatedUser authenticatedUser;
+    private final AccessAnnotationChecker accessChecker;
     public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker) {
         this.authenticatedUser = authenticatedUser;
         this.accessChecker = accessChecker;
@@ -74,13 +70,13 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
             // basic details
             if (thisUser1.getPerson() == null) {
-                event.forwardTo(MainInfoView.class);
+                event.forwardTo(PersonView.class);
                 return;
             }
 
             // basic details
             if (thisUser1.getPerson().getDefaultForms() == null) {
-                event.forwardTo(DetailInfoView.class);
+                event.forwardTo(PersonFormView.class);
                 return;
             }
 
@@ -233,9 +229,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
             ContextMenu userMenu = new ContextMenu(layout);
             userMenu.setOpenOnClick(true);
-            userMenu.addItem("Logout", e -> {
-                authenticatedUser.logout();
-            });
+            userMenu.addItem("Logout", e -> authenticatedUser.logout());
 
             Span name = new Span(user.getUsername());
             name.addClassNames("font-medium", "text-s", "text-secondary");
@@ -260,7 +254,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
     private String getCurrentPageTitle() {
         Component content = getContent();
-        Class aClass = content.getClass();
+        Class<? extends Component> aClass = content.getClass();
         if (HasDynamicTitle.class.isAssignableFrom(aClass)) {
             HasDynamicTitle hasDynamicTitle = (HasDynamicTitle) content;
             return hasDynamicTitle.getPageTitle();

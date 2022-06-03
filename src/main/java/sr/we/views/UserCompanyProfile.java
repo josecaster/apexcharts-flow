@@ -21,9 +21,12 @@ import sr.we.data.controller.BusinessService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Business;
 import sr.we.shekelflowcore.entity.ThisUser;
+import sr.we.shekelflowcore.entity.helper.MappedSuperClass;
+import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.views.about.AboutView;
 import sr.we.views.business.BusinessView;
 import sr.we.views.business.BusinessViewCreate;
+import sr.we.views.person.GeneralView;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -34,7 +37,6 @@ import java.util.stream.Collectors;
 public class UserCompanyProfile extends Button {
 
     private List<Business> businesses;
-    private Dialog dialog;
     private boolean clear;
 
     public UserCompanyProfile(Dialog dialog)  {
@@ -87,13 +89,17 @@ public class UserCompanyProfile extends Button {
 
         new Text("You are singed in as ");
 
-        RouterLink manageProfileLink = new RouterLink("Manage your profile", BusinessView.class);
+        RouterLink manageProfileLink = new RouterLink("Manage your profile", GeneralView.class);
         HorizontalLayout profileLayout = new HorizontalLayout(new LineAwesomeIcon("la la-user-circle"), manageProfileLink);
         profileLayout.setWidthFull();
         dialog.add(profileLayout);
 
         AuthenticatedUser authenticatedUser = ContextProvider.getBean(AuthenticatedUser.class);
         Optional<ThisUser> maybeUser = authenticatedUser.get();
+        if(maybeUser.isEmpty()){
+            authenticatedUser.logout();
+            throw new ValidationException("Invalid Authentication");
+        }
         ThisUser thisUser = maybeUser.get();
         Avatar avatar = new Avatar(thisUser.getUsername()/*, user.getProfilePictureUrl()*/);
         avatar.addClassNames("me-xs");
@@ -109,9 +115,7 @@ public class UserCompanyProfile extends Button {
 //        dialog.add(footer);
         ContextMenu userMenu = new ContextMenu(footer);
         userMenu.setOpenOnClick(true);
-        userMenu.addItem("Logout", e -> {
-            authenticatedUser.logout();
-        });
+        userMenu.addItem("Logout", e -> authenticatedUser.logout());
 
         LanguageSelect languageSelect = new LanguageSelect();
         languageSelect.setWidthFull();
@@ -121,7 +125,6 @@ public class UserCompanyProfile extends Button {
 
         com.vaadin.flow.component.button.Button cancelButton = new com.vaadin.flow.component.button.Button("Cancel", e -> dialog.close());
         dialog.getFooter().add(cancelButton);
-        this.dialog = dialog;
         clear = false;
         addClickListener(e -> {
             clear = true;
@@ -176,13 +179,10 @@ public class UserCompanyProfile extends Button {
         UI current = UI.getCurrent();
 
         businesses = businessService.list(token);
-        if(businesses == null){
-            businesses=new ArrayList<>();
+        if(businesses == null) {
+            businesses = new ArrayList<>();
         }
-        if(businesses == null){
-            businesses=new ArrayList<>();
-        }
-        List<Long> collect = businesses.stream().map(f -> f.getId()).collect(Collectors.toList());
+        List<Long> collect = businesses.stream().map(MappedSuperClass::getId).collect(Collectors.toList());
         collect.add(0,0L);
         listBox.setItems(collect);
         Optional<Business> max = businesses.stream().filter(f -> f.getCounter().compareTo(0L) != 0).max(Comparator.comparingLong(Business::getCounter));

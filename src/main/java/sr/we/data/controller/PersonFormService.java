@@ -28,4 +28,26 @@ public class PersonFormService extends MyController{
         });
     }
 
+    public PersonForm edit(String accessToken, PersonFormVO vo){
+        String body = new GsonBuilder().create().toJson(vo);
+        RestTemplate restTemplate = new RestTemplate();
+        String fooResourceUrl
+                = configProperties.getRest()+ Services.PERSON_FORM_EDIT;
+        HttpEntity<String> httpEntity = getAuthHttpEntity(body,accessToken);
+
+        return encapsulate(() -> {
+            ResponseEntity<PersonForm> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.POST, httpEntity, PersonForm.class);
+            return exchange.getBody();
+        });
+    }
+
+    public PersonForm me(String accessToken){
+        RestTemplate restTemplate = new RestTemplate();
+
+        return encapsulate(() -> {
+            ResponseEntity<PersonForm> exchange = restTemplate.exchange(configProperties.getRest() + Services.PERSON_FORM_ME, HttpMethod.GET, getAuthHttpEntity(accessToken), PersonForm.class);
+            return exchange.getBody();
+        });
+    }
+
 }

@@ -10,27 +10,22 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.router.*;
-import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.spring.SpringVaadinSession;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.WebAttributes;
 import sr.we.ContextProvider;
 import sr.we.CustomErrorHandler;
 import sr.we.data.controller.UserService;
 import sr.we.security.CustomAuthenticationProvider;
 import sr.we.shekelflowcore.entity.ThisUser;
 import sr.we.shekelflowcore.entity.helper.vo.UserVO;
-import sr.we.shekelflowcore.exception.FrameworkException;
 import sr.we.shekelflowcore.exception.ValidationException;
+import sr.we.views.person.PersonView;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -96,9 +91,7 @@ public class IntroView extends VerticalLayout implements BeforeEnterObserver{
 
         Button go_to_login = new Button("Login");
         button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        go_to_login.addClickListener(f -> {
-            UI.getCurrent().navigate(LoginView.class);
-        });
+        go_to_login.addClickListener(f -> UI.getCurrent().navigate(LoginView.class));
 
         verticalLayout.setMaxWidth("350px");
         verticalLayout.setJustifyContentMode(JustifyContentMode.CENTER);
@@ -127,7 +120,7 @@ public class IntroView extends VerticalLayout implements BeforeEnterObserver{
                 if(!authenticate.isAuthenticated()){
                     Notification.show("Not Authenticated");
                 } else {
-                    UI.getCurrent().navigate(MainInfoView.class);
+                    UI.getCurrent().navigate(PersonView.class);
                 }
             }
         });

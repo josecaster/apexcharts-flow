@@ -79,12 +79,12 @@ public class BusinessViewCreate extends StateListenerLayout implements HasDynami
         vo.setName(companyName.getValue());
         Business business = businessService.create(token, vo);
 
-        Notification notification = new Notification();
-        notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-        notification.setText(getTranslation("sr.we.success"));
-        notification.setDuration(5000);
-        notification.setPosition(Notification.Position.MIDDLE);
-        notification.open();
+//        Notification notification = new Notification();
+//        notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+//        notification.setText(getTranslation("sr.we.success"));
+//        notification.setDuration(5000);
+//        notification.setPosition(Notification.Position.MIDDLE);
+//        notification.open();
 
         UI.getCurrent().navigate(BusinessView.class);
 
@@ -102,19 +102,16 @@ public class BusinessViewCreate extends StateListenerLayout implements HasDynami
         if(companyName.isEmpty()){
             return false;
         }
-        if(!typeOfBusiness.getOptionalValue().isPresent()){
+        if(typeOfBusiness.getOptionalValue().isEmpty()){
             return false;
         }
-        if(!country.getOptionalValue().isPresent()){
+        if(country.getOptionalValue().isEmpty()){
             return false;
         }
-        if(!businessCurrency.getOptionalValue().isPresent()){
+        if(businessCurrency.getOptionalValue().isEmpty()){
             return false;
         }
-        if(!typeOfOrganization.getOptionalValue().isPresent()){
-            return false;
-        }
-        return true;
+        return typeOfOrganization.getOptionalValue().isPresent();
     }
 
     @Override

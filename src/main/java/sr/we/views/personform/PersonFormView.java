@@ -1,15 +1,10 @@
-package sr.we.views.login;
+package sr.we.views.personform;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -18,42 +13,45 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.SpringVaadinSession;
-import org.apache.catalina.security.SecurityUtil;
 import sr.we.ContextProvider;
-import sr.we.data.controller.BusinessService;
 import sr.we.data.controller.PersonFormService;
 import sr.we.security.AuthenticatedUser;
-import sr.we.shekelflowcore.entity.Person;
 import sr.we.shekelflowcore.entity.PersonForm;
 import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.entity.ThisUser;
 import sr.we.shekelflowcore.entity.helper.vo.PersonFormVO;
-import sr.we.shekelflowcore.entity.helper.vo.PersonVO;
+import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.views.StateListenerLayout;
 import sr.we.views.business.CountrySelect;
 import sr.we.views.dashboard.DashboardView;
+import sr.we.views.login.EmailAddress;
+import sr.we.views.person.PersonView;
 
 import javax.annotation.security.RolesAllowed;
-import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 
 @PageTitle("Detail info")
 @Route(value = "detail-info", absolute = true)
 @RolesAllowed({Role.user,Role.staff,Role.owner,Role.admin})
-public class DetailInfoView extends StateListenerLayout implements BeforeEnterObserver {
+public class PersonFormView extends StateListenerLayout implements BeforeEnterObserver {
 
 
-    private TextField streetAddress, state, postalCode, city, occupation;
-    private EmailAddress emailAddress;
-    private CountrySelect countrySelect;
+    private final TextField streetAddress;
+    private final TextField state;
+    private final TextField postalCode;
+    private final TextField city;
+    private final TextField occupation;
+    private final EmailAddress emailAddress;
+    private final CountrySelect countrySelect;
     private ThisUser user;
     private boolean userPresent;
 
-    public DetailInfoView() {
+    public PersonFormView() {
 
         setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
-        setAlignItems(FlexComponent.Alignment.CENTER);
+        setCenterItems();
 
         setSizeFull();
 
@@ -143,14 +141,14 @@ public class DetailInfoView extends StateListenerLayout implements BeforeEnterOb
         vo.setEmailAddress(emailAddress.getValue());
         vo.setOccupation(occupation.getValue());
         PersonForm personForm = personFormService.create(token, vo);
-        user.getPerson().setForms(new HashSet<>(Arrays.asList(personForm)));
+        user.getPerson().setForms(new HashSet<>(List.of(personForm)));
 
-        Notification notification = new Notification();
-        notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-        notification.setText(getTranslation("sr.we.success"));
-        notification.setDuration(5000);
-        notification.setPosition(Notification.Position.MIDDLE);
-        notification.open();
+//        Notification notification = new Notification();
+//        notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+//        notification.setText(getTranslation("sr.we.success"));
+//        notification.setDuration(5000);
+//        notification.setPosition(Notification.Position.MIDDLE);
+//        notification.open();
 
         UI.getCurrent().navigate(DashboardView.class);
 
@@ -170,16 +168,13 @@ public class DetailInfoView extends StateListenerLayout implements BeforeEnterOb
         if(streetAddress.isEmpty()){
             return false;
         }
-        if(!countrySelect.getOptionalValue().isPresent()){
+        if(countrySelect.getOptionalValue().isEmpty()){
             return false;
         }
-        if(!city.getOptionalValue().isPresent()){
+        if(city.getOptionalValue().isEmpty()){
             return false;
         }
-        if(!state.getOptionalValue().isPresent()){
-            return false;
-        }
-        return true;
+        return state.getOptionalValue().isPresent();
     }
 
     @Override
@@ -187,10 +182,14 @@ public class DetailInfoView extends StateListenerLayout implements BeforeEnterOb
         AuthenticatedUser bean = ContextProvider.getBean(AuthenticatedUser.class);
         Optional<ThisUser> thisUser = bean.get();
         userPresent = thisUser.isPresent();
+        if(!userPresent){
+            bean.logout();
+            throw new ValidationException("Invalid Authentication");
+        }
         user = thisUser.get();
         if(user.getPerson() == null){
             // navigate to profile
-            event.forwardTo(MainInfoView.class);
+            event.forwardTo(PersonView.class);
         } else if (user.getPerson().getDefaultForms() != null){
             // navigate to profile
             event.forwardTo(DashboardView.class);
