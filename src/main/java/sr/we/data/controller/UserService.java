@@ -9,6 +9,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import sr.we.shekelflowcore.entity.ApplicationUserVerification;
 import sr.we.shekelflowcore.entity.Business;
+import sr.we.shekelflowcore.entity.Person;
 import sr.we.shekelflowcore.entity.ThisUser;
 import sr.we.shekelflowcore.entity.helper.vo.BusinessVO;
 import sr.we.shekelflowcore.entity.helper.vo.UserVO;
@@ -20,6 +21,7 @@ public class UserService extends MyController {
 
     public ThisUser authenticate(String username, String password) {
         RestTemplate restTemplate = new RestTemplate();
+        //noinspection deprecation
         restTemplate.getInterceptors().add(
                 new BasicAuthorizationInterceptor(username, password));
         String fooResourceUrl
@@ -66,8 +68,7 @@ public class UserService extends MyController {
         HttpHeaders headers = getAuthHttpHeaders(accessToken);
         headers.set("token", verify);
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        HttpEntity<String> httpEntity = new HttpEntity<>(headers);
-        return httpEntity;
+        return new HttpEntity<>(headers);
     }
 
     public ThisUser create(UserVO vo) {
@@ -80,6 +81,35 @@ public class UserService extends MyController {
 
         return encapsulate(() -> {
             ResponseEntity<ThisUser> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.POST, httpEntity, ThisUser.class);
+            return exchange.getBody();
+        });
+
+    }
+
+    public void publishReset(String emailAddress) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        encapsulate(() -> {
+            ResponseEntity<String> exchange = restTemplate.exchange(configProperties.getRest() + Services.USER_PUBLISH_RESET + "?emailAddress=" + emailAddress, HttpMethod.GET, getHttpEntity(), String.class);
+            return exchange.getBody();
+        });
+    }
+
+    public static class Auth {
+
+        public String username, password, temp, confirmPassword;
+
+    }
+
+    public void reset(Auth vo) {
+        String body = new GsonBuilder().create().toJson(vo);
+        RestTemplate restTemplate = new RestTemplate();
+        String fooResourceUrl
+                = configProperties.getRest() + Services.USER_RESET;
+        HttpEntity<String> httpEntity = getHttpEntity(body);
+
+         encapsulate(() -> {
+            ResponseEntity<String> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.POST, httpEntity, String.class);
             return exchange.getBody();
         });
 
