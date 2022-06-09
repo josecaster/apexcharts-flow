@@ -9,11 +9,13 @@ import com.vaadin.flow.router.*;
 import com.vaadin.flow.spring.SpringVaadinSession;
 import sr.we.ContextProvider;
 import sr.we.data.controller.BusinessService;
+import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Business;
 import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.entity.helper.vo.BusinessVO;
 import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.views.MainLayout;
+import sr.we.views.ReRouteLayout;
 import sr.we.views.StateListenerLayout;
 import sr.we.views.dashboard.DashboardView;
 import sr.we.views.settings.SettingsLayout;
@@ -75,7 +77,7 @@ public class BusinessViewEdit extends StateListenerLayout implements HasDynamicT
     @Override
     protected void onSave() {
         BusinessService businessService = ContextProvider.getBean(BusinessService.class);
-        String token = (String) SpringVaadinSession.getCurrent().getAttribute("Token");
+        String token = AuthenticatedUser.token();
         BusinessVO vo = new BusinessVO();
         vo.setBusinessType(typeOfBusiness.getValue().getId());
         vo.setBusinessOrganisationType(typeOfOrganization.getValue().getId());
@@ -92,7 +94,7 @@ public class BusinessViewEdit extends StateListenerLayout implements HasDynamicT
 //        notification.setPosition(Notification.Position.MIDDLE);
 //        notification.open();
 
-        UI.getCurrent().navigate(DashboardView.class);
+        UI.getCurrent().navigate(ReRouteLayout.class);
 
 
     }
@@ -135,7 +137,7 @@ public class BusinessViewEdit extends StateListenerLayout implements HasDynamicT
             event.forwardTo(BusinessView.class);
             throw new ValidationException("Invalid Authentication");
         }
-        String token = (String) SpringVaadinSession.getCurrent().getAttribute("Token");
+        String token = AuthenticatedUser.token();
         UI current = UI.getCurrent();
         new Thread(() -> {
             BusinessService businessService = ContextProvider.getBean(BusinessService.class);

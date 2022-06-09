@@ -11,6 +11,7 @@ import com.vaadin.flow.spring.SpringVaadinSession;
 import org.apache.commons.lang3.StringUtils;
 import sr.we.ContextProvider;
 import sr.we.data.controller.UserService;
+import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Business;
 
 import java.util.List;
@@ -54,7 +55,7 @@ public class ResetPasswordDialog extends Button {
             emailField.setInvalid(false);
             e.getSource().setEnabled(false);
             progressBar.setVisible(true);
-            String token = (String) SpringVaadinSession.getCurrent().getAttribute("Token");
+            String token = AuthenticatedUser.token();
             UI current = UI.getCurrent();
             new Thread(() -> {
                 UserService bean = ContextProvider.getBean(UserService.class);

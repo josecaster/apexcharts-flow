@@ -13,6 +13,7 @@ import com.vaadin.flow.spring.SpringVaadinSession;
 import org.apache.commons.lang3.StringUtils;
 import sr.we.ContextProvider;
 import sr.we.data.controller.BusinessService;
+import sr.we.security.AuthenticatedUser;
 import sr.we.views.MainLayout;
 
 @PageTitle("About")
@@ -23,7 +24,7 @@ public class AboutView extends VerticalLayout {
     public AboutView() {
         setSpacing(false);
 
-        String token = (String) SpringVaadinSession.getCurrent().getAttribute("Token");
+        String token = AuthenticatedUser.token();
 
         if(StringUtils.isNotEmpty(token)) {
             add(new Text(token));

@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Component;
+import sr.we.ContextProvider;
 import sr.we.data.controller.UserService;
 import sr.we.shekelflowcore.entity.ThisUser;
 
@@ -31,6 +32,15 @@ public class AuthenticatedUser {
 
     public Optional<ThisUser> get() {
         return getAuthentication().map(authentication -> (ThisUser) authentication.getPrincipal());
+    }
+
+    public static String token(){
+        AuthenticatedUser user = ContextProvider.getBean(AuthenticatedUser.class);
+        Optional<ThisUser> thisUser = user.get();
+        if(thisUser.isPresent()){
+            return thisUser.get().getToken().getToken();
+        }
+        return null;
     }
 
     public void logout() {

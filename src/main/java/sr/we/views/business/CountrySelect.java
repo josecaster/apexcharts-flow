@@ -4,6 +4,7 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.spring.SpringVaadinSession;
 import sr.we.ContextProvider;
 import sr.we.data.controller.PojoService;
+import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Country;
 import sr.we.shekelflowcore.entity.helper.MappedSuperClassReference;
 
@@ -16,7 +17,7 @@ public class CountrySelect extends Select<Country> {
 
     public CountrySelect() {
         PojoService pojoService = ContextProvider.getBean(PojoService.class);
-        String token = (String) SpringVaadinSession.getCurrent().getAttribute("Token");
+        String token = AuthenticatedUser.token();
 
         countries = pojoService.listCountry(token);
         setItems(countries);

@@ -55,3 +55,6 @@
       --lumo-success-text-color: hsl(159, 61%, 40%);
 
     }
+[slot='label'] {
+  font-weight:1000;
+}

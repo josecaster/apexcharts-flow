@@ -10,6 +10,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.SpringVaadinSession;
 import sr.we.ContextProvider;
 import sr.we.data.controller.BusinessService;
+import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Business;
 import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.entity.helper.vo.BusinessVO;
@@ -70,7 +71,7 @@ public class BusinessViewCreate extends StateListenerLayout implements HasDynami
     @Override
     protected void onSave() {
         BusinessService businessService = ContextProvider.getBean(BusinessService.class);
-        String token = (String) SpringVaadinSession.getCurrent().getAttribute("Token");
+        String token = AuthenticatedUser.token();
         BusinessVO vo = new BusinessVO();
         vo.setBusinessType(typeOfBusiness.getValue().getId());
         vo.setBusinessOrganisationType(typeOfOrganization.getValue().getId());
