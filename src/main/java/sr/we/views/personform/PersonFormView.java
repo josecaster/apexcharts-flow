@@ -21,6 +21,7 @@ import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.entity.ThisUser;
 import sr.we.shekelflowcore.entity.helper.vo.PersonFormVO;
 import sr.we.shekelflowcore.exception.ValidationException;
+import sr.we.views.ReRouteLayout;
 import sr.we.views.StateListenerLayout;
 import sr.we.views.business.CountrySelect;
 import sr.we.views.dashboard.DashboardView;
@@ -129,7 +130,7 @@ public class PersonFormView extends StateListenerLayout implements BeforeEnterOb
     @Override
     protected void onSave() {
         PersonFormService personFormService = ContextProvider.getBean(PersonFormService.class);
-        String token = (String) SpringVaadinSession.getCurrent().getAttribute("Token");
+        String token = AuthenticatedUser.token();
         PersonFormVO vo = new PersonFormVO();
         AuthenticatedUser bean = ContextProvider.getBean(AuthenticatedUser.class);
         vo.setPerson(userPresent ? user.getId() : null);
@@ -150,7 +151,7 @@ public class PersonFormView extends StateListenerLayout implements BeforeEnterOb
 //        notification.setPosition(Notification.Position.MIDDLE);
 //        notification.open();
 
-        UI.getCurrent().navigate(DashboardView.class);
+        UI.getCurrent().navigate(ReRouteLayout.class);
 
 
     }
@@ -192,7 +193,7 @@ public class PersonFormView extends StateListenerLayout implements BeforeEnterOb
             event.forwardTo(PersonView.class);
         } else if (user.getPerson().getDefaultForms() != null){
             // navigate to profile
-            event.forwardTo(DashboardView.class);
+            event.forwardTo(ReRouteLayout.class);
         }
     }
 }

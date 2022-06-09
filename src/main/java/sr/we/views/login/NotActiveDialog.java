@@ -69,7 +69,7 @@ public class NotActiveDialog extends Dialog {
                     }
                 }).start();
                 UserService userService = ContextProvider.getBean(UserService.class);
-                String token = (String) SpringVaadinSession.getCurrent().getAttribute("Token");
+                String token = AuthenticatedUser.token();
                 userService.publishVerify(token);
 
                 new Thread(new Runnable() {
@@ -97,7 +97,7 @@ public class NotActiveDialog extends Dialog {
             Button click_here = new Button("Click Here: " + verify);
             click_here.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
             verticalLayout.add(click_here);
-            String token = (String) SpringVaadinSession.getCurrent().getAttribute("Token");
+            String token = AuthenticatedUser.token();
             click_here.addClickListener(f -> {
                 SpringVaadinSession.getCurrent().setAttribute("Verify", null);
 

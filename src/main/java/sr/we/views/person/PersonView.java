@@ -22,6 +22,7 @@ import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.entity.ThisUser;
 import sr.we.shekelflowcore.entity.helper.vo.PersonVO;
 import sr.we.shekelflowcore.exception.ValidationException;
+import sr.we.views.ReRouteLayout;
 import sr.we.views.StateListenerLayout;
 import sr.we.views.dashboard.DashboardView;
 import sr.we.views.login.GenderSelect;
@@ -118,7 +119,7 @@ public class PersonView extends StateListenerLayout implements BeforeEnterObserv
     @Override
     protected void onSave() {
         PersonService personService = ContextProvider.getBean(PersonService.class);
-        String token = (String) SpringVaadinSession.getCurrent().getAttribute("Token");
+        String token = AuthenticatedUser.token();
         PersonVO vo = new PersonVO();
         vo.setFirstname(firstName.getValue());
         vo.setLastname(firstName.getValue());
@@ -177,7 +178,7 @@ public class PersonView extends StateListenerLayout implements BeforeEnterObserv
         user = thisUser.get();
         if(user.getPerson() != null){
             // navigate to profile
-            event.forwardTo(DashboardView.class);
+            event.forwardTo(ReRouteLayout.class);
         }
     }
 }

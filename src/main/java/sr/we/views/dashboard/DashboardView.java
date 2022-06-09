@@ -20,9 +20,8 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.router.*;
+
 import javax.annotation.security.RolesAllowed;
 
 import sr.we.ContextProvider;
@@ -33,9 +32,8 @@ import sr.we.views.dashboard.ServiceHealth.Status;
 
 @PageTitle("Dashboard")
 @Route(value = "dashboard", layout = MainLayout.class)
-@RouteAlias(value = "dashboard", layout = MainLayout.class)
 @RolesAllowed({Role.user,Role.staff,Role.owner,Role.admin})
-public class DashboardView extends Main {
+public class DashboardView extends Main implements BeforeEnterObserver {
 
     public DashboardView() {
         addClassName("dashboard-view");
@@ -226,4 +224,8 @@ public class DashboardView extends Main {
         return theme;
     }
 
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        System.out.println(event);
+    }
 }

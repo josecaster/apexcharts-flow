@@ -22,9 +22,8 @@ import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Business;
 import sr.we.shekelflowcore.entity.ThisUser;
 import sr.we.shekelflowcore.entity.helper.MappedSuperClass;
+import sr.we.shekelflowcore.entity.helper.Token;
 import sr.we.shekelflowcore.exception.ValidationException;
-import sr.we.views.about.AboutView;
-import sr.we.views.business.BusinessView;
 import sr.we.views.business.BusinessViewCreate;
 import sr.we.views.person.GeneralView;
 
@@ -36,10 +35,11 @@ import java.util.stream.Collectors;
 
 public class UserCompanyProfile extends Button {
 
+    private final ListBox<Long> listBox;
     private List<Business> businesses;
-    private boolean clear;
+    private boolean clear, clicked;
 
-    public UserCompanyProfile(Dialog dialog)  {
+    public UserCompanyProfile(Dialog dialog) {
         super();
         dialog.setModal(false);
         dialog.setDraggable(true);
@@ -49,8 +49,7 @@ public class UserCompanyProfile extends Button {
         dialog.getElement().getStyle().set("left", "0px");
 
 
-
-        ListBox<Long> listBox = new ListBox<>();
+        listBox = new ListBox<>();
         listBox.setRenderer(new ComponentRenderer<>(id -> {
             Optional<Business> any = businesses.stream().filter(f -> f.getId().compareTo(id) == 0).findAny();
             boolean present = any.isPresent();
@@ -59,14 +58,12 @@ public class UserCompanyProfile extends Button {
             row.setAlignItems(FlexComponent.Alignment.CENTER);
 
             Avatar avatar = new Avatar();
-            avatar.setName(present? business.getName() : getTranslation("sr.we.personal"));
+            avatar.setName(present ? business.getName() : getTranslation("sr.we.personal"));
 //            avatar.setImage(person.getPictureUrl());
 
-            Span name = new Span(present? business.getName() : getTranslation("sr.we.personal"));
-            Span profession = new Span(present?business.getBusinessType().getName():getTranslation("sr.we.personal.info"));
-            profession.getStyle()
-                    .set("color", "var(--lumo-secondary-text-color)")
-                    .set("font-size", "var(--lumo-font-size-s)");
+            Span name = new Span(present ? business.getName() : getTranslation("sr.we.personal"));
+            Span profession = new Span(present ? business.getBusinessType().getName() : getTranslation("sr.we.personal.info"));
+            profession.getStyle().set("color", "var(--lumo-secondary-text-color)").set("font-size", "var(--lumo-font-size-s)");
 
             VerticalLayout column = new VerticalLayout(name, profession);
             column.setPadding(false);
@@ -96,7 +93,7 @@ public class UserCompanyProfile extends Button {
 
         AuthenticatedUser authenticatedUser = ContextProvider.getBean(AuthenticatedUser.class);
         Optional<ThisUser> maybeUser = authenticatedUser.get();
-        if(maybeUser.isEmpty()){
+        if (maybeUser.isEmpty()) {
             authenticatedUser.logout();
             throw new ValidationException("Invalid Authentication");
         }
@@ -106,8 +103,6 @@ public class UserCompanyProfile extends Button {
 
         Span name = new Span(thisUser.getUsername());
         name.addClassNames("font-medium", "text-s", "text-secondary");
-
-
 
 
         Footer footer = new Footer(avatar, name);
@@ -127,21 +122,23 @@ public class UserCompanyProfile extends Button {
         dialog.getFooter().add(cancelButton);
         clear = false;
         addClickListener(e -> {
+            clicked = true;
             clear = true;
             listBox.clear();
             clear = false;
 
             setValues(listBox);
             dialog.open();
+            clicked = false;
         });
 
         listBox.addValueChangeListener(id -> {
-            if(id.getValue() == null){
+            if (id.getValue() == null) {
 //                setText(getTranslation("sr.we.personal"));
                 return;
             }
             Optional<Business> any = businesses.stream().filter(f -> f.getId().compareTo(id.getValue()) == 0).findAny();
-            if(any.isPresent()){
+            if (any.isPresent()) {
                 Business business = any.get();
                 setText(business.getName());
             } else {
@@ -150,48 +147,56 @@ public class UserCompanyProfile extends Button {
         });
 
 
-
         listBox.addValueChangeListener(id -> {
             BusinessService businessService = ContextProvider.getBean(BusinessService.class);
-            String token = (String) SpringVaadinSession.getCurrent().getAttribute("Token");
-            if(id.getValue() == null){
-                if(!clear) {
+            Token token1 = thisUser.getToken();
+            String token = token1.getToken();
+            if (id.getValue() == null) {
+                if (!clear) {
                     businessService.unselectAll(token);
                 }
                 return;
             }
             Optional<Business> any = businesses.stream().filter(f -> f.getId().compareTo(id.getValue()) == 0).findAny();
 
-            if(any.isPresent()){
+            if (any.isPresent()) {
                 businessService.select(any.get().getId(), token);
             } else {
                 businessService.unselectAll(token);
             }
             dialog.close();
+
         });
 
         setValues(listBox);
     }
 
     private void setValues(ListBox<Long> listBox) {
-        String token = (String) SpringVaadinSession.getCurrent().getAttribute("Token");
+        String token = AuthenticatedUser.token();
         BusinessService businessService = ContextProvider.getBean(BusinessService.class);
-        UI current = UI.getCurrent();
 
         businesses = businessService.list(token);
-        if(businesses == null) {
+        if (businesses == null) {
             businesses = new ArrayList<>();
         }
         List<Long> collect = businesses.stream().map(MappedSuperClass::getId).collect(Collectors.toList());
-        collect.add(0,0L);
+        collect.add(0, 0L);
         listBox.setItems(collect);
         Optional<Business> max = businesses.stream().filter(f -> f.getCounter().compareTo(0L) != 0).max(Comparator.comparingLong(Business::getCounter));
-        if(max.isPresent()){
+        if (max.isPresent()) {
             Business business = max.get();
             listBox.setValue(business.getId());
-        } else{
+        } else {
             listBox.setValue(0L);
         }
+        listBox.addValueChangeListener(f -> {
+            if(!clicked) {
+                UI.getCurrent().navigate(ReRouteLayout.class);
+            }
+        });
+    }
 
+    public Long getListBox() {
+        return listBox.getValue();
     }
 }

@@ -91,6 +91,17 @@ public abstract class StateListenerLayout extends Scroller {
         });
     }
 
+    public void stateArray(Component[] components) {
+        Arrays.stream(components).forEach(f -> {
+            if (AbstractField.class.isAssignableFrom(f.getClass())) {
+                ((AbstractField<?, ?>) f).addValueChangeListener(g -> {
+                    boolean valid = validate();
+                    stateChanged(valid, true);
+                });
+            }
+        });
+    }
+
     protected abstract void onSave();
 
     protected abstract void onDiscard();

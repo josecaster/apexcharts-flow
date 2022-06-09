@@ -11,7 +11,7 @@ public class GenderSelect extends Select<Gender> {
         setItemLabelGenerator(new ItemLabelGenerator<Gender>() {
             @Override
             public String apply(Gender item) {
-                return item.toString();
+                return getTranslation(item.toString());
             }
         });
         setLabel(getTranslation("sr.we.gender"));

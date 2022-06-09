@@ -4,6 +4,7 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.spring.SpringVaadinSession;
 import sr.we.ContextProvider;
 import sr.we.data.controller.PojoService;
+import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.BusinessType;
 import sr.we.shekelflowcore.entity.Currency;
 
@@ -13,7 +14,7 @@ public class BusinessTypeSelect extends Select<BusinessType> {
 
     public BusinessTypeSelect() {
         PojoService pojoService = ContextProvider.getBean(PojoService.class);
-        String token = (String) SpringVaadinSession.getCurrent().getAttribute("Token");
+        String token = AuthenticatedUser.token();
 
         List<BusinessType> businessTypes = pojoService.listBusinessType(token);
         setItems(businessTypes);

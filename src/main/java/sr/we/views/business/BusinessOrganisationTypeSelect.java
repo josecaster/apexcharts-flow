@@ -4,6 +4,7 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.spring.SpringVaadinSession;
 import sr.we.ContextProvider;
 import sr.we.data.controller.PojoService;
+import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.BusinessOrganisationType;
 import sr.we.shekelflowcore.entity.BusinessType;
 
@@ -13,7 +14,7 @@ public class BusinessOrganisationTypeSelect extends Select<BusinessOrganisationT
 
     public BusinessOrganisationTypeSelect() {
         PojoService pojoService = ContextProvider.getBean(PojoService.class);
-        String token = (String) SpringVaadinSession.getCurrent().getAttribute("Token");
+        String token = AuthenticatedUser.token();
 
         List<BusinessOrganisationType> businessOrganisationTypes = pojoService.listBusinessOrganisationType(token);
         setItems(businessOrganisationTypes);

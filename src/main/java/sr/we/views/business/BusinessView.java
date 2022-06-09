@@ -11,6 +11,7 @@ import com.vaadin.flow.router.*;
 import com.vaadin.flow.spring.SpringVaadinSession;
 import sr.we.ContextProvider;
 import sr.we.data.controller.BusinessService;
+import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Business;
 import sr.we.shekelflowcore.entity.Role;
 import sr.we.views.LineAwesomeIcon;
@@ -63,7 +64,7 @@ public class BusinessView extends TableLayout implements AfterNavigationObserver
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        String token = (String) SpringVaadinSession.getCurrent().getAttribute("Token");
+        String token = AuthenticatedUser.token();
         UI current = UI.getCurrent();
         new Thread(new Runnable() {
             @Override

@@ -17,6 +17,7 @@ import com.vaadin.flow.spring.SpringVaadinSession;
 import org.apache.commons.lang3.StringUtils;
 import sr.we.ContextProvider;
 import sr.we.data.controller.PersonService;
+import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Person;
 import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.entity.helper.vo.PersonVO;
@@ -110,7 +111,7 @@ public class GeneralView extends StateListenerLayout implements BeforeEnterObser
     @Override
     protected void onSave() {
         PersonService personService = ContextProvider.getBean(PersonService.class);
-        String token = (String) SpringVaadinSession.getCurrent().getAttribute("Token");
+        String token = AuthenticatedUser.token();
         PersonVO vo = new PersonVO();
         vo.setId(person == null ? null : person.getId());
         vo.setFirstname(firstName.getValue());
@@ -159,7 +160,7 @@ public class GeneralView extends StateListenerLayout implements BeforeEnterObser
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        String token = (String) SpringVaadinSession.getCurrent().getAttribute("Token");
+        String token = AuthenticatedUser.token();
         UI current = UI.getCurrent();
         new Thread(() -> {
             PersonService businessService = ContextProvider.getBean(PersonService.class);

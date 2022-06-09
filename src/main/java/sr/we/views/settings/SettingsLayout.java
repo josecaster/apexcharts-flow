@@ -13,6 +13,7 @@ import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import sr.we.CustomErrorHandler;
 import sr.we.security.AuthenticatedUser;
 import sr.we.views.LineAwesomeIcon;
+import sr.we.views.ReRouteLayout;
 import sr.we.views.business.BusinessView;
 import sr.we.views.dashboard.DashboardView;
 import sr.we.views.person.GeneralView;
@@ -106,7 +107,7 @@ public class SettingsLayout extends AppLayout implements BeforeEnterObserver {
         Button home = new Button(getTranslation("sr.we.home"));
         home.setIcon(new LineAwesomeIcon("la la-home"));
         home.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_CONTRAST);
-        home.addClickListener(f -> UI.getCurrent().navigate(DashboardView.class));
+        home.addClickListener(f -> UI.getCurrent().navigate(ReRouteLayout.class));
 
         com.vaadin.flow.component.html.Section section = new com.vaadin.flow.component.html.Section(home,appName, createNavigation());
         section.addClassNames("drawer-section");

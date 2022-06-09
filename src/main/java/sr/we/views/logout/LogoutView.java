@@ -26,7 +26,7 @@ public class LogoutView extends VerticalLayout {
         authenticatedUser.logout();
 //        setSpacing(false);
 //
-//        String token = (String) SpringVaadinSession.getCurrent().getAttribute("Token");
+//        String token = AuthenticatedUser.token();
 //
 //        if(StringUtils.isNotEmpty(token)) {
 //            add(new Text(token));

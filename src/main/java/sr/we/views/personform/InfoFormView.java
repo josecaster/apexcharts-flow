@@ -119,7 +119,7 @@ public class InfoFormView extends StateListenerLayout implements BeforeEnterObse
     @Override
     protected void onSave() {
         PersonFormService personFormService = ContextProvider.getBean(PersonFormService.class);
-        String token = (String) SpringVaadinSession.getCurrent().getAttribute("Token");
+        String token = AuthenticatedUser.token();
         PersonFormVO vo = new PersonFormVO();
         AuthenticatedUser bean = ContextProvider.getBean(AuthenticatedUser.class);
         vo.setId(personForm == null ? null : personForm.getId());
@@ -156,7 +156,7 @@ public class InfoFormView extends StateListenerLayout implements BeforeEnterObse
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        String token = (String) SpringVaadinSession.getCurrent().getAttribute("Token");
+        String token = AuthenticatedUser.token();
         UI current = UI.getCurrent();
         new Thread(() -> {
             PersonFormService businessService = ContextProvider.getBean(PersonFormService.class);

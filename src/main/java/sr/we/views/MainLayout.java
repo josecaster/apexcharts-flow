@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import sr.we.ContextProvider;
 import sr.we.CustomErrorHandler;
 import sr.we.security.AuthenticatedUser;
+import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.entity.ThisUser;
 import sr.we.shekelflowcore.entity.helper.Token;
 import sr.we.views.about.AboutView;
@@ -26,27 +27,41 @@ import sr.we.views.customers.CustomersView;
 import sr.we.views.dashboard.DashboardView;
 import sr.we.views.flow.FlowView;
 import sr.we.views.loans.LoansView;
-import sr.we.views.personform.PersonFormView;
-import sr.we.views.person.PersonView;
 import sr.we.views.login.NotActiveDialog;
 import sr.we.views.partners.PartnersView;
+import sr.we.views.person.PersonView;
+import sr.we.views.personform.PersonFormView;
 import sr.we.views.products.ProductsView;
 import sr.we.views.productscomponents.ProductsComponentsView;
 import sr.we.views.purchases.PurchasesView;
 import sr.we.views.reports.ReportsView;
 
+import javax.annotation.security.RolesAllowed;
 import java.util.Optional;
 
 /**
  * The main view is a top-level placeholder for other views.
  */
+//@RoutePrefix(":business")
+//@Route(":business?")
+////@RouteAlias(":businessID(" + RouteParameterRegex.INTEGER + ")")
+////@RouteAlias("last")
+//@RoutePrefix(":business")
+//@Route(value = "")
+//@RoutePrefix("forum/category/:categoryID")
+@RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
+@Route("")
+@RoutePrefix("n/a/:business")
 public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
-    boolean constructed = false;
+    private static Optional<String> business;
     private final Dialog dialog;
     private final H1 viewTitle;
     private final AuthenticatedUser authenticatedUser;
     private final AccessAnnotationChecker accessChecker;
+    boolean constructed = false;
+    private final UserCompanyProfile userCompanyProfile;
+
     public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker) {
         this.authenticatedUser = authenticatedUser;
         this.accessChecker = accessChecker;
@@ -56,7 +71,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
         VaadinSession.getCurrent().setErrorHandler(new CustomErrorHandler());
 
-
+        userCompanyProfile = new UserCompanyProfile(dialog);
     }
 
     @Override
@@ -86,7 +101,25 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
                 return;
             }
         }
+
+//        Optional<String> business1 = event.getRouteParameters().get("business");
+//        if (business1.isPresent()) {
+//            business = business1.get();
+//            Long aLong = Long.valueOf(business);
+//            if(aLong.compareTo(userCompanyProfile.getListBox()) != 0){
+//                event.forwardTo(MainLayout.class, new RouteParameters(new RouteParam("business", userCompanyProfile.getListBox().toString())));
+//            }
+//        } else {
+//            event.forwardTo(MainLayout.class, new RouteParameters(new RouteParam("business", userCompanyProfile.getListBox().toString())));
+//        }
+
+        business = event.getRouteParameters().get("business");
+
         if (!constructed) {
+//            UI current = UI.getCurrent();
+//            new Thread(() -> {
+//                current.access(() -> construct());
+//            }).start();
             construct();
         }
     }
@@ -118,19 +151,18 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
     }
 
     private Component createDrawerContent() {
-        String token = (String) SpringVaadinSession.getCurrent().getAttribute("Token");
+        String token = AuthenticatedUser.token();
         if (!StringUtils.isEmpty(token)) {
 
-            com.vaadin.flow.component.html.Section section = new com.vaadin.flow.component.html.Section(new UserCompanyProfile(dialog), dialog,
-                    createNavigation(),createSettings(), createFooter());
+
+            com.vaadin.flow.component.html.Section section = new com.vaadin.flow.component.html.Section(userCompanyProfile, dialog, createNavigation(), createSettings(), createFooter());
             section.addClassNames("drawer-section");
             return section;
         }
         H2 appName = new H2("ShekelFlow");
         appName.addClassNames("app-name");
 
-        com.vaadin.flow.component.html.Section section = new com.vaadin.flow.component.html.Section(appName,
-                createNavigation(),createSettings(), createFooter());
+        com.vaadin.flow.component.html.Section section = new com.vaadin.flow.component.html.Section(appName, createNavigation(), createSettings(), createFooter());
         section.addClassNames("drawer-section");
         return section;
     }
@@ -175,9 +207,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
     private MenuItemInfo[] createSettingItems() {
         return new MenuItemInfo[]{ //
-                new MenuItemInfo(getTranslation("sr.we.settings"), "la la-cogs", BusinessView.class)
-
-
+                new MenuItemInfo(getTranslation("sr.we.settings"), "la la-cogs", BusinessView.class, false)
 
 
         };
@@ -203,8 +233,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
                 new MenuItemInfo(getTranslation("sr.we.flow"), "la la-file", FlowView.class), //
 
-                new MenuItemInfo(getTranslation("sr.we.authentication.authorization"), "la la-columns",
-                        AthenticationAuthorizationView.class), //
+                new MenuItemInfo(getTranslation("sr.we.authentication.authorization"), "la la-columns", AthenticationAuthorizationView.class), //
 
                 new MenuItemInfo(getTranslation("sr.we.communication"), "la la-comments", CommunicationView.class), //
 
@@ -270,17 +299,25 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
         private final Class<? extends Component> view;
 
-        public MenuItemInfo(String menuTitle, String iconClass, Class<? extends Component> view) {
+        public MenuItemInfo(String menuTitle, String iconClass, Class<? extends Component> view, boolean main) {
             this.view = view;
             RouterLink link = new RouterLink();
             link.addClassNames("menu-item-link");
-            link.setRoute(view);
+            if (main) {
+                link.setRoute(view, new RouteParameters(new RouteParam("business", business.isPresent() ? business.get() : "0")));
+            } else {
+                link.setRoute(view);
+            }
 
             Span text = new Span(menuTitle);
             text.addClassNames("menu-item-text");
 
             link.add(new LineAwesomeIcon(iconClass), text);
             add(link);
+        }
+
+        public MenuItemInfo(String menuTitle, String iconClass, Class<? extends Component> view) {
+            this(menuTitle, iconClass, view, true);
         }
 
         public Class<?> getView() {
