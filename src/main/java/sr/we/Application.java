@@ -2,11 +2,19 @@ package sr.we;
 
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.page.AppShellConfigurator;
+import com.vaadin.flow.component.page.Inline;
 import com.vaadin.flow.component.page.Push;
+import com.vaadin.flow.component.page.TargetElement;
+import com.vaadin.flow.server.AppShellSettings;
 import com.vaadin.flow.server.PWA;
+import com.vaadin.flow.spring.annotation.EnableVaadin;
 import com.vaadin.flow.theme.Theme;
+import com.vaadin.flow.theme.lumo.Lumo;
+import com.vaadin.flow.theme.material.Material;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.system.ApplicationHome;
@@ -19,13 +27,18 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
  * and some desktop browsers.
  *
  */
-@SpringBootApplication
+@SpringBootApplication(exclude = { ErrorMvcAutoConfiguration.class, SecurityAutoConfiguration.class })
 @NpmPackage(value = "@fontsource/poppins", version = "4.5.0")
 @Theme(value = "shekelflow")
 @PWA(name = "ShekelFlow", shortName = "ShekelFlow", offlineResources = {})
 @Push
 @NpmPackage(value = "line-awesome", version = "1.3.0")
 @EnableConfigurationProperties(ConfigProperties.class)
+//@Inline(wrapping = Inline.Wrapping.AUTOMATIC,
+//        position = Inline.Position.APPEND,
+//        target = TargetElement.BODY,
+//        value = "splash-screen.html")
+//@EnableVaadin("sr.we.ui")
 public class Application extends SpringBootServletInitializer implements AppShellConfigurator {
 
     public static final String CUSTOM_BUNDLE_PREFIX = "custom_messages";
@@ -39,6 +52,24 @@ public class Application extends SpringBootServletInitializer implements AppShel
         new ApplicationHome(Application.class).getDir();
         TranslationProvider bean = ContextProvider.getBean(TranslationProvider.class);
         bean.addCustom(CUSTOM_BUNDLE_PREFIX);
+    }
+
+    @Override
+    public void configurePage(AppShellSettings settings) {
+        settings.setViewport("width=device-width, initial-scale=1");
+        settings.setPageTitle("SeaQNS-Finance");
+        settings.setBodySize("100vw", "100vh");
+        settings.addMetaTag("author", "Blackhammer");
+//        settings.addFavIcon("icon", "icons/icon-192.png", "192x192");
+//        settings.addLink("shortcut icon", "icons/favicon.ico");
+
+//        settings.addInlineFromFile(
+//                TargetElement.BODY,
+//                Inline.Position.APPEND,
+//                "splash-screen.html",
+//                Inline.Wrapping.NONE);
+//        settings.addInlineWithContents(Inline.Position.PREPEND,
+//                "console.log(\"foo\");", Inline.Wrapping.JAVASCRIPT);
     }
 
 }

@@ -9,7 +9,7 @@ import org.springframework.web.client.RestTemplate;
 import sr.we.shekelflowcore.entity.Customer;
 import sr.we.shekelflowcore.entity.helper.adapter.CustomerBody;
 import sr.we.shekelflowcore.entity.helper.vo.CustomerVO;
-import sr.we.shekelflowcore.settings.Services;
+import sr.we.shekelflowcore.settings.Routes;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,7 +21,7 @@ public class CustomerService extends MyController{
         RestTemplate restTemplate = new RestTemplate();
 
         return encapsulate(() -> {
-            ResponseEntity<Customer> exchange = restTemplate.exchange(configProperties.getRest() + Services.CUSTOMER_GET + "?id=" + id, HttpMethod.GET, getAuthHttpEntity(accessToken), Customer.class);
+            ResponseEntity<Customer> exchange = restTemplate.exchange(configProperties.getRest() + Routes.CUSTOMER_GET + "?id=" + id, HttpMethod.GET, getAuthHttpEntity(accessToken), Customer.class);
             Customer body = exchange.getBody();
             return body;
         });
@@ -30,7 +30,7 @@ public class CustomerService extends MyController{
     public List<Customer> list(Long businessId,String accessToken){
         RestTemplate restTemplate = new RestTemplate();
         String fooResourceUrl
-                = configProperties.getRest()+ Services.CUSTOMER_LIST;
+                = configProperties.getRest()+ Routes.CUSTOMER_LIST;
         HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
 
         return encapsulate(() -> {
@@ -43,7 +43,7 @@ public class CustomerService extends MyController{
         String body = new GsonBuilder().create().toJson(vo);
         RestTemplate restTemplate = new RestTemplate();
         String fooResourceUrl
-                = configProperties.getRest()+ Services.CUSTOMER_CREATE;
+                = configProperties.getRest()+ Routes.CUSTOMER_CREATE;
         HttpEntity<String> httpEntity = getAuthHttpEntity(body,accessToken);
 
         return encapsulate(() -> {
@@ -56,7 +56,7 @@ public class CustomerService extends MyController{
         String body = new GsonBuilder().create().toJson(vo);
         RestTemplate restTemplate = new RestTemplate();
         String fooResourceUrl
-                = configProperties.getRest()+ Services.CUSTOMER_EDIT;
+                = configProperties.getRest()+ Routes.CUSTOMER_EDIT;
         HttpEntity<String> httpEntity = getAuthHttpEntity(body,accessToken);
 
         return encapsulate(() -> {

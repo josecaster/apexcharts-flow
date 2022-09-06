@@ -1,25 +1,18 @@
 package sr.we.data.generator;
 
-import com.vaadin.exampledata.DataType;
-import com.vaadin.exampledata.ExampleDataGenerator;
 import com.vaadin.flow.spring.annotation.SpringComponent;
-import java.time.LocalDateTime;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import sr.we.data.entity.SamplePerson;
-import sr.we.data.service.SamplePersonRepository;
 import sr.we.data.controller.UserService;
+import sr.we.data.service.SamplePersonRepository;
 
 @SpringComponent
 public class DataGenerator {
 
     @Bean
     public CommandLineRunner loadData(PasswordEncoder passwordEncoder, SamplePersonRepository samplePersonRepository,
-            UserService userService) {
+                                      UserService userService) {
         return args -> {
 //            Logger logger = LoggerFactory.getLogger(getClass());
 //            if (samplePersonRepository.count() != 0L) {

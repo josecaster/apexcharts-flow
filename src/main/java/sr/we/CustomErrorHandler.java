@@ -13,6 +13,7 @@ import org.springframework.web.client.HttpStatusCodeException;
 import sr.we.shekelflowcore.exception.FrameworkException;
 import sr.we.shekelflowcore.exception.SecurityException;
 import sr.we.shekelflowcore.exception.ValidationException;
+import sr.we.ui.views.login.LoginView;
 
 public class CustomErrorHandler implements ErrorHandler {
 
@@ -33,7 +34,8 @@ public class CustomErrorHandler implements ErrorHandler {
                 } else if(errorEvent.getThrowable() instanceof FrameworkException exception){
                     notification.setText("Framework Issue Detected, Try Again after Maintenance");
                 }else if(errorEvent.getThrowable() instanceof SecurityException exception){
-                    notification.setText("Account insecure");
+                    notification.setText("Please login again for security reasons");
+                    UI.getCurrent().navigate(LoginView.class);
                 }else if(errorEvent.getThrowable() instanceof ValidationException exception){
                     notification.addThemeVariants(NotificationVariant.LUMO_CONTRAST);
                     notification.setText(exception.getError().getMessage());

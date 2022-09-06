@@ -6,11 +6,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.RestTemplate;
-import sr.we.shekelflowcore.entity.Person;
 import sr.we.shekelflowcore.entity.PersonForm;
 import sr.we.shekelflowcore.entity.helper.vo.PersonFormVO;
-import sr.we.shekelflowcore.entity.helper.vo.PersonVO;
-import sr.we.shekelflowcore.settings.Services;
+import sr.we.shekelflowcore.settings.Routes;
 
 @Controller
 public class PersonFormService extends MyController{
@@ -19,7 +17,7 @@ public class PersonFormService extends MyController{
         String body = new GsonBuilder().create().toJson(vo);
         RestTemplate restTemplate = new RestTemplate();
         String fooResourceUrl
-                = configProperties.getRest()+ Services.PERSON_FORM_CREATE;
+                = configProperties.getRest()+ Routes.PERSON_FORM_CREATE;
         HttpEntity<String> httpEntity = getAuthHttpEntity(body,accessToken);
 
         return encapsulate(() -> {
@@ -32,7 +30,7 @@ public class PersonFormService extends MyController{
         String body = new GsonBuilder().create().toJson(vo);
         RestTemplate restTemplate = new RestTemplate();
         String fooResourceUrl
-                = configProperties.getRest()+ Services.PERSON_FORM_EDIT;
+                = configProperties.getRest()+ Routes.PERSON_FORM_EDIT;
         HttpEntity<String> httpEntity = getAuthHttpEntity(body,accessToken);
 
         return encapsulate(() -> {
@@ -45,7 +43,7 @@ public class PersonFormService extends MyController{
         RestTemplate restTemplate = new RestTemplate();
 
         return encapsulate(() -> {
-            ResponseEntity<PersonForm> exchange = restTemplate.exchange(configProperties.getRest() + Services.PERSON_FORM_ME, HttpMethod.GET, getAuthHttpEntity(accessToken), PersonForm.class);
+            ResponseEntity<PersonForm> exchange = restTemplate.exchange(configProperties.getRest() + Routes.PERSON_FORM_ME, HttpMethod.GET, getAuthHttpEntity(accessToken), PersonForm.class);
             return exchange.getBody();
         });
     }

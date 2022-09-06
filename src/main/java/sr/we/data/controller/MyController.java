@@ -13,6 +13,8 @@ import sr.we.shekelflowcore.entity.helper.Build;
 import sr.we.shekelflowcore.entity.helper.Error;
 import sr.we.shekelflowcore.exception.ExceptionService;
 
+import java.util.HashMap;
+
 @Component
 public abstract class MyController {
 
@@ -21,6 +23,21 @@ public abstract class MyController {
 
     protected HttpEntity<String> getAuthHttpEntity(String accessToken) {
         HttpHeaders headers = getAuthHttpHeaders(accessToken);
+        HttpEntity<String> httpEntity = new HttpEntity<>(headers);
+        return httpEntity;
+    }
+
+    public HashMap<String, String> getMap(){
+        return new HashMap();
+    }
+
+    protected HttpEntity<String> getAuthHttpEntity(String accessToken, HashMap<String, String> map) {
+        HttpHeaders headers = getAuthHttpHeaders(accessToken);
+        if(map != null && !map.isEmpty()){
+            map.entrySet().stream().forEach(f -> {
+                headers.add(f.getKey(), f.getValue());
+            });
+        }
         HttpEntity<String> httpEntity = new HttpEntity<>(headers);
         return httpEntity;
     }

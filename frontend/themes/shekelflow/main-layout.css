@@ -27,7 +27,7 @@
 }
 
 [slot='drawer'] nav a[highlight]::before {
-  background-color: var(--lumo-primary-color-10pct);
+  background-color: hsl(197, 100%, 45%,0.1);
 }
 
 [slot='drawer'] footer vaadin-context-menu {

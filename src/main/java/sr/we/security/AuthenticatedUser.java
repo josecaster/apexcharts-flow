@@ -24,13 +24,13 @@ public class AuthenticatedUser {
         this.userService = userService;
     }
 
-    private Optional<Authentication> getAuthentication() {
+    private static Optional<Authentication> getAuthentication() {
         SecurityContext context = SecurityContextHolder.getContext();
         return Optional.ofNullable(context.getAuthentication())
                 .filter(authentication -> !(authentication instanceof AnonymousAuthenticationToken));
     }
 
-    public Optional<ThisUser> get() {
+    public static Optional<ThisUser> get() {
         return getAuthentication().map(authentication -> (ThisUser) authentication.getPrincipal());
     }
 

@@ -13,8 +13,7 @@ import javax.servlet.http.Cookie;
 import java.util.Arrays;
 import java.util.Optional;
 
-@WebServlet(urlPatterns = "/*", name = "slot", asyncSupported = true, initParams = {
-        @WebInitParam(name = InitParameters.I18N_PROVIDER, value = "sr.we.TranslationProvider")})
+@WebServlet(urlPatterns = "/*", name = "slot", asyncSupported = true, initParams = {@WebInitParam(name = InitParameters.I18N_PROVIDER, value = "sr.we.TranslationProvider")})
 public class ApplicationServlet extends VaadinServlet {
 
     @Override

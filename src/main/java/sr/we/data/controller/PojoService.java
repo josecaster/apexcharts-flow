@@ -1,28 +1,24 @@
 package sr.we.data.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.RestTemplate;
-import sr.we.ConfigProperties;
 import sr.we.shekelflowcore.entity.*;
-import sr.we.shekelflowcore.entity.helper.vo.BusinessVO;
-import sr.we.shekelflowcore.settings.Services;
+import sr.we.shekelflowcore.settings.Routes;
 
 import java.util.Arrays;
 import java.util.List;
 
 @Controller
-public class PojoService extends MyController{
+public class PojoService extends MyController {
 
 
-
-    public List<Country> listCountry(String accessToken){
+    public List<Country> listCountry(String accessToken) {
         RestTemplate restTemplate = new RestTemplate();
-        String fooResourceUrl
-                = configProperties.getRest()+ Services.COUNTRY_LIST;
+        String fooResourceUrl = configProperties.getRest() + Routes.COUNTRY_LIST;
         HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
 
         return encapsulate(() -> {
@@ -31,10 +27,20 @@ public class PojoService extends MyController{
         });
     }
 
-    public List<Currency> listCurrency(String accessToken){
+    public List<PaymentMethod> listPaymentMethod(String accessToken) {
         RestTemplate restTemplate = new RestTemplate();
-        String fooResourceUrl
-                = configProperties.getRest()+ Services.CURRENCY_LIST;
+        String fooResourceUrl = configProperties.getRest() + Routes.PAYMENT_METHOD_LIST;
+        HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
+
+        return encapsulate(() -> {
+            ResponseEntity<PaymentMethod[]> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, PaymentMethod[].class);
+            return Arrays.asList(exchange.getBody());
+        });
+    }
+
+    public List<Currency> listCurrency(String accessToken) {
+        RestTemplate restTemplate = new RestTemplate();
+        String fooResourceUrl = configProperties.getRest() + Routes.CURRENCY_LIST;
         HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
 
         return encapsulate(() -> {
@@ -43,10 +49,9 @@ public class PojoService extends MyController{
         });
     }
 
-    public List<BusinessType> listBusinessType(String accessToken){
+    public List<BusinessType> listBusinessType(String accessToken) {
         RestTemplate restTemplate = new RestTemplate();
-        String fooResourceUrl
-                = configProperties.getRest()+ Services.BUSINESS_TYPE_LIST;
+        String fooResourceUrl = configProperties.getRest() + Routes.BUSINESS_TYPE_LIST;
         HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
 
         return encapsulate(() -> {
@@ -55,10 +60,9 @@ public class PojoService extends MyController{
         });
     }
 
-    public List<BusinessOrganisationType> listBusinessOrganisationType(String accessToken){
+    public List<BusinessOrganisationType> listBusinessOrganisationType(String accessToken) {
         RestTemplate restTemplate = new RestTemplate();
-        String fooResourceUrl
-                = configProperties.getRest()+ Services.BUSINESS_ORGANISATION_TYPE_LIST;
+        String fooResourceUrl = configProperties.getRest() + Routes.BUSINESS_ORGANISATION_TYPE_LIST;
         HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
 
         return encapsulate(() -> {
@@ -67,9 +71,28 @@ public class PojoService extends MyController{
         });
     }
 
+    public List<NumericVal> listNumericVal(String accessToken, String type) {
+        return encapsulate(() -> {
+            RestTemplate restTemplate = new RestTemplate();
+            String fooResourceUrl = configProperties.getRest() + Routes.NUMERIC_VAL_LIST;
+            if (StringUtils.isBlank(type)) {
+                fooResourceUrl += "?type=" + type;
+            }
+            HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
+            ResponseEntity<NumericVal[]> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, NumericVal[].class);
+            return Arrays.asList(exchange.getBody());
+        });
+    }
 
 
+    public List<AssetType> listAssetTypes(String accessToken) {
+        RestTemplate restTemplate = new RestTemplate();
+        String fooResourceUrl = configProperties.getRest() + Routes.ASSET_TYPE_LIST;
+        HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
 
-
-
+        return encapsulate(() -> {
+            ResponseEntity<AssetType[]> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, AssetType[].class);
+            return Arrays.asList(exchange.getBody());
+        });
+    }
 }

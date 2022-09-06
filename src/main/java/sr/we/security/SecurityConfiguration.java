@@ -1,16 +1,31 @@
 package sr.we.security;
 
+import com.vaadin.flow.server.HandlerHelper;
+import com.vaadin.flow.shared.ApplicationConstants;
+import com.vaadin.flow.spring.security.RequestUtil;
+import com.vaadin.flow.spring.security.VaadinAwareSecurityContextHolderStrategy;
 import com.vaadin.flow.spring.security.VaadinWebSecurityConfigurerAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
+import org.springframework.security.config.annotation.web.configurers.ExceptionHandlingConfigurer;
+import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import sr.we.views.login.LoginView;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.util.matcher.RequestMatcher;
+import sr.we.ui.views.login.LoginView;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 @EnableWebSecurity
 @Configuration
@@ -23,18 +38,87 @@ public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
+    static boolean isFrameworkInternalRequest(HttpServletRequest request) {
+        StringBuffer requestURL = request.getRequestURL();
+        String s = requestURL.toString();
+        if(s.endsWith("sw-runtime-resources-precache.js")){
+            return true;
+        }
+        final String parameterValue = request.getParameter(ApplicationConstants.REQUEST_TYPE_PARAMETER);
+        return parameterValue != null && Stream.of(HandlerHelper.RequestType.values()).anyMatch(r -> r.getIdentifier().equals(parameterValue));
+    }
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        super.configure(http);
-        setLoginView(http, LoginView.class, LOGOUT_URL);
-        http.formLogin().defaultSuccessUrl("/u");
+//        SecurityContextHolder.setStrategyName(VaadinAwareSecurityContextHolderStrategy.class.getName());
+//        CsrfConfigurer var3 = http.csrf();
+//        var3.disable();
+//        http.requestCache().requestCache(new CustomRequestCache());
+//        ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry urlRegistry = http.authorizeRequests();
+//        urlRegistry.requestMatchers(SecurityConfiguration::isFrameworkInternalRequest).permitAll();;//.permitAll();
+//        urlRegistry.antMatchers("/forgot-password/**").permitAll();
+//        urlRegistry.anyRequest().authenticated();
+//
+//        setLoginView(http, LoginView.class, LOGOUT_URL);
+//        http.formLogin().defaultSuccessUrl("/u");
+//        http.csrf().disable();
+        // Vaadin handles CSRF internally
+        http.csrf().disable()
+
+                // Register our CustomRequestCache, which saves unauthorized access attempts, so the user is redirected after login.
+                .requestCache().requestCache(new CustomRequestCache())
+
+                // Restrict access to our application.
+                .and().authorizeRequests()
+
+                // Allow all Vaadin internal requests.
+                .requestMatchers(SecurityConfiguration::isFrameworkInternalRequest).permitAll()
+                .and().authorizeRequests().antMatchers("/forgot-password/**").permitAll()
+                .and().authorizeRequests().antMatchers("/").permitAll()
+
+                // Allow all requests by logged-in users.
+                .anyRequest().authenticated()
+
+                // Configure the login page.
+                .and().formLogin()
+                .loginPage("/login").permitAll()
+//                .loginProcessingUrl("/login")
+                .defaultSuccessUrl("/u")
+                .failureUrl("/login?error")
+
+                // Configure logout
+                .and().logout().logoutSuccessUrl("/u");
+//
+//        super.configure(http);
+//        setLoginView(http, LoginView.class);
 
     }
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-        super.configure(web);
-        web.ignoring().antMatchers("/images/*.png");
+        web.ignoring().antMatchers(
+                // Client-side JS
+                "/VAADIN/**",
+
+                // the standard favicon URI
+                "/favicon.ico",
+
+                // the robots exclusion standard
+                "/robots.txt",
+
+                // web application manifest
+                "/manifest.webmanifest",
+                "/sw.js",
+                "/offline.html",
+
+                // icons and images
+                "/icons/**",
+                "/images/**",
+                "/styles/**",
+
+                // (development mode) H2 debugging console
+                "/h2-console/**");
+//        web.ignoring().antMatchers("/images/*.png");
     }
 
     @Override

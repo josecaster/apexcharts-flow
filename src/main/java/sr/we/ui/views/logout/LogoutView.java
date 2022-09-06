@@ -1,0 +1,46 @@
+package sr.we.ui.views.logout;
+
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
+import sr.we.security.AuthenticatedUser;
+import sr.we.ui.views.MainLayout;
+
+@PageTitle("Loggedout")
+@Route(value = "logout", layout = MainLayout.class)
+@AnonymousAllowed
+public class LogoutView extends VerticalLayout {
+
+    public LogoutView(AuthenticatedUser authenticatedUser) {
+        authenticatedUser.logout();
+//        setSpacing(false);
+//
+//        String token = AuthenticatedUser.token();
+//
+//        if(StringUtils.isNotEmpty(token)) {
+//            add(new Text(token));
+//        }
+//
+//        Button title = new Button("Test");
+//        title.addClickListener(f -> {
+//            BusinessService businessService = ContextProvider.getBean(BusinessService.class);
+//            businessService.list(token);
+//        });
+//
+//        add(title);
+//
+//        Image img = new Image("images/empty-plant.png", "placeholder plant");
+//        img.setWidth("200px");
+//        add(img);
+//
+//        add(new H2("This place intentionally left empty"));
+//        add(new Paragraph("It’s a place where you can grow your own UI 🤗"));
+//
+//        setSizeFull();
+//        setJustifyContentMode(JustifyContentMode.CENTER);
+//        setDefaultHorizontalComponentAlignment(Alignment.CENTER);
+//        getStyle().set("text-align", "center");
+    }
+
+}

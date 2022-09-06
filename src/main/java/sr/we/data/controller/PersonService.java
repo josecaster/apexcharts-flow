@@ -6,11 +6,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.RestTemplate;
-import sr.we.shekelflowcore.entity.Business;
 import sr.we.shekelflowcore.entity.Person;
 import sr.we.shekelflowcore.entity.helper.adapter.LocalDateAdapter;
 import sr.we.shekelflowcore.entity.helper.vo.PersonVO;
-import sr.we.shekelflowcore.settings.Services;
+import sr.we.shekelflowcore.settings.Routes;
 
 import java.time.LocalDate;
 
@@ -22,7 +21,7 @@ public class PersonService extends MyController {
                 .registerTypeAdapter(LocalDate.class, new LocalDateAdapter()).create().toJson(vo);
         RestTemplate restTemplate = new RestTemplate();
         String fooResourceUrl
-                = configProperties.getRest() + Services.PERSON_CREATE;
+                = configProperties.getRest() + Routes.PERSON_CREATE;
         HttpEntity<String> httpEntity = getAuthHttpEntity(body, accessToken);
 
         return encapsulate(() -> {
@@ -36,7 +35,7 @@ public class PersonService extends MyController {
                 .registerTypeAdapter(LocalDate.class, new LocalDateAdapter()).create().toJson(vo);
         RestTemplate restTemplate = new RestTemplate();
         String fooResourceUrl
-                = configProperties.getRest() + Services.PERSON_EDIT;
+                = configProperties.getRest() + Routes.PERSON_EDIT;
         HttpEntity<String> httpEntity = getAuthHttpEntity(body, accessToken);
 
         return encapsulate(() -> {
@@ -49,7 +48,7 @@ public class PersonService extends MyController {
         RestTemplate restTemplate = new RestTemplate();
 
         return encapsulate(() -> {
-            ResponseEntity<Person> exchange = restTemplate.exchange(configProperties.getRest() + Services.PERSON_ME, HttpMethod.GET, getAuthHttpEntity(accessToken), Person.class);
+            ResponseEntity<Person> exchange = restTemplate.exchange(configProperties.getRest() + Routes.PERSON_ME, HttpMethod.GET, getAuthHttpEntity(accessToken), Person.class);
             return exchange.getBody();
         });
     }
