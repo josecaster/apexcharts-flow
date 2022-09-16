@@ -1,11 +1,6 @@
 package sr.we.ui.views.finance.payments;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.splitlayout.SplitLayout;
-import com.vaadin.flow.component.splitlayout.SplitLayoutVariant;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.*;
 import sr.we.ContextProvider;
 import sr.we.data.controller.BusinessService;
@@ -13,13 +8,13 @@ import sr.we.data.controller.LoanRequestService;
 import sr.we.data.controller.UserAccessService;
 import sr.we.demo.about.AboutView;
 import sr.we.security.AuthenticatedUser;
-import sr.we.shekelflowcore.entity.*;
-import sr.we.shekelflowcore.exception.ValidationException;
+import sr.we.shekelflowcore.entity.Currency;
+import sr.we.shekelflowcore.entity.LoanRequest;
+import sr.we.shekelflowcore.entity.PaymentTransaction;
+import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.security.Privileges;
-import sr.we.shekelflowcore.security.privileges.TransactionsPrivilege;
+import sr.we.shekelflowcore.security.privileges.PaymentsPrivilege;
 import sr.we.ui.views.MainLayout;
-import sr.we.ui.views.business.BusinessView;
-import sr.we.ui.views.finance.loans.LoansView;
 import sr.we.ui.views.finance.transactions.TransactionForm;
 
 import javax.annotation.security.RolesAllowed;
@@ -43,7 +38,7 @@ public class PaymentsView extends PaymentsForm implements BeforeEnterObserver, A
     public void afterNavigation(AfterNavigationEvent event) {
         LoanRequestService loanService = ContextProvider.getBean(LoanRequestService.class);
         List<LoanRequest> list = loanService.list(AuthenticatedUser.token(), Long.valueOf(businessStringId), null);
-        if(list != null) {
+        if (list != null) {
             list = list.stream().filter(f -> f.getStatus().compareTo(LoanRequest.Status.REPAYMENT) == 0).collect(Collectors.toList());
             grid.setItems(list);
         } else {
@@ -55,8 +50,8 @@ public class PaymentsView extends PaymentsForm implements BeforeEnterObserver, A
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         UserAccessService userAccesService = ContextProvider.getBean(UserAccessService.class);
-        boolean hasAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new TransactionsPrivilege(), Privileges.READ);
-        if(!hasAccess){
+        boolean hasAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new PaymentsPrivilege(), Privileges.READ);
+        if (!hasAccess) {
             UI.getCurrent().navigate(AboutView.class);
         }
         Optional<String> business1 = event.getRouteParameters().get("business");

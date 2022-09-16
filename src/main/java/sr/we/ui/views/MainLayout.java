@@ -9,6 +9,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.select.Select;
@@ -275,7 +276,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
     private MenuItemInfo[] createSettingItems() {
         return new MenuItemInfo[]{ //
-                new MenuItemInfo(getTranslation("sr.we.settings"), "la la-cog", BusinessView.class, false)
+                new MenuItemInfo(getTranslation("sr.we.settings"), "icons/menus/icons8_settings_48px.png", BusinessView.class, false)
 
 
         };
@@ -288,58 +289,58 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(LoanReportPrivilege.class), Privileges.READ)) {
             //current.access(() -> {
-                MenuItemInfo dashboard = new MenuItemInfo(getTranslation("sr.we.dashboard"), "la la-chart-area", DashboardView.class);
+                MenuItemInfo dashboard = new MenuItemInfo(getTranslation("sr.we.dashboard"), "icons/menus/icons8_dashboard_48px.png", DashboardView.class);
                 list.add(dashboard);
 //            });
         }
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(LoanPrivilege.class), Privileges.READ)) {
             //current.access(() -> {
-                MenuItemInfo loans = new MenuItemInfo(getTranslation("sr.we.loans"), "la la-list", LoanView.class);
+                MenuItemInfo loans = new MenuItemInfo(getTranslation("sr.we.loans"), "icons/menus/icons8_debt_48px.png", LoanView.class);
                 list.add(loans);
 //            });
         }
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(LoanRequestPrivilege.class), Privileges.READ)) {
             //current.access(() -> {
-            MenuItemInfo loans = new MenuItemInfo(getTranslation("sr.we.loan.requests"), "la la-list", RequestsView.class);
+            MenuItemInfo loans = new MenuItemInfo(getTranslation("sr.we.loan.requests"), "icons/menus/icons8_lend_48px.png", RequestsView.class);
             list.add(loans);
 //            });
         }
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(CustomerPrivilege.class), Privileges.READ)) {
             //current.access(() -> {
-                MenuItemInfo customers = new MenuItemInfo(getTranslation("sr.we.customers"), "la la-th-list", CustomersView.class);
+                MenuItemInfo customers = new MenuItemInfo(getTranslation("sr.we.customers"), "icons/menus/icons8_customer_48px.png", CustomersView.class);
                 list.add(customers);
 //            });
         }
-        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(TransactionsPrivilege.class), Privileges.INSERT)) {
+        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(PaymentsPrivilege.class), Privileges.INSERT)) {
             //current.access(() -> {
-                MenuItemInfo transactions = new MenuItemInfo("Payments", "la la-cash-register", PaymentsView.class);
+                MenuItemInfo transactions = new MenuItemInfo("Payments", "icons/menus/icons8_payment_history_48px.png", PaymentsView.class);
                 list.add(transactions);
 //            });
         }
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(TransactionsPrivilege.class), Privileges.READ)) {
             //current.access(() -> {
-                MenuItemInfo transactions = new MenuItemInfo("Transactions", "la la-list", TransactionGrid.class);
+                MenuItemInfo transactions = new MenuItemInfo("Transactions", "icons/menus/icons8_transaction_48px.png", TransactionGrid.class);
                 list.add(transactions);
 //            });
         }
 
-        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(TransactionsPrivilege.class), Privileges.INSERT)) {
+        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(POSPrivilege.class), Privileges.INSERT)) {
             //current.access(() -> {
-            MenuItemInfo transactions = new MenuItemInfo("POS", "la la-list", PosView.class);
+            MenuItemInfo transactions = new MenuItemInfo("POS", "icons/menus/icons8_cash_register_48px.png", PosView.class);
             list.add(transactions);
 //            });
         }
 
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(ProductsPrivilege.class), Privileges.READ)) {
             //current.access(() -> {
-                MenuItemInfo products = new MenuItemInfo("Products", "la la-list", ProductView.class);
+                MenuItemInfo products = new MenuItemInfo("Products", "icons/menus/icons8_product_48px.png", ProductView.class);
                 list.add(products);
 //            });
         }
 
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(ServicesPrivilege.class), Privileges.READ)) {
             //current.access(() -> {
-                MenuItemInfo products = new MenuItemInfo("Services", "la la-list", ServiceView.class);
+                MenuItemInfo products = new MenuItemInfo("Services", "icons/menus/icons8_service_48px.png", ServiceView.class);
                 list.add(products);
 //            });
         }
@@ -414,7 +415,12 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
             Span text = new Span(menuTitle);
 //            text.addClassNames("menu-item-text");
 
-            link.add(new LineAwesomeIcon(iconClass), text);
+            Image img = new Image(iconClass, "icon by Icons8");
+            img.setWidth("18px");
+            img.setHeight("18px");
+            img.getElement().getStyle().set("margin-inline-end","var(--lumo-space-s)");
+            img.getElement().getStyle().set("margin-top","calc(var(--lumo-space-xs) * 0.5)");
+            link.add(iconClass.startsWith("icons/menus/") ? img : new LineAwesomeIcon(iconClass), text);
             add(link);
         }
 

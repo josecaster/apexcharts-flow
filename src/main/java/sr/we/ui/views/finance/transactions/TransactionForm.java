@@ -164,7 +164,7 @@ public class TransactionForm extends FormLayout {
     }
 
 
-    public void save() {
+    public PaymentTransaction save() {
         PaymentTransactionVO paymentTransactionVO = new PaymentTransactionVO();
         paymentTransactionVO.setAmount(amountFld.getValue());
         paymentTransactionVO.setAccount(accountSelect.getValue().getId());
@@ -181,12 +181,13 @@ public class TransactionForm extends FormLayout {
 
         if (paymentTransactionVO.getAccount() != null && paymentTransactionVO.getPaymentDate() != null && paymentTransactionVO.getPaymentMethod() != null && paymentTransactionVO.getExchangeRate() != null) {
             PaymentTransactionService paymentTransactionService = ContextProvider.getBean(PaymentTransactionService.class);
-            paymentTransactionService.create(AuthenticatedUser.token(), paymentTransactionVO);
+            PaymentTransaction paymentTransaction = paymentTransactionService.create(AuthenticatedUser.token(), paymentTransactionVO);
             if(this.refresh == null) {
                 UI.getCurrent().getPage().reload();
             } else {
                 refresh.build();
             }
+            return paymentTransaction;
         } else {
             throw new ValidationException("Not all required fields are filled");
         }

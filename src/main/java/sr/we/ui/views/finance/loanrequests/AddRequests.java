@@ -10,15 +10,12 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.template.Id;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.RouteParam;
 import com.vaadin.flow.router.RouteParameters;
-import org.apache.commons.lang3.StringUtils;
 import sr.we.ContextProvider;
 import sr.we.data.controller.LoanRequestService;
 import sr.we.security.AuthenticatedUser;
-import sr.we.shekelflowcore.entity.Loan;
 import sr.we.shekelflowcore.entity.LoanRequest;
 import sr.we.shekelflowcore.entity.LoanRequestPlan;
 import sr.we.shekelflowcore.entity.helper.Build;
@@ -27,10 +24,7 @@ import sr.we.shekelflowcore.entity.helper.vo.LoanRequestAssetsVO;
 import sr.we.shekelflowcore.entity.helper.vo.LoanRequestVO;
 import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.ui.components.Highlight;
-import sr.we.ui.components.finance.FrequencyField;
 import sr.we.ui.views.LineAwesomeIcon;
-import sr.we.ui.views.products.EditProductsView;
-import sr.we.ui.views.products.ProductView;
 
 import java.util.*;
 
@@ -55,14 +49,18 @@ public class AddRequests extends LitTemplate {
     protected RepaymentForm repaymentForm;
     @Id("requestor-form")
     protected RequestorForm requestorForm;
+    @Id("board-layout")
+    protected Div boardLayout;
     @Id("back-button")
     private Button backButton;
     @Id("save-btn")
     private Button saveBtn;
     private String business;
-    @Id("board-layout")
-    protected Div boardLayout;
-
+    @Id("contract-layout")
+    private Div contractLayout;
+    @Id("generate-contract-btn")
+    private Button generateContractBtn;
+    private LoanRequest loanRequest;
 
     /**
      * Creates a new AddRequests.
@@ -81,7 +79,7 @@ public class AddRequests extends LitTemplate {
         saveBtn.addClickListener(f -> onSave());
 
 
-        refresh = new Build<>(){
+        refresh = new Build<>() {
 
             @Override
             public Object build() {
@@ -89,14 +87,51 @@ public class AddRequests extends LitTemplate {
                 return null;
             }
         };
+        contractLayout.setVisible(false);
+        generateContractBtn.addClickListener(f -> {
+            /*try {
+                createNewContent();
+            } catch (IOException | Docx4JException | JAXBException | ParserConfigurationException |
+                     TransformerException e) {
+                throw new RuntimeException(e);
+            }*/
+        });
     }
+
+    /*public void createNewContent() throws IOException, FrameworkException, Docx4JException, JAXBException, ParserConfigurationException, TransformerException {
+            OfficeDocDocxParser officeDocDocxParser = new OfficeDocDocxParser(UI.getCurrent().getLocale());
+            Map<String, String> placeholders = new HashMap<>();
+        File file1 = ResourceUtils.getFile(
+                "classpath:contracts/contract-new-hire-6-maanden.docx");
+        String letterDocname = "contract-new-hire-6-maanden.docx";
+            String outputFilename = Constants.REPORT_TEMP_HOME + Constants.FILE_SEPERATOR + Calendar.getInstance().getTime().getTime() + "_" + letterDocname;
+            if (file1 != null) {
+                officeDocDocxParser.getFileFromTemplate(file1, outputFilename, placeholders);
+                final File file = new File(outputFilename);
+
+                Anchor anchor = new Anchor(new StreamResource(letterDocname, new InputStreamFactory() {
+
+                    @Override
+                    public InputStream createInputStream() {
+//                        UploadTemplateGenerator generator = new UploadTemplateGenerator(value, locale);
+//                        byte[] array = generator.createExcel();
+                        try {
+                            return new FileInputStream(file);//new ByteArrayInputStream("new byte[]{}".getBytes());
+                        } catch (FileNotFoundException e) {
+                            throw new RuntimeException(e);
+                        }
+
+                    }
+                }), "Download Contract");
+                contractLayout.add(anchor);
+            }
+    }*/
 
     public void setBusiness(String business) {
         this.business = business;
         requestorForm.setBusiness(business);
     }
 
-    private LoanRequest loanRequest;
     protected void setLoanRequest(LoanRequest loanRequest) {
         this.loanRequest = loanRequest;
         requestorForm.setLoanRequest(loanRequest, refresh);
@@ -104,6 +139,7 @@ public class AddRequests extends LitTemplate {
         provisionForm.setLoanRequest(loanRequest, refresh);
         repaymentForm.setLoanRequest(loanRequest, refresh);
         refresh.build();
+        contractLayout.setVisible(true);
     }
 
     private void board() {

@@ -6,6 +6,7 @@ import './requestor-form';
 import './assets-form';
 import './provision-form';
 import './repayment-form';
+import '@vaadin/button/src/vaadin-button.js';
 
 @customElement('add-requests')
 export class AddRequests extends LitElement {
@@ -37,9 +38,14 @@ export class AddRequests extends LitElement {
  <vaadin-form-layout id="form-layout">
   <requestor-form id="requestor-form" colspan="1"></requestor-form>
   <vaadin-form-layout colspan="2" style="width: 100%;">
-   <assets-form id="assets-form" style="width: 100%;" colspan="1"></assets-form>
+   <assets-form id="assets-form" style="width: 100%; height: 100%;" colspan="1"></assets-form>
    <provision-form id="provision-form" style="width: 100%;" colspan="1"></provision-form>
    <repayment-form id="repayment-form" style="width: 100%;" colspan="2"></repayment-form>
+   <div id="contract-layout" style="width: 100%;">
+    <vaadin-button id="generate-contract-btn" tabindex="0">
+     Generate contract
+    </vaadin-button>
+   </div>
   </vaadin-form-layout>
  </vaadin-form-layout>
 </vaadin-vertical-layout>

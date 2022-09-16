@@ -1,5 +1,30 @@
 import {Flow} from '@vaadin/flow-frontend/Flow';
 import {Router} from '@vaadin/router';
+import { registerStyles, css } from '@vaadin/vaadin-themable-mixin/register-styles.js';
+
+registerStyles('vaadin-app-layout', css`
+  ::-webkit-scrollbar {
+    width: 5px;
+    background-color: var(--lumo-base-color);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--lumo-primary-color);
+  }
+`);
+
+registerStyles('vaadin-grid', css`
+  ::-webkit-scrollbar {
+    width: 5px;
+    background-color: var(--lumo-base-color);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--lumo-primary-color);
+  }
+`);
+
+
 
 const {serverSideRoutes} = new Flow({
   imports: () => import('../target/frontend/generated-flow-imports')

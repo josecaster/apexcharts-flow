@@ -1,6 +1,5 @@
 package sr.we.ui.views.pos;
 
-import com.infraleap.animatecss.Animated;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -9,7 +8,6 @@ import com.vaadin.flow.component.board.Row;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -26,12 +24,16 @@ import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.apache.commons.lang3.StringUtils;
 import sr.we.ContextProvider;
+import sr.we.data.controller.BusinessService;
 import sr.we.data.controller.PosHeaderService;
 import sr.we.data.controller.PosStartService;
 import sr.we.data.controller.UserAccessService;
@@ -42,13 +44,15 @@ import sr.we.shekelflowcore.entity.helper.vo.PosHeaderDetailVO;
 import sr.we.shekelflowcore.entity.helper.vo.PosHeaderVO;
 import sr.we.shekelflowcore.entity.helper.vo.PosStartVO;
 import sr.we.shekelflowcore.security.Privileges;
-import sr.we.shekelflowcore.security.privileges.TransactionsPrivilege;
+import sr.we.shekelflowcore.security.privileges.POSPrivilege;
 import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.ui.views.LineAwesomeIcon;
 import sr.we.ui.views.MainLayout;
+import sr.we.ui.views.finance.transactions.TransactionDialog;
 
 import javax.annotation.security.RolesAllowed;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -66,10 +70,10 @@ import java.util.stream.Collectors;
 @PageTitle("Point of sale")
 public class PosView extends LitTemplate implements BeforeEnterObserver {
 
+    private final Dialog dialog;
+    private final Grid<PosHeader> ticketsGrid;
     @Id("board-layout")
     private Div boardLayout;
-    //    @Id("checkout-layout")
-//    private VerticalLayout checkoutLayout;
     @Id("main-form-layout")
     private FormLayout mainFormLayout;
     @Id("filter-cmb")
@@ -99,19 +103,24 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
     private Grid<Item> itemGrid;
     private Grid<Fee> feeGrid;
     private Map<String, Object> map, feeMap;
-    private ContextMenu variableMenu;
     private List<Item> itemList = null;
     private List<Fee> feeList = null;
-    //    private Build<String> value;
-//    private Build<Double> percentage;
     private LocalDateTime targetDate;
     private String business;
+    private Business business2;
+    @Id("tickets-layout")
+    private Div ticketsLayout;
+    private final List<PosHeader> ticketsList;
+    @Id("top-bar-layout")
+    private Element topBarLayout;
 
     /**
      * Creates a new PosView.
      */
     public PosView() {
         mainFormLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0px", 1), new FormLayout.ResponsiveStep("1500px", 3));
+
+        topBarLayout.setVisible(false);
 
         posHeaderCmb.setItemLabelGenerator(f -> {
             return "Ticket #" + f.getHeaderSeq();
@@ -130,22 +139,115 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
             PosHeaderVO vo = getVO();
             vo.setCharged(false);
             PosHeaderService posHeaderService = ContextProvider.getBean(PosHeaderService.class);
+            PosHeader posHeader = null;
             if (vo.getId() == null) {
-                posHeaderService.create(AuthenticatedUser.token(), vo);
+                posHeader = posHeaderService.create(AuthenticatedUser.token(), vo);
             } else {
-                posHeaderService.edit(AuthenticatedUser.token(), vo);
+                posHeader = posHeaderService.edit(AuthenticatedUser.token(), vo);
             }
         });
 
         chargeBtn.addClickListener(f -> {
             PosHeaderVO vo = getVO();
-            vo.setCharged(true);
+            vo.setCharged(false);
             PosHeaderService posHeaderService = ContextProvider.getBean(PosHeaderService.class);
+            PosHeader posHeader = null;
             if (vo.getId() == null) {
-                posHeaderService.create(AuthenticatedUser.token(), vo);
+                posHeader = posHeaderService.create(AuthenticatedUser.token(), vo);
             } else {
-                posHeaderService.edit(AuthenticatedUser.token(), vo);
+                posHeader = posHeaderService.edit(AuthenticatedUser.token(), vo);
             }
+
+
+            TransactionDialog transactionDialog = new TransactionDialog(posHeader.getRest(), LocalDate.now(), Long.valueOf(business), business2.getCurrency(), business2.getCurrency(), PaymentTransaction.Reference.POS, posHeader.getId(), PaymentTransaction.Reference.POS.getPlusMin());
+            transactionDialog.disableAmount();
+            transactionDialog.setOnSave(() -> {
+                return null;
+            });
+            transactionDialog.setRefresh(() -> {
+
+                startNewTicket();
+                return null;
+            });
+            transactionDialog.open();
+        });
+
+
+        dialog = new Dialog();
+
+        ticketsLayout.removeAll();
+        ticketsGrid = new Grid<>();
+        ticketsLayout.add(ticketsGrid);
+        ticketsList = new ArrayList<>();
+        ticketsGrid.setItems(ticketsList);
+        ticketsGrid.addColumn(f -> {
+            return "Ticket #" + f.getHeaderSeq();
+        }).setHeader("ID");
+        ticketsGrid.addColumn(PosHeader::getNote).setHeader("Note");
+        ticketsGrid.addColumn(f -> Constants.CURRENCY_FORMAT.format(f.getPrice())).setHeader("Price");
+        ticketsGrid.addColumn(f -> Constants.CURRENCY_FORMAT.format(f.getRest())).setHeader("Rest");
+        ticketsGrid.addComponentColumn(new ValueProvider<PosHeader, LineAwesomeIcon>() {
+            @Override
+            public LineAwesomeIcon apply(PosHeader posHeader) {
+                if (posHeader.getRest().compareTo(BigDecimal.ZERO) == 0) {
+                    LineAwesomeIcon lineAwesomeIcon = new LineAwesomeIcon("la la-check");
+                    lineAwesomeIcon.getElement().getThemeList().add("badge primary success");
+                    return lineAwesomeIcon;
+                }
+                LineAwesomeIcon lineAwesomeIcon = null;
+                if (posHeader.getPaymentTransactions() != null && !posHeader.getPaymentTransactions().isEmpty()) {
+                    lineAwesomeIcon = new LineAwesomeIcon("la la-check");
+                } else {
+                    lineAwesomeIcon = new LineAwesomeIcon("la la-chevron-circle-down");
+                }
+                lineAwesomeIcon.addClickListener(f -> {
+                    TransactionDialog transactionDialog = new TransactionDialog(posHeader.getRest(), LocalDate.now(), Long.valueOf(business), business2.getCurrency(), business2.getCurrency(), PaymentTransaction.Reference.POS, posHeader.getId(), PaymentTransaction.Reference.POS.getPlusMin());
+//                    transactionDialog.disableAmount();
+                    transactionDialog.setOnSave(() -> {
+                        return null;
+                    });
+                    transactionDialog.setRefresh(() -> {
+//                        String placeholder = ticketNumber();
+//                        posHeaderCmb.setPlaceholder(placeholder);
+//                        productTitle.setText("New " + placeholder);
+                        startNewTicket();
+                        return null;
+                    });
+                    transactionDialog.open();
+//                    BigDecimal rest = detail.getFactor().subtract(detail.getTransactionsAmount());
+//                    LocalDate initDate = detail.getInitDate();
+//                    Long businessId = loanRequest.getLoan().getBusiness().getId();
+////                    LoanRequestService loanRequestService = ContextProvider.getBean(LoanRequestService.class);
+////                    LoanRequest loanRequest1 = loanRequestService.get(loanRequestPlan.getLoanRequestId(), AuthenticatedUser.token());
+//                    Currency fromCurrency = loanRequest.getLoan().getCurrency();
+//                    Currency selectedCurrency = loanRequest.getCurrency();
+//                    PaymentTransaction.Reference reference = PaymentTransaction.Reference.LOAN_REQUEST_PLAN_DETAIL;
+//                    Long referenceId = detail.getId();
+//                    PaymentTransaction.PlusMin plusMin = PaymentTransaction.PlusMin.PLUS;
+//                    TransactionDialog transactionDialog = new TransactionDialog(rest, initDate, businessId, fromCurrency, selectedCurrency, reference, referenceId, plusMin);
+//                    transactionDialog.setNextReferenceId(loanRequest.getId());
+//                    transactionDialog.setRefresh(refresh);
+//                    transactionDialog.open();
+                });
+
+                lineAwesomeIcon.getElement().getThemeList().add("badge primary error");
+                return lineAwesomeIcon;
+            }
+        }).setHeader("Record Payment");
+
+        variableBtn.addClickListener(f-> {
+            PosHeaderVO vo = getVO();
+            vo.setCharged(false);
+            PosHeaderService posHeaderService = ContextProvider.getBean(PosHeaderService.class);
+            PosHeader posHeader = null;
+            if (vo.getId() == null) {
+                posHeader = posHeaderService.create(AuthenticatedUser.token(), vo);
+            } else {
+                posHeader = posHeaderService.edit(AuthenticatedUser.token(), vo);
+            }
+            startNewTicket();
+            refreshTickets();
+            ticketsGrid.scrollIntoView();
         });
     }
 
@@ -155,8 +257,6 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
         radioLayout.removeAll();
         radioLayout.add(productservicesRadio);
         productservicesRadio.setItems(EnumSet.allOf(Radio.class));
-
-        Board board = new Board();
 
         grid = new Grid();
         map = new HashMap<>();
@@ -201,6 +301,7 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
         productservicesRadio.setValue(Radio.SERVICES);
 
         feeGrid = new Grid<>();
+        feeGrid.setHeight("60px");
         feeLayout.removeAll();
         feeLayout.add(feeGrid);
         feeGrid.setAllRowsVisible(true);
@@ -216,7 +317,8 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
         itemsLayout.removeAll();
         itemsLayout.add(itemGrid);
         itemGrid.setSelectionMode(Grid.SelectionMode.NONE);
-        itemGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_WRAP_CELL_CONTENT, GridVariant.LUMO_COMPACT);
+        itemGrid.setHeight("300px");
+        itemGrid.addThemeVariants( GridVariant.LUMO_ROW_STRIPES, GridVariant.LUMO_WRAP_CELL_CONTENT, GridVariant.LUMO_COMPACT);
         itemGrid.addComponentColumn(item -> {
             NumberField numberField = new NumberField();
             numberField.setValue((double) item.getCount());
@@ -252,18 +354,15 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
             });
             return lineAwesomeIcon;
         }).setAutoWidth(false).setWidth("25px");
+        itemGrid.setItemDetailsRenderer(new ComponentRenderer<VerticalLayout, Item>(data -> {
+            return getVariableLayout(data);
+        }));
+        itemGrid.setDetailsVisibleOnClick(true);
         itemList = new ArrayList<>();
         itemGrid.setItems(itemList);
 
         feeList = new ArrayList<>();
         feeGrid.setItems(feeList);
-
-
-        variableMenu = new ContextMenu(variableBtn);
-        variableMenu.setOpenOnClick(true);
-        variableBtn.addClickListener(clickEvent -> {
-            Animated.removeAnimations(variableBtn);
-        });
 
 
     }
@@ -305,7 +404,7 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
             detailCmb.addValueChangeListener(f -> {
                 d.setInventoryDetail(f.getValue());
                 itemGrid.getDataProvider().refreshAll();
-                variableBtn.click();
+//                variableBtn.click();
                 total();
             });
         }
@@ -323,15 +422,15 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
                     d.getFeeMap().put(e.getKey(), (f.getValue() == null ? null : f.getValue().toString()));
                     itemGrid.getDataProvider().refreshAll();
                     feeGrid.getDataProvider().refreshAll();
-                    variableBtn.click();
+//                    variableBtn.click();
                     total();
                 });
             });
         }
         if (layout.getComponentCount() > 0) {
-            variableMenu.add(layout);
-            variableMenu.add(new Hr());
-            Animated.animate(variableBtn, Animated.Animation.BOUNCE);
+//            variableMenu.add(layout);
+//            variableMenu.add(new Hr());
+//            Animated.animate(variableBtn, Animated.Animation.BOUNCE);
         }
         return layout;
     }
@@ -488,19 +587,22 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         UserAccessService userAccesService = ContextProvider.getBean(UserAccessService.class);
-        boolean hasAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new TransactionsPrivilege(), Privileges.INSERT);
+        boolean hasAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new POSPrivilege(), Privileges.INSERT);
         if (!hasAccess) {
             UI.getCurrent().navigate(AboutView.class);
         }
         Optional<String> business1 = event.getRouteParameters().get("business");
         business1.ifPresent(s -> business = s);
+        BusinessService businessService = ContextProvider.getBean(BusinessService.class);
+        business2 = businessService.get(Long.valueOf(business), AuthenticatedUser.token());
         PosStartService posStartService = ContextProvider.getBean(PosStartService.class);
         targetDate = LocalDateTime.now();
         List<PosStart> list = posStartService.list(Long.valueOf(business), targetDate.toLocalDate(), AuthenticatedUser.token());
         if (list == null || list.isEmpty()) {
-            Dialog dialog = new Dialog();
+
             dialog.setCloseOnOutsideClick(false);
             dialog.setCloseOnEsc(false);
+            dialog.removeAll();
             dialog.setHeaderTitle("Start a new shift");
             FormLayout formLayout = new FormLayout();
             formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0px", 1));
@@ -527,6 +629,9 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
                 UI.getCurrent().getPage().reload();
             });
         } else {
+            if (dialog != null && dialog.isOpened()) {
+                dialog.close();
+            }
             posStart = list.get(0);
             List<PosHeader> collect = posStart.getPosHeader().stream().filter(f -> f.getCharged() == null || !f.getCharged()).collect(Collectors.toList());
             posHeaderCmb.setItems(collect);
@@ -536,13 +641,19 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
 //                posHeaderCmb.setValue(posHeader);
 //                productTitle.setText("Ticket #" + posHeader.getHeaderSeq());
 //            } else {
-                // start new ticket
-                String placeholder = "Ticket #" + posStart.getPosHeader().size() + 1;
-                posHeaderCmb.setPlaceholder(placeholder);
-                productTitle.setText("New " + placeholder);
-                startNewTicket();
+            // start new ticket
+//            String placeholder = ticketNumber();
+//            posHeaderCmb.setPlaceholder(placeholder);
+//            productTitle.setText("New " + placeholder);
+            startNewTicket();
 //            }
         }
+    }
+
+    private void refreshTickets() {
+        ticketsList.clear();
+        ticketsList.addAll(posStart.getPosHeader().stream().filter(f -> f.getCharged() == null || !f.getCharged()).collect(Collectors.toList()));
+        ticketsGrid.getDataProvider().refreshAll();
     }
 
     public Map<String, Object> getMap() {
@@ -566,8 +677,22 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
 
     private void startNewTicket() {
         init();
-        String placeholder = "Ticket #" + posStart.getPosHeader().size() + 1;
+        PosStartService posStartService = ContextProvider.getBean(PosStartService.class);
+        List<PosStart> list = posStartService.list(Long.valueOf(business), targetDate.toLocalDate(), AuthenticatedUser.token());
+        if (list != null && !list.isEmpty()) {
+            posStart = list.get(0);
+        }
+        String placeholder = ticketNumber();
+        posHeaderCmb.setPlaceholder(placeholder);
         productTitle.setText("New " + placeholder);
+        String text = "0.00";
+        totalHeaderLbl.setText("Total " + text);
+        totalAmountFooterLbl.setText(text);
+    }
+
+    private String ticketNumber() {
+        String placeholder = "Ticket #" + (posStart.getPosHeader().size() + 1);
+        return placeholder;
     }
 
     private void setTicket(PosHeader posHeader) {

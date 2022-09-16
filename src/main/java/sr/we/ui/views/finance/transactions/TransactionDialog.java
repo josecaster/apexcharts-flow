@@ -65,7 +65,10 @@ public class TransactionDialog extends Dialog {
         add(transactionForm);
 
         saveButton.addClickListener(g -> {
-            transactionForm.save();
+            PaymentTransaction save = transactionForm.save();
+            if(save != null && onSave != null){
+                onSave.build();
+            }
         });
     }
 
@@ -81,10 +84,14 @@ public class TransactionDialog extends Dialog {
         transactionForm.setNextReferenceId(id);
     }
 
-    private Build refresh;
+    private Build refresh, onSave;
 
     public void setRefresh(Build refresh) {
         this.refresh = refresh;
         transactionForm.setRefresh(refresh);
+    }
+
+    public void setOnSave(Build onSave) {
+        this.onSave = onSave;
     }
 }

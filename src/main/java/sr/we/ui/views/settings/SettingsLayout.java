@@ -14,6 +14,7 @@ import sr.we.ContextProvider;
 import sr.we.CustomErrorHandler;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.ThisUser;
+import sr.we.ui.views.MainLayout;
 import sr.we.ui.views.person.GeneralView;
 import sr.we.ui.views.LineAwesomeIcon;
 import sr.we.ui.views.ReRouteLayout;
@@ -130,7 +131,7 @@ public class SettingsLayout extends AppLayout implements BeforeEnterObserver {
         list.addClassNames("navigation-list");
         nav.add(list);
 
-        for (MenuItemInfo menuItem : createMenuItems()) {
+        for (MainLayout.MenuItemInfo menuItem : createMenuItems()) {
             if (accessChecker.hasAccess(menuItem.getView())) {
                 list.add(menuItem);
             }
@@ -139,14 +140,14 @@ public class SettingsLayout extends AppLayout implements BeforeEnterObserver {
         return nav;
     }
 
-    private MenuItemInfo[] createMenuItems() {
-        return new MenuItemInfo[]{ //
-                new MenuItemInfo(getTranslation("sr.we.business"), "las la-feather", BusinessView.class),
+    private MainLayout.MenuItemInfo[] createMenuItems() {
+        return new MainLayout.MenuItemInfo[]{ //
+                new MainLayout.MenuItemInfo(getTranslation("sr.we.business"), "icons/menus/icons8_business_48px.png", BusinessView.class, false),
 
-                new MenuItemInfo(getTranslation("sr.we.general"), "la la-user", GeneralView.class), //
+                new MainLayout.MenuItemInfo(getTranslation("sr.we.general"), "icons/menus/icons8_contact_48px.png", GeneralView.class, false), //
 
-                new MenuItemInfo(getTranslation("sr.we.info"), "la la-info-circle", InfoFormView.class),
-                new MenuItemInfo("Users and permissions", "la la-info-circle", UsersAndPermissions.class)
+                new MainLayout.MenuItemInfo(getTranslation("sr.we.info"), "icons/menus/icons8_contact_details_48px.png", InfoFormView.class, false),
+                new MainLayout.MenuItemInfo("Users and permissions", "icons/menus/icons8_users_48px.png", UsersAndPermissions.class, false)
 
 
         };
@@ -196,32 +197,5 @@ public class SettingsLayout extends AppLayout implements BeforeEnterObserver {
         }
         PageTitle title = getContent().getClass().getAnnotation(PageTitle.class);
         return title == null ? "" : title.value();
-    }
-
-    /**
-     * A simple navigation item component, based on ListItem element.
-     */
-    public static class MenuItemInfo extends ListItem {
-
-        private final Class<? extends Component> view;
-
-        public MenuItemInfo(String menuTitle, String iconClass, Class<? extends Component> view) {
-            this.view = view;
-            RouterLink link = new RouterLink();
-            link.addClassNames("menu-item-link");
-            link.setRoute(view);
-
-            Span text = new Span(menuTitle);
-            text.addClassNames("menu-item-text");
-
-            link.add(new LineAwesomeIcon(iconClass), text);
-            add(link);
-        }
-
-        public Class<?> getView() {
-            return view;
-        }
-
-
     }
 }

@@ -21,6 +21,11 @@
   top: calc(var(--lumo-space-xs) * 0.5);
   transition: background-color 140ms;
 }
+[slot='drawer'] nav a:hover {
+  background-color: var(--lumo-primary-color);
+  color: var(--lumo-base-color);
+  border-radius: var(--lumo-border-radius);
+}
 
 [slot='drawer'] nav a[highlight] {
   color: var(--lumo-primary-text-color);
@@ -29,6 +34,7 @@
 [slot='drawer'] nav a[highlight]::before {
   background-color: hsl(197, 100%, 45%,0.1);
 }
+
 
 [slot='drawer'] footer vaadin-context-menu {
   align-items: center;
@@ -42,6 +48,15 @@
   padding: var(--lumo-space-s);
   position: relative;
   color: var(--lumo-secondary-text-color);
+}
+
+.menu-item-link:hover {
+  display: flex;
+  margin-left: var(--lumo-space-s);
+  margin-right: var(--lumo-space-s);
+  padding: var(--lumo-space-s);
+  position: relative;
+  color: var(--lumo-primary-color);
 }
 
 .menu-item-text {

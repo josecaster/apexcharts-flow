@@ -2,29 +2,18 @@ package sr.we.security;
 
 import com.vaadin.flow.server.HandlerHelper;
 import com.vaadin.flow.shared.ApplicationConstants;
-import com.vaadin.flow.spring.security.RequestUtil;
-import com.vaadin.flow.spring.security.VaadinAwareSecurityContextHolderStrategy;
 import com.vaadin.flow.spring.security.VaadinWebSecurityConfigurerAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
-import org.springframework.security.config.annotation.web.configurers.ExceptionHandlingConfigurer;
-import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
-import org.springframework.security.web.util.matcher.RequestMatcher;
-import sr.we.ui.views.login.LoginView;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Objects;
 import java.util.stream.Stream;
 
 @EnableWebSecurity
@@ -33,19 +22,19 @@ public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
 
     public static final String LOGOUT_URL = "/";
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
     static boolean isFrameworkInternalRequest(HttpServletRequest request) {
         StringBuffer requestURL = request.getRequestURL();
         String s = requestURL.toString();
-        if(s.endsWith("sw-runtime-resources-precache.js")){
+        if (s.endsWith("sw-runtime-resources-precache.js")) {
             return true;
         }
         final String parameterValue = request.getParameter(ApplicationConstants.REQUEST_TYPE_PARAMETER);
         return parameterValue != null && Stream.of(HandlerHelper.RequestType.values()).anyMatch(r -> r.getIdentifier().equals(parameterValue));
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Override

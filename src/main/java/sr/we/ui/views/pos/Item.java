@@ -15,7 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Item {
-    private ProductOrService productOrService;
+    private final ProductOrService productOrService;
     private Map<String, Object> map;
     private Map<String, Object> feeMap;
     private Map<String, CalculationComponent> descMap;
@@ -32,6 +32,7 @@ public class Item {
         this.map = map;
         this.posHeaderDetail = posHeaderDetail;
         this.descMap = new HashMap<>();
+        this.productOrService = (posHeaderDetail.getProduct() == null ? new ProductOrService(posHeaderDetail.getServices()) : new ProductOrService(posHeaderDetail.getProduct()));
 
         this.feeMap = feeMap;
         this.feeDescMap = new HashMap<>();
@@ -120,7 +121,7 @@ public class Item {
         Services services = productOrService == null ? (posHeaderDetail == null ? null : posHeaderDetail.getServices()) : productOrService.getServices();
         if (product != null) {
             return (product.getPrice() == null ? BigDecimal.ZERO : product.getPrice());
-        } else if(services != null){
+        } else if (services != null) {
             Boolean advancedPricing = services.getVariablePrice();
             if (advancedPricing == null || !advancedPricing) {
                 return (services.getPrice() == null ? BigDecimal.ZERO : services.getPrice());
