@@ -2,9 +2,15 @@ package sr.we.security;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.VaadinServletRequest;
+
+import java.security.Principal;
 import java.util.Optional;
+
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.WrappedSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,14 +30,20 @@ public class AuthenticatedUser {
         this.userService = userService;
     }
 
-    private static Optional<Authentication> getAuthentication() {
-        SecurityContext context = SecurityContextHolder.getContext();
-        return Optional.ofNullable(context.getAuthentication())
+    private static Optional<Principal> getAuthentication() {
+        VaadinServletRequest vaadinServletRequest = VaadinServletRequest.getCurrent();
+        Principal userPrincipal = vaadinServletRequest.getUserPrincipal();
+        return Optional.ofNullable(userPrincipal)
                 .filter(authentication -> !(authentication instanceof AnonymousAuthenticationToken));
     }
 
     public static Optional<ThisUser> get() {
-        return getAuthentication().map(authentication -> (ThisUser) authentication.getPrincipal());
+        return getAuthentication().map(authentication -> {
+            if(authentication instanceof UsernamePasswordAuthenticationToken){
+                return (ThisUser)((UsernamePasswordAuthenticationToken)authentication).getPrincipal();
+            }
+            return (ThisUser) authentication;
+        });
     }
 
     public static String token(){
@@ -44,9 +56,10 @@ public class AuthenticatedUser {
     }
 
     public void logout() {
+        VaadinSession.getCurrent().getSession().invalidate();
         UI.getCurrent().getPage().setLocation(SecurityConfiguration.LOGOUT_URL);
-        SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
-        logoutHandler.logout(VaadinServletRequest.getCurrent().getHttpServletRequest(), null, null);
+//        SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
+//        logoutHandler.logout(VaadinServletRequest.getCurrent().getHttpServletRequest(), null, null);
     }
 
 }

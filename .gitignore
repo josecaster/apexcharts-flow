@@ -26,3 +26,6 @@ webpack.generated.js
 /types.d.ts
 /webpack.config.js
 /package-lock.json
+/LOG_PATH_IS_UNDEFINED/
+/dpworld-log
+/vite.config.ts
