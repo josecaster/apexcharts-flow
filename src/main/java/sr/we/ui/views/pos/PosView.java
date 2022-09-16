@@ -633,8 +633,8 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
                 dialog.close();
             }
             posStart = list.get(0);
-            List<PosHeader> collect = posStart.getPosHeader().stream().filter(f -> f.getCharged() == null || !f.getCharged()).collect(Collectors.toList());
-            posHeaderCmb.setItems(collect);
+            refreshTickets();
+//            posHeaderCmb.setItems(collect);
 //            Optional<PosHeader> max = collect.stream().max(Comparator.comparingLong(PosHeader::getHeaderSeq));
 //            if (max.isPresent()) {
 //                PosHeader posHeader = max.get();
