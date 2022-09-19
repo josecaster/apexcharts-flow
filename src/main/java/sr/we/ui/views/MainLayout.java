@@ -29,6 +29,7 @@ import sr.we.shekelflowcore.entity.helper.Token;
 import sr.we.shekelflowcore.security.PrivilegeModeAbstract;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.*;
+import sr.we.ui.views.account.ChartOfAccountsView;
 import sr.we.ui.views.business.BusinessView;
 import sr.we.ui.views.customers.CustomersView;
 import sr.we.ui.views.dashboard.DashboardView;
@@ -342,6 +343,12 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
             //current.access(() -> {
                 MenuItemInfo products = new MenuItemInfo("Services", "icons/menus/icons8_service_48px.png", ServiceView.class);
                 list.add(products);
+//            });
+        }
+        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(AccountsPrivilege.class), Privileges.READ)) {
+            //current.access(() -> {
+            MenuItemInfo products = new MenuItemInfo("Chart of accounts", "icons/menus/icons8_ledger_48px.png", ChartOfAccountsView.class);
+            list.add(products);
 //            });
         }
         return list.toArray(new MenuItemInfo[]{});

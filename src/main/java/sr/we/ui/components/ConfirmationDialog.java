@@ -3,10 +3,9 @@ package sr.we.ui.components;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.icon.Icon;
 
-public class ConfirmationDialog extends Dialog {
+public class ConfirmationDialog extends MyDialog {
 
     private final Button continueBtn;
     private final Button cancelButton;

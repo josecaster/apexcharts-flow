@@ -25,6 +25,7 @@ import sr.we.security.CustomAuthenticationProvider;
 import sr.we.shekelflowcore.entity.ThisUser;
 import sr.we.shekelflowcore.entity.helper.vo.UserVO;
 import sr.we.ui.components.EmailAddress;
+import sr.we.ui.components.MyDialog;
 import sr.we.ui.views.person.PersonView;
 
 import java.util.List;
@@ -84,7 +85,7 @@ public class IntroView extends VerticalLayout implements BeforeEnterObserver{
 
         verticalLayout. add(new Hr());
 
-        ResetPasswordDialog button = new ResetPasswordDialog(new Dialog());
+        ResetPasswordDialog button = new ResetPasswordDialog(new MyDialog());
         button.setText("Forgot password?");
         button.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
 

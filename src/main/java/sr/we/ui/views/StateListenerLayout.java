@@ -5,6 +5,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -23,18 +24,22 @@ public abstract class StateListenerLayout extends Scroller {
 
     public StateListenerLayout() {
         layout = new VerticalLayout();
-        setContent(layout);
+
         setScrollDirection(Scroller.ScrollDirection.VERTICAL);
 //        getStyle().set("border-bottom", "1px solid var(--lumo-contrast-20pct)").set("padding", "var(--lumo-space-m)");
         saveBtn = new Button(getTranslation("sr.we.save"));
         saveBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         Button discardBtn = new Button((getTranslation("sr.we.discard")));
-        discardBtn.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
+        discardBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         HorizontalLayout horizontalLayout = new HorizontalLayout(discardBtn, saveBtn);
         horizontalLayout.setWidthFull();
         horizontalLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+        horizontalLayout.setPadding(false);
+        horizontalLayout.setMargin(false);
         actionLayout = new VerticalLayout(horizontalLayout);
-        add(actionLayout);
+        actionLayout.setPadding(false);
+        actionLayout.setMargin(false);
+        setContent(new VerticalLayout(layout,new Hr(),actionLayout));
         stateChanged(false, false);
 
         saveBtn.addClickListener(f -> {

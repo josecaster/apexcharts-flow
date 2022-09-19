@@ -16,13 +16,16 @@ import java.util.List;
 @Controller
 public class AccountService extends MyController {
 
-    public List<Account> list(String accessToken, Long businessId) {
+    public List<Account> list(String accessToken, AccountVO vo) {
+        String body = new GsonBuilder().create().toJson(vo);
         RestTemplate restTemplate = new RestTemplate();
-        String fooResourceUrl = configProperties.getRest() + Routes.ACCOUNT_LIST + "?businessId=" + businessId;
-        HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
+        String fooResourceUrl = configProperties.getRest() + Routes.ACCOUNT_LIST ;
+//        HttpEntity<String> httpEntity = getAuthHttpEntity(body,accessToken);
 
         return encapsulate(() -> {
-            ResponseEntity<Account[]> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, Account[].class);
+            HttpEntity<String> httpEntity = getAuthHttpEntity(body,accessToken);
+            ResponseEntity<Account[]> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.POST, httpEntity, Account[].class);
+//            ResponseEntity<Account[]> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, Account[].class);
             return Arrays.asList(exchange.getBody());
         });
     }

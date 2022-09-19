@@ -56,12 +56,12 @@ public class TransactionForm extends FormLayout {
     private Build refresh;
 
 
-    public TransactionForm(BigDecimal rest, LocalDate initDate, Long businessId, Currency fromCurrency, Currency selectedCurrency, PaymentTransaction.Reference reference, Long referenceId, PaymentTransaction.PlusMin plusMin) {
+    public TransactionForm(BigDecimal rest, LocalDate initDate, Long businessId, Currency fromCurrency, Currency selectedCurrency, PaymentTransaction.Reference reference, Long referenceId) {
 
         this.businessId = businessId;
         this.reference = reference;
         this.referenceId = referenceId;
-        this.plusMin = plusMin;
+        this.plusMin = reference.getPlusMin();
 
         // init
         amountFld = new BigDecimalField();
@@ -72,7 +72,7 @@ public class TransactionForm extends FormLayout {
         element.setAttribute("theme", "badge primary");
         element.getStyle().set("font-size", "var(--lumo-font-size-xl)");
         paymentMethodSelect = new PaymentMethodSelect();
-        accountSelect = new AccountSelect(businessId);
+        accountSelect = new AccountSelect(businessId, reference);
         memoFld = new TextArea();
         currencySelect = new CurrencySelect();
         currencySelect.setLabel("To");

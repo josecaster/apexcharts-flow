@@ -159,7 +159,7 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
             }
 
 
-            TransactionDialog transactionDialog = new TransactionDialog(posHeader.getRest(), LocalDate.now(), Long.valueOf(business), business2.getCurrency(), business2.getCurrency(), PaymentTransaction.Reference.POS, posHeader.getId(), PaymentTransaction.Reference.POS.getPlusMin());
+            TransactionDialog transactionDialog = new TransactionDialog(posHeader.getRest(), LocalDate.now(), Long.valueOf(business), business2.getCurrency(), business2.getCurrency(), PaymentTransaction.Reference.POS, posHeader.getId());
             transactionDialog.disableAmount();
             transactionDialog.setOnSave(() -> {
                 return null;
@@ -201,7 +201,7 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
                     lineAwesomeIcon = new LineAwesomeIcon("la la-chevron-circle-down");
                 }
                 lineAwesomeIcon.addClickListener(f -> {
-                    TransactionDialog transactionDialog = new TransactionDialog(posHeader.getRest(), LocalDate.now(), Long.valueOf(business), business2.getCurrency(), business2.getCurrency(), PaymentTransaction.Reference.POS, posHeader.getId(), PaymentTransaction.Reference.POS.getPlusMin());
+                    TransactionDialog transactionDialog = new TransactionDialog(posHeader.getRest(), LocalDate.now(), Long.valueOf(business), business2.getCurrency(), business2.getCurrency(), PaymentTransaction.Reference.POS, posHeader.getId());
 //                    transactionDialog.disableAmount();
                     transactionDialog.setOnSave(() -> {
                         return null;

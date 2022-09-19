@@ -17,6 +17,7 @@ import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.LoanRequestPrivilege;
+import sr.we.ui.components.MyDialog;
 import sr.we.ui.views.business.BusinessView;
 import sr.we.ui.views.finance.loans.LoansView;
 import sr.we.ui.views.finance.loans.tabs.LTabRequests;
@@ -42,7 +43,7 @@ public class LRCreateView extends VerticalLayout implements BeforeEnterObserver,
     public LRCreateView() {
 
         loanRequestStateView = new LRCreateLayout();
-        dialog = new Dialog(loanRequestStateView);
+        dialog = new MyDialog(loanRequestStateView);
         dialog.setHeaderTitle("Request new Loan");
         Button closeButton = new Button(new Icon("lumo", "cross"), (e) -> {
             dialog.close();

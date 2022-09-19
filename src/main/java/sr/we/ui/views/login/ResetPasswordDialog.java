@@ -13,6 +13,7 @@ import sr.we.data.controller.UserService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Business;
 import sr.we.ui.components.EmailAddress;
+import sr.we.ui.components.MyDialog;
 
 import java.util.List;
 
@@ -20,7 +21,7 @@ public class ResetPasswordDialog extends Button {
 
     private List<Business> businesses;
 
-    public ResetPasswordDialog(Dialog dialog) {
+    public ResetPasswordDialog(MyDialog dialog) {
         super();
         dialog.setModal(true);
         dialog.setDraggable(false);

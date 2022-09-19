@@ -16,10 +16,11 @@ import sr.we.data.controller.UserService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.ThisUser;
 import sr.we.shekelflowcore.exception.SecurityException;
+import sr.we.ui.components.MyDialog;
 
 import java.util.Optional;
 
-public class NotActiveDialog extends Dialog {
+public class NotActiveDialog extends MyDialog {
 
     public NotActiveDialog() {
         VerticalLayout verticalLayout = new VerticalLayout();

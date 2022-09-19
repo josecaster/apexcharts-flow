@@ -35,6 +35,7 @@ import sr.we.shekelflowcore.security.privileges.LoanRequestPrivilege;
 import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.ui.components.FieldSet;
 import sr.we.ui.components.Highlight;
+import sr.we.ui.components.MyDialog;
 import sr.we.ui.components.finance.LoanRequestStatusWizard;
 import sr.we.ui.views.LineAwesomeIcon;
 import sr.we.ui.views.ReRouteLayout;
@@ -326,7 +327,7 @@ public class LRView extends VerticalLayout implements BeforeEnterObserver {
         UserAccessService userAccesService = ContextProvider.getBean(UserAccessService.class);
         boolean hasAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new LoanRequestPlanPrivilege(), Privileges.INSERT, Privileges.EXECUTE);
         lineAwesomeIcon.setVisible(hasAccess);
-        Dialog dialog = new Dialog();
+        Dialog dialog = new MyDialog();
         dialog.setHeaderTitle("Generate payment plan");
         Button closeButton = new Button(new Icon("lumo", "cross"), (e) -> {
             dialog.close();

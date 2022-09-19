@@ -22,6 +22,7 @@ import sr.we.shekelflowcore.entity.helper.vo.PaymentTransactionVO;
 import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.TransactionsPrivilege;
+import sr.we.ui.components.MyDialog;
 import sr.we.ui.components.finance.AccountSelect;
 import sr.we.ui.components.finance.PaymentMethodSelect;
 import sr.we.ui.components.general.CurrencySelect;
@@ -30,12 +31,12 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public class TransactionDialog extends Dialog {
+public class TransactionDialog extends MyDialog {
 
 
     private final TransactionForm transactionForm;
 
-    public TransactionDialog(BigDecimal rest, LocalDate initDate, Long businessId, Currency fromCurrency, Currency selectedCurrency, PaymentTransaction.Reference reference, Long referenceId, PaymentTransaction.PlusMin plusMin) {
+    public TransactionDialog(BigDecimal rest, LocalDate initDate, Long businessId, Currency fromCurrency, Currency selectedCurrency, PaymentTransaction.Reference reference, Long referenceId) {
 
         setHeaderTitle("Record a payment");
         Button closeButton = new Button(new Icon("lumo", "cross"), (e) -> {
@@ -61,7 +62,7 @@ public class TransactionDialog extends Dialog {
         saveButton.setVisible(hasAccess);
 
 
-        transactionForm = new TransactionForm(rest, initDate, businessId, fromCurrency, selectedCurrency, reference, referenceId, plusMin);
+        transactionForm = new TransactionForm(rest, initDate, businessId, fromCurrency, selectedCurrency, reference, referenceId);
         add(transactionForm);
 
         saveButton.addClickListener(g -> {
