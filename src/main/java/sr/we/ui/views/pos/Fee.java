@@ -12,20 +12,20 @@ import sr.we.shekelflowcore.settings.util.Rubric;
 import java.math.BigDecimal;
 
 public class Fee {
-    private final PosView posView;
+    private final IFee posView;
     private final CalculationComponent calculationComponent;
     private String title;
     private BigDecimal price;
     private CalculationResult calculate;
     private PosHeaderDetail posHeaderDetail;
 
-    public Fee(PosView posView, PosHeaderDetail posHeaderDetail,  CalculationComponent calculationComponent) {
+    public Fee(IFee posView, PosHeaderDetail posHeaderDetail,  CalculationComponent calculationComponent) {
         this(posView,calculationComponent);
         this.posHeaderDetail = posHeaderDetail;
         this.price = posHeaderDetail.getPrice();
     }
 
-    public Fee(PosView posView, CalculationComponent calculationComponent) {
+    public Fee(IFee posView, CalculationComponent calculationComponent) {
         this.posView = posView;
         this.calculationComponent = calculationComponent;
         this.title = calculationComponent.getName();

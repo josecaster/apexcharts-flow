@@ -2,6 +2,7 @@ package sr.we.ui.views.finance.loanrequests;
 
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.avatar.Avatar;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.littemplate.LitTemplate;
@@ -14,7 +15,7 @@ import sr.we.shekelflowcore.entity.Customer;
 import sr.we.shekelflowcore.entity.CustomerContact;
 import sr.we.shekelflowcore.entity.Loan;
 import sr.we.shekelflowcore.entity.LoanRequest;
-import sr.we.shekelflowcore.entity.helper.Build;
+import sr.we.shekelflowcore.entity.helper.Executable;
 import sr.we.shekelflowcore.entity.helper.adapter.LoanRequestBody;
 import sr.we.ui.components.finance.FrequencyField;
 
@@ -52,6 +53,8 @@ public class RequestorForm extends LitTemplate {
     @Id("loan-cmb")
     private LoanCmb loanCmb;
     private LoanRequest loanRequest;
+    @Id("intrest-first-chk")
+    private Checkbox intrestFirstChk;
 
     /**
      * Creates a new RequestorForm.
@@ -85,6 +88,7 @@ public class RequestorForm extends LitTemplate {
     public LoanRequestBody getLoanRequestBody() {
         Loan loan = loanCmb.getValue();
         LoanRequestBody loanRequestBody = new LoanRequestBody();
+        loanRequestBody.setCustomer(customerCmb.getValue() == null ? null : customerCmb.getValue().getId());
         loanRequestBody.setBusinessId(StringUtils.isBlank(business) ? null : Long.valueOf(business));
         loanRequestBody.setLoanId(loan == null ? null : loan.getId());
         loanRequestBody.setName(nameFld.getValue());
@@ -98,6 +102,7 @@ public class RequestorForm extends LitTemplate {
         loanRequestBody.setAmount(amountFld.getValue() == null ? null : BigDecimal.valueOf(amountFld.getValue()));
         loanRequestBody.setDate(requestDateFld.getValue());
         loanRequestBody.setNew(true);
+        loanRequestBody.setIntrestFirst(intrestFirstChk.getValue());
         return loanRequestBody;
     }
 
@@ -107,7 +112,7 @@ public class RequestorForm extends LitTemplate {
         loanCmb.load(Long.valueOf(business));
     }
 
-    protected void setLoanRequest(LoanRequest loanRequest, Build refresh) {
+    protected void setLoanRequest(LoanRequest loanRequest, Executable refresh) {
         this.loanRequest = loanRequest;
         customerCmb.setValue(loanRequest.getCustomer());
         setCustomer(loanRequest.getCustomer());
@@ -115,6 +120,7 @@ public class RequestorForm extends LitTemplate {
         amountFld.setValue(loanRequest.getAmount().doubleValue());
         requestDateFld.setValue(loanRequest.getEstimatedDate());
         loanCmb.setValue(loanRequest.getLoan());
+        intrestFirstChk.setValue(loanRequest.getIntrestFirst());
 
         loanCmb.setReadOnly(true);
         requestDateFld.setReadOnly(true);
@@ -125,5 +131,6 @@ public class RequestorForm extends LitTemplate {
         firstnameFld.setReadOnly(true);
         mobileFld.setReadOnly(true);
         emailFld.setReadOnly(true);
+        intrestFirstChk.setReadOnly(true);
     }
 }

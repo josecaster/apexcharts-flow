@@ -6,14 +6,14 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import sr.we.shekelflowcore.entity.helper.Build;
+import sr.we.shekelflowcore.entity.helper.Executable;
 
 public class Highlight extends VerticalLayout {
 
-    private Build<String> value;
-    private Build<Double> percentage;
+    private Executable<String> value;
+    private Executable<Double> percentage;
 
-    public Highlight(String title, Build<String> value, Build<Double> procent) {
+    public Highlight(String title, Executable<String> value, Executable<Double> procent) {
 
 
 

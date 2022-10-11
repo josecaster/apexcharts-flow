@@ -1,13 +1,11 @@
 package sr.we.ui.views.finance.loans.tabs.request.planning;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -15,20 +13,17 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.function.ValueProvider;
-import org.apache.commons.lang3.StringUtils;
 import sr.we.ContextProvider;
 import sr.we.data.controller.LoanRequestService;
 import sr.we.data.controller.UserAccessService;
-import sr.we.demo.about.AboutView;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.LoanRequest;
 import sr.we.shekelflowcore.entity.LoanRequestPlan;
-import sr.we.shekelflowcore.entity.helper.Build;
+import sr.we.shekelflowcore.entity.helper.Executable;
 import sr.we.shekelflowcore.entity.helper.adapter.LoanRequestSchedulePlan;
 import sr.we.shekelflowcore.entity.helper.adapter.LoanRequestSchedulePlanDetail;
 import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.shekelflowcore.security.Privileges;
-import sr.we.shekelflowcore.security.privileges.LoanAssetsPrivilege;
 import sr.we.shekelflowcore.security.privileges.LoanRequestPlanPrivilege;
 import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.ui.components.TempDatePicker;
@@ -44,9 +39,9 @@ public class LRPGenerate extends VerticalLayout {
     private LoanRequestSchedulePlan loanRequestPlan;
     private Grid<LoanRequestSchedulePlanDetail> grid;
 
-    public LRPGenerate(LoanRequestSchedulePlan plan, LoanRequest loanRequest, Build build) {
+    public LRPGenerate(LoanRequestSchedulePlan plan, LoanRequest loanRequest, Executable executable) {
         this.loanRequestPlan = plan;
-        generatePLanning(loanRequest, build);
+        generatePLanning(loanRequest, executable);
         if (plan != null) {
             forPlan();
             enablePayment();
@@ -66,7 +61,7 @@ public class LRPGenerate extends VerticalLayout {
         }).setHeader("Payment");
     }
 
-    private void generatePLanning(LoanRequest loanRequest, Build build) {
+    private void generatePLanning(LoanRequest loanRequest, Executable executable) {
         HorizontalLayout horizontalLayout = new HorizontalLayout();
         RadioButtonGroup<LoanRequestPlan.Type> loanRequestPLanType = new RadioButtonGroup<>();
 
@@ -105,7 +100,12 @@ public class LRPGenerate extends VerticalLayout {
             loanRequestPLanType.setValue(LoanRequestPlan.Type.PAYMENT);
             checkbox.setVisible(true);
         } else {
-            loanRequestPLanType.setItems(LoanRequestPlan.Type.BALANCE, LoanRequestPlan.Type.EXTEND);
+            List<LoanRequestPlan.Type> types = new ArrayList<>();
+            if (loanRequest.getBalance() != null && loanRequest.getBalance().compareTo(BigDecimal.ZERO) != 0) {
+                types.add(LoanRequestPlan.Type.BALANCE);
+            }
+            types.add(LoanRequestPlan.Type.EXTEND);
+            loanRequestPLanType.setItems(types);
             if (loanRequest.getBalance() != null && loanRequest.getBalance().compareTo(BigDecimal.ZERO) != 0) {
                 loanRequestPLanType.setValue(LoanRequestPlan.Type.BALANCE);
             } else {
@@ -195,7 +195,7 @@ public class LRPGenerate extends VerticalLayout {
 
         save.addClickListener(f -> {
             loanRequestService.save(loanRequestPlan, AuthenticatedUser.token());
-            build.build();
+            executable.build();
 //            forPlan();
 //            enablePayment();
         });

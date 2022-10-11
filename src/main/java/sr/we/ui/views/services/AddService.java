@@ -6,26 +6,29 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.formlayout.FormLayout.FormItem;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.template.Id;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.RouteParam;
 import com.vaadin.flow.router.RouteParameters;
 import sr.we.ContextProvider;
 import sr.we.data.controller.BusinessService;
-import sr.we.data.controller.ServicesService;
+import sr.we.data.controller.ItemsService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Business;
 import sr.we.shekelflowcore.entity.CalculationComponent;
 import sr.we.shekelflowcore.entity.Currency;
-import sr.we.shekelflowcore.entity.Services;
+import sr.we.shekelflowcore.entity.Items;
+import sr.we.shekelflowcore.entity.helper.InterExecutable;
 import sr.we.shekelflowcore.entity.helper.vo.CalculationComponentVO;
+import sr.we.shekelflowcore.entity.helper.vo.IProductInventoryVO;
 import sr.we.shekelflowcore.entity.helper.vo.ServicesVO;
 import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.ui.views.LineAwesomeIcon;
 import sr.we.ui.views.ReRouteLayout;
+import sr.we.ui.views.products.ProductInventory;
 
 import java.util.*;
 
@@ -50,7 +53,7 @@ public class AddService extends LitTemplate {
 
     private String businessString;
     private Business business;
-    private Services services;
+    private Items items;
     private Currency currency;
     @Id("service-price")
     private ServicePrice servicePrice;
@@ -61,6 +64,14 @@ public class AddService extends LitTemplate {
     @Id("main-form-layout")
     private FormLayout mainFormLayout;
     private ServicesVO servicesVO;
+    @Id("service-inventory")
+    private ProductInventory serviceInventory;
+    @Id("service-type")
+    private ServiceType serviceType;
+    @Id("ser-comp-layout")
+    private FormItem serCompLayout;
+    @Id("serv-formula-layout")
+    private FormItem servFormulaLayout;
 
     /**
      * Creates a new AddService.
@@ -80,7 +91,7 @@ public class AddService extends LitTemplate {
 //            ServicesVO servicesVO = serviceForm.getVO();
 //            servicesVO.setId(services == null ? null : services.getId());
 //            servicesVO.setNew(services == null);
-//            servicesVO.setBusiness(business.getId());
+            servicesVO.setBusiness(business.getId());
 //
 //            List<CalculationComponentVO> vo = serviceComponents.getVO();
 //            servicesVO.setCalculationComponentVO(vo);
@@ -93,20 +104,35 @@ public class AddService extends LitTemplate {
 //            servicesVO.setComparePrice(vo1.getComparePrice());
 //            servicesVO.setPrice(vo1.getPrice());
 //            servicesVO.setVariablePrice(vo1.getVariablePrice());
+//            ServicesVO vo = serviceType.getVO();
+//            servicesVO.setChargeTax(vo.getChargeTax());
+//            servicesVO.setActive(vo.getActive());
+//            servicesVO.setTrackInventory(vo.getTrackInventory());
+//            servicesVO.setVariablePrice(vo.getVariablePrice());
+
+            //inventory
+            IProductInventoryVO productInventoryVO = serviceInventory.getVO();
+            servicesVO.setSku(productInventoryVO.getSku());
+            servicesVO.setBarcode(productInventoryVO.getBarcode());
+//            servicesVO.setTrackInventory(productInventoryVO.getTrackInventory());
+            servicesVO.setProductsInventory(productInventoryVO.getProductsInventory());
 
 
-            ServicesService productService = ContextProvider.getBean(ServicesService.class);
+            ItemsService productService = ContextProvider.getBean(ItemsService.class);
             if (servicesVO.isNew()) {
-                services = productService.create(AuthenticatedUser.token(), servicesVO);
+                items = productService.create(AuthenticatedUser.token(), servicesVO);
             } else {
-                services = productService.edit(AuthenticatedUser.token(), servicesVO);
+                items = productService.edit(AuthenticatedUser.token(), servicesVO);
             }
-            List<String> strings = Arrays.asList(services.getId().toString());
+            List<String> strings = Arrays.asList(items.getId().toString());
             Map<String, List<String>> map = new HashMap<>();
             map.put("id", strings);
             QueryParameters queryParameters = new QueryParameters(map);
             UI.getCurrent().navigate(EditServiceView.getLocation(business.getId().toString()), queryParameters);
         });
+
+
+
     }
 
     protected void setBusiness(BeforeEnterEvent event) {
@@ -133,10 +159,10 @@ public class AddService extends LitTemplate {
             throw new ValidationException("Invalid Link");
         }
         String token = AuthenticatedUser.token();
-        ServicesService productService = getBean(ServicesService.class);
-        services = productService.get(Long.valueOf(id.get()), token);
+        ItemsService productService = getBean(ItemsService.class);
+        items = productService.get(Long.valueOf(id.get()), token);
 
-        if (services == null) {
+        if (items == null) {
             event.forwardTo(ReRouteLayout.class);
             throw new ValidationException("No services found");
         }
@@ -148,20 +174,20 @@ public class AddService extends LitTemplate {
         servicesVO = new ServicesVO();
         servicesVO.setNew(true);
         List<CalculationComponentVO> items = new ArrayList<>();
-        if(services != null){
+        if(this.items != null){
             servicesVO.setNew(false);
-            servicesVO.setId(services.getId());
-            servicesVO.setCode(services.getCode());
-            servicesVO.setName(services.getName());
-            servicesVO.setPrice(services.getPrice());
-            servicesVO.setFormula(services.getFormula());
-            servicesVO.setType(services.getType());
-            servicesVO.setVariablePrice(services.getVariablePrice());
-            servicesVO.setComparePrice(services.getComparePrice());
-            servicesVO.setCost(services.getCost());
-            servicesVO.setActive(services.getActive());
-            servicesVO.setBusiness(services.getBusiness().getId());
-            for(CalculationComponent calculationComponent : services.getCalculationComponents()){
+            servicesVO.setId(this.items.getId());
+            servicesVO.setCode(this.items.getCode());
+            servicesVO.setName(this.items.getName());
+            servicesVO.setPrice(this.items.getPrice());
+            servicesVO.setFormula(this.items.getFormula());
+            servicesVO.setType(this.items.getType());
+            servicesVO.setVariablePrice(this.items.getVariablePrice());
+            servicesVO.setComparePrice(this.items.getComparePrice());
+            servicesVO.setCost(this.items.getCost());
+            servicesVO.setActive(this.items.getActive());
+            servicesVO.setBusiness(this.items.getBusiness().getId());
+            for(CalculationComponent calculationComponent : this.items.getCalculationComponents()){
                 CalculationComponentVO calculationComponentVO = new CalculationComponentVO();
                 calculationComponentVO.setNew(false);
                 calculationComponentVO.setId(calculationComponent.getId());
@@ -172,12 +198,31 @@ public class AddService extends LitTemplate {
                 calculationComponentVO.setActive(calculationComponent.getActive());
                 items.add(calculationComponentVO);
             }
+
+            servicesVO.setSku(this.items.getSku());
+            servicesVO.setBarcode(this.items.getBarcode());
+            servicesVO.setTrackInventory(this.items.getTrackInventory());
+            servicesVO.setProductsInventory(this.items.getProductsInventoriesVO());
         }
         servicesVO.setCalculationComponentVO(items);
+        serviceType.setVO(servicesVO);
         serviceForm.setVO(servicesVO);
         serviceComponents.setVO(servicesVO);
         serviceFormula.setVO(servicesVO);
         servicePrice.setVO(servicesVO);
+
+
+
+        serviceInventory.setProduct(this.servicesVO);
+
+        serviceType.trackInventroy(serviceInventory.getTrackInventory());
+        InterExecutable<?, Boolean> advancedPrice = (f) -> {
+            serCompLayout.setVisible(f);
+            servFormulaLayout.setVisible(f);
+            servicePrice.getAdvancedPrice().build(f);
+            return null;
+        };
+        serviceType.addVancedPricing(advancedPrice);
     }
 
 }

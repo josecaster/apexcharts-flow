@@ -121,7 +121,7 @@ public class PersonView extends StateListenerLayout implements BeforeEnterObserv
         String token = AuthenticatedUser.token();
         PersonVO vo = new PersonVO();
         vo.setFirstname(firstName.getValue());
-        vo.setLastname(firstName.getValue());
+        vo.setLastname(lastName.getValue());
         vo.setSsn(ssn.getValue());
         vo.setBirthdate(birthDate.getValue());
         vo.setGender(genderSelect.getValue());

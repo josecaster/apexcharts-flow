@@ -16,7 +16,7 @@ import sr.we.data.controller.UserAccessService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.LoanRequest;
 import sr.we.shekelflowcore.entity.LoanRequestPlan;
-import sr.we.shekelflowcore.entity.helper.Build;
+import sr.we.shekelflowcore.entity.helper.Executable;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.LoanRequestPlanPrivilege;
 import sr.we.ui.views.finance.loans.tabs.request.planning.LRPGenerate;
@@ -62,7 +62,7 @@ public class RepaymentForm extends LitTemplate {
         generatePaymentBtn.addClickListener(f -> {
             String token = AuthenticatedUser.token();
 
-            LRPGenerate loanRequestsPlanningView = new LRPGenerate(null, loanRequest, new Build() {
+            LRPGenerate loanRequestsPlanningView = new LRPGenerate(null, loanRequest, new Executable() {
                 @Override
                 public Object build() {
                     dialog.close();
@@ -79,8 +79,8 @@ public class RepaymentForm extends LitTemplate {
         });
     }
 
-    private Build refresh;
-    protected void setLoanRequest(LoanRequest loanRequest, Build refresh) {
+    private Executable refresh;
+    protected void setLoanRequest(LoanRequest loanRequest, Executable refresh) {
         this.loanRequest = loanRequest;
         this.refresh = refresh;
 
@@ -137,6 +137,11 @@ public class RepaymentForm extends LitTemplate {
                 });
             }
         }).start();
+
+        generatePaymentBtn.setVisible(false);
+        if (loanRequest.getStatus().compareTo(LoanRequest.Status.APPROVED) == 0) {
+            generatePaymentBtn.setVisible(true);
+        }
     }
 
 }

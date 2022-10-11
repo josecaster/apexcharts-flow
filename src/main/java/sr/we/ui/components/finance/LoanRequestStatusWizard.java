@@ -14,8 +14,7 @@ import sr.we.ContextProvider;
 import sr.we.data.controller.LoanRequestService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.LoanRequest;
-import sr.we.shekelflowcore.entity.helper.Build;
-import sr.we.ui.components.ConfirmationDialog;
+import sr.we.shekelflowcore.entity.helper.Executable;
 import sr.we.ui.views.LineAwesomeIcon;
 
 public class LoanRequestStatusWizard extends VerticalLayout {
@@ -27,7 +26,7 @@ public class LoanRequestStatusWizard extends VerticalLayout {
     private final Div content;
     private final Tabs tabs;
 
-    private Build nextBuild, backBuild;
+    private Executable nextExecutable, backExecutable;
 
     public LoanRequestStatusWizard() {
 
@@ -37,13 +36,13 @@ public class LoanRequestStatusWizard extends VerticalLayout {
         back = new Button("Back");
         next = new Button("Next");
         next.addClickListener(e -> {
-            if (nextBuild != null) {
-                nextBuild.build();
+            if (nextExecutable != null) {
+                nextExecutable.build();
             }
         });
         back.addClickListener(e -> {
-            if (backBuild != null) {
-                backBuild.build();
+            if (backExecutable != null) {
+                backExecutable.build();
             }
         });
         HorizontalLayout header = new HorizontalLayout(back, next);
@@ -108,7 +107,7 @@ public class LoanRequestStatusWizard extends VerticalLayout {
     }
 
     public void setLoanRequestStatus(LoanRequest.Status status, Long loanRequestId) {
-        switch (status) {
+        /*switch (status) {
             case REQUESTED -> {
                 select(status);
 
@@ -259,12 +258,12 @@ public class LoanRequestStatusWizard extends VerticalLayout {
                 backBuild = null;
                 break;
             }
-        }
+        }*/
     }
 
-    public void addTabListener(Build build){
+    public void addTabListener(Executable executable){
         tabs.addSelectedChangeListener(f -> {
-           build.build();
+           executable.build();
         });
     }
 
@@ -272,7 +271,7 @@ public class LoanRequestStatusWizard extends VerticalLayout {
         Tab selectedTab = tabs.getSelectedTab();
 
         LoanRequest.Status status = this.status;
-        if(selectedTab.equals(requested)){
+       /* if(selectedTab.equals(requested)){
             status = LoanRequest.Status.REQUESTED;
         }
         if(selectedTab.equals(review)){
@@ -296,7 +295,7 @@ public class LoanRequestStatusWizard extends VerticalLayout {
         if(selectedTab.equals(closed)){
             status = LoanRequest.Status.CLOSED;
         }
-
+*/
         if(this.status.compareTo(status) != 0){
             back.setVisible(false);
             next.setVisible(false);
@@ -315,7 +314,7 @@ public class LoanRequestStatusWizard extends VerticalLayout {
             requested.setEnabled(true);
         }
         requested.setSelected(false);
-        if(status.ordinal() < LoanRequest.Status.REVIEW.ordinal()) {
+        /*if(status.ordinal() < LoanRequest.Status.REVIEW.ordinal()) {
             review.setEnabled(false);
         } else {
             review.setEnabled(true);
@@ -329,7 +328,7 @@ public class LoanRequestStatusWizard extends VerticalLayout {
             eligible.setEnabled(false);
         } else {
             eligible.setEnabled(true);
-        }
+        }*/
         review.setSelected(false);
         input.setSelected(false);
         eligible.setSelected(false);
@@ -340,7 +339,7 @@ public class LoanRequestStatusWizard extends VerticalLayout {
             approved.setEnabled(true);
         }
         provide.setSelected(false);
-        if(status.ordinal() < LoanRequest.Status.PROVIDE.ordinal()) {
+        /*if(status.ordinal() < LoanRequest.Status.PROVIDE.ordinal()) {
             provide.setEnabled(false);
         } else {
             provide.setEnabled(true);
@@ -355,7 +354,7 @@ public class LoanRequestStatusWizard extends VerticalLayout {
             closed.setEnabled(false);
         } else {
             closed.setEnabled(true);
-        }
+        }*/
         closed.setSelected(false);
         switch (status){
             case REQUESTED -> {
@@ -365,7 +364,7 @@ public class LoanRequestStatusWizard extends VerticalLayout {
                 next.setVisible(true);
                 break;
             }
-            case REVIEW -> {
+           /* case REVIEW -> {
                 review.setEnabled(true);
                 review.setSelected(true);
                 back.setVisible(false);
@@ -385,7 +384,7 @@ public class LoanRequestStatusWizard extends VerticalLayout {
                 back.setVisible(true);
                 next.setVisible(true);
                 break;
-            }
+            }*/
             case APPROVED -> {
                 approved.setSelected(true);
                 approved.setEnabled(true);
@@ -394,7 +393,7 @@ public class LoanRequestStatusWizard extends VerticalLayout {
                 next.setVisible(true);
                 break;
             }
-            case PROVIDE -> {
+           /* case PROVIDE -> {
                 provide.setSelected(true);
                 provide.setEnabled(true);
 
@@ -415,7 +414,7 @@ public class LoanRequestStatusWizard extends VerticalLayout {
                 back.setVisible(false);
                 next.setVisible(false);
                 break;
-            }
+            }*/
         }
 
 

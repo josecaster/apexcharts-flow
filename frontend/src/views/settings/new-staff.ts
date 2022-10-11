@@ -29,7 +29,7 @@ export class NewStaff extends LitElement {
  <hr style="width: 100%;">
  <h3 style="padding: 0px; margin: 0px;">Staff</h3>
  <p>Give staff access to your store by sending them an invitation. If you’re working with a designer, developer, or marketer, find out how to give collaborator access to your store.</p>
- <staff-form id="staff-form" style="align-self: stretch;"></staff-form>
+ <staff-form id="staff-form" style="align-self: center;max-width:1000px;"></staff-form>
 </vaadin-vertical-layout>
 `;
   }

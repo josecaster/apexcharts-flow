@@ -41,6 +41,9 @@ export class RequestorForm extends LitElement {
   <vaadin-date-picker label="Request date" id="request-date-fld" required invalid></vaadin-date-picker>
   <vaadin-number-field id="duration-fld" type="number" required label="Duration"></vaadin-number-field>
   <vaadin-number-field type="number" id="amount-fld" required label="Loan amount" invalid></vaadin-number-field>
+  <vaadin-checkbox id="intrest-first-chk" style="font-weight:bold; margin-top: var(--lumo-space-l);">
+   I want to pay interest first and principle later
+  </vaadin-checkbox>
  </vaadin-form-layout>
 </vaadin-vertical-layout>
 `;

@@ -50,7 +50,7 @@ public class IntroView extends VerticalLayout implements BeforeEnterObserver{
         VerticalLayout verticalLayout = new VerticalLayout();
 //        verticalLayout.getThemeList().add("dark");
 
-        Image img = new Image("images/empty-plant.png", "placeholder plant");
+        Image img = new Image("images/seaqns-icon.png", "placeholder plant");
         img.setWidth("200px");
         verticalLayout.add(img);
 

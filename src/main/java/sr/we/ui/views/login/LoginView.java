@@ -35,7 +35,7 @@ public class LoginView extends LoginOverlay implements BeforeLeaveObserver, Afte
         i18n.setHeader(header);
         i18n.getHeader().setTitle("ShekelFlow");
         Header header2 = new Header();
-        Image seaqns_icon = new Image("images/seaqns-logo-inv.png", "seaqns icon");
+        Image seaqns_icon = new Image("images/seaqns-icon.png", "seaqns icon");
         seaqns_icon.setWidth("100px");
         header2.add(seaqns_icon);
         setTitle(header2);

@@ -1,23 +1,23 @@
 package sr.we.ui.views.finance.loans.tabs.request.planning;
 
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.function.ValueProvider;
-import sr.we.ContextProvider;
-import sr.we.data.controller.LoanRequestService;
-import sr.we.security.AuthenticatedUser;
-import sr.we.shekelflowcore.entity.*;
-import sr.we.shekelflowcore.entity.helper.Build;
+import sr.we.shekelflowcore.entity.Currency;
+import sr.we.shekelflowcore.entity.LoanRequest;
+import sr.we.shekelflowcore.entity.LoanRequestPlan;
+import sr.we.shekelflowcore.entity.LoanRequestPlanDetail;
+import sr.we.shekelflowcore.entity.helper.Executable;
+import sr.we.shekelflowcore.enums.Reference;
 import sr.we.shekelflowcore.settings.util.Constants;
-import sr.we.ui.components.ToolbarLayout;
 import sr.we.ui.views.LineAwesomeIcon;
 import sr.we.ui.views.finance.transactions.TransactionDialog;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -27,19 +27,21 @@ import java.util.stream.Collectors;
 public class LRPView extends VerticalLayout {
 
     private final LoanRequestPlan loanRequestPlan;
-    private final Build refresh;
+    private final Executable refresh;
+    private final LoanRequest loanRequest;
     private Grid<LoanRequestPlanDetail> grid;
 
-    private final LoanRequest loanRequest;
-
-    public LRPView(LoanRequestPlan plan, LoanRequest loanRequest, Build build) {
+    public LRPView(LoanRequestPlan plan, LoanRequest loanRequest, Executable executable) {
         this.loanRequestPlan = plan;
         this.loanRequest = loanRequest;
-        refresh = build;
+        refresh = executable;
         generatePLanning(refresh);
         forPlan();
-//        if (loanRequest.getStatus().ordinal() == LoanRequest.Status.REPAYMENT.ordinal()) {
+
+        if (loanRequest.getStatus().compareTo(LoanRequest.Status.APPROVED) == 0) {
             enablePayment();
+        }
+//        if (loanRequest.getStatus().ordinal() == LoanRequest.Status.REPAYMENT.ordinal()) {
 //        }
         setMargin(false);
         setPadding(false);
@@ -72,7 +74,7 @@ public class LRPView extends VerticalLayout {
 //                    LoanRequest loanRequest1 = loanRequestService.get(loanRequestPlan.getLoanRequestId(), AuthenticatedUser.token());
                     Currency fromCurrency = loanRequest.getLoan().getCurrency();
                     Currency selectedCurrency = loanRequest.getCurrency();
-                    PaymentTransaction.Reference reference = PaymentTransaction.Reference.LOAN_REQUEST_PLAN_DETAIL;
+                    Reference reference = Reference.LOAN_REQUEST_PLAN_DETAIL;
                     Long referenceId = detail.getId();
                     TransactionDialog transactionDialog = new TransactionDialog(rest, initDate, businessId, fromCurrency, selectedCurrency, reference, referenceId);
                     transactionDialog.setNextReferenceId(loanRequest.getId());
@@ -86,7 +88,7 @@ public class LRPView extends VerticalLayout {
         }).setHeader("Record Payment");
     }
 
-    private void generatePLanning(Build build) {
+    private void generatePLanning(Executable executable) {
         Div horizontalLayout = new Div();
         add(horizontalLayout);
 
@@ -101,6 +103,7 @@ public class LRPView extends VerticalLayout {
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
         add(grid);
         grid.setAllRowsVisible(true);
+        grid.setClassName("resonate");
 
         grid.addComponentColumn(new ValueProvider<LoanRequestPlanDetail, Span>() {
             @Override
@@ -138,10 +141,15 @@ public class LRPView extends VerticalLayout {
             @Override
             public Div apply(LoanRequestPlanDetail loanRequestPlanning) {
 
-                ProgressBar progressBar = new ProgressBar();
-                progressBar.setMax(loanRequestPlanning.getFactor().doubleValue());
                 BigDecimal transactionsAmount = loanRequestPlanning.getTransactionsAmount();
-                progressBar.setValue(transactionsAmount.doubleValue());
+                ProgressBar progressBar = new ProgressBar();
+                progressBar.setMax(1);
+                if(loanRequestPlanning.getFactor().doubleValue() != 0) {
+                    BigDecimal divide = BigDecimal.valueOf(transactionsAmount.doubleValue()).//
+                            divide(BigDecimal.valueOf(loanRequestPlanning.getFactor().doubleValue()), 2, RoundingMode.HALF_EVEN);
+                    double value = divide.doubleValue();
+                    progressBar.setValue(value);
+                }
                 Div div = new Div(progressBar);
                 div.setHeightFull();
                 return div;

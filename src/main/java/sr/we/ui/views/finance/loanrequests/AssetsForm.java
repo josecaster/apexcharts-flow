@@ -19,7 +19,7 @@ import sr.we.data.controller.LoanRequestService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.LoanRequest;
 import sr.we.shekelflowcore.entity.LoanRequestAssets;
-import sr.we.shekelflowcore.entity.helper.Build;
+import sr.we.shekelflowcore.entity.helper.Executable;
 import sr.we.shekelflowcore.entity.helper.vo.LoanRequestAssetsFilesVO;
 import sr.we.shekelflowcore.entity.helper.vo.LoanRequestAssetsVO;
 import sr.we.ui.components.finance.LoanAssetsSelect;
@@ -74,7 +74,7 @@ public class AssetsForm extends LitTemplate {
     @Id("total-asset-lbl")
     private H3 totalAssetLbl;
     private LoanRequest loanRequest;
-    private Build refresh;
+    private Executable refresh;
 
     /**
      * Creates a new AssetsForm.
@@ -116,9 +116,11 @@ public class AssetsForm extends LitTemplate {
         list = new ArrayList<>();
         grid.setItems(list);
         grid.getDataProvider().refreshAll();
-        grid.addColumn(LoanRequestAssetsVO::getLoanAssets).setHeader("Asset type");
-        grid.addColumn(LoanRequestAssetsVO::getAmount).setHeader("Amount");
-        grid.addColumn(LoanRequestAssetsVO::getMemo).setHeader("Memo");
+        grid.addColumn(LoanRequestAssetsVO::getLoanAssets).setHeader("Asset type").setFlexGrow(0);
+        grid.addColumn(f -> f.getCurrencyCode()).setHeader("Currency").setFlexGrow(0);
+        grid.addColumn(LoanRequestAssetsVO::getAmount).setHeader("Amount").setFlexGrow(0);
+        grid.addColumn(LoanRequestAssetsVO::getMemo).setHeader("Memo").setFlexGrow(1);
+        grid.setAllRowsVisible(true);
 
         addAssetsBtn.addClickListener(f -> {
             LoanRequestAssetsVO vo = getVO();
@@ -136,7 +138,10 @@ public class AssetsForm extends LitTemplate {
                 viewAssetsDetail.setOpened(true);
             }
             grid.scrollIntoView();
+
         });
+
+        totalAssetLbl.setVisible(false);
     }
 
     protected LoanRequestAssetsVO getVO() {
@@ -146,6 +151,7 @@ public class AssetsForm extends LitTemplate {
         loanRequestAssetsVO.setLoanRequest(loanRequest.getId());
         loanRequestAssetsVO.setMemo(assetMemoFld.getValue());
         loanRequestAssetsVO.setAmount(assetValueFld1.getValue() == null ? BigDecimal.ZERO : BigDecimal.valueOf(assetValueFld1.getValue()));
+        loanRequestAssetsVO.setCurrency(assetCurrencyCmb1.getValue() == null ? null : assetCurrencyCmb1.getValue().getId());
         loanRequestAssetsVO.setValid(true);
         try {
 
@@ -181,7 +187,7 @@ public class AssetsForm extends LitTemplate {
         return loanRequestAssetsVO;
     }
 
-    protected void setLoanRequest(LoanRequest loanRequest, Build refresh) {
+    protected void setLoanRequest(LoanRequest loanRequest, Executable refresh) {
         list.clear();
         this.refresh = refresh;
         this.loanRequest = loanRequest;
@@ -196,6 +202,8 @@ public class AssetsForm extends LitTemplate {
             loanRequestAssetsVO.setMemo(requestAssets.getMemo());
             loanRequestAssetsVO.setValid(requestAssets.getValid());
             loanRequestAssetsVO.setAmount(requestAssets.getAmount());
+            loanRequestAssetsVO.setCurrency(requestAssets.getCurrency() == null ? loanRequest.getCurrency().getId() : requestAssets.getCurrency().getId());
+            loanRequestAssetsVO.setCurrencyCode(requestAssets.getCurrency() == null ? loanRequest.getCurrency().getCode() : requestAssets.getCurrency().getCode());
 //            loanRequestAssetsVO.setFiles(requestAssets.getLoanRequestAssetsFiles());
             list.add(loanRequestAssetsVO);
         }
@@ -209,9 +217,16 @@ public class AssetsForm extends LitTemplate {
             }
         }
 
-
-        BigDecimal reduce = list.stream().map(f -> f.getAmount()).reduce(BigDecimal.ZERO, BigDecimal::add);
-        totalAssetLbl.setText("Total asset value " + loanRequest.getCurrency().getCode() + " " + reduce);
+        addAssetsBtn.setVisible(false);
+        discardAssetsBtn.setVisible(false);
+        uploadBtn.setVisible(false);
+        if (loanRequest.getStatus().compareTo(LoanRequest.Status.REQUESTED) == 0 || loanRequest.getStatus().compareTo(LoanRequest.Status.APPROVED) == 0) {
+            addAssetsBtn.setVisible(true);
+            discardAssetsBtn.setVisible(true);
+            uploadBtn.setVisible(true);
+        }
+//        BigDecimal reduce = list.stream().map(f -> f.getAmount()).reduce(BigDecimal.ZERO, BigDecimal::add);
+//        totalAssetLbl.setText("Total asset value " + loanRequest.getCurrency().getCode() + " " + reduce);
     }
 
     public List<LoanRequestAssetsVO> getList() {

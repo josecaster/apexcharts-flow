@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.0.final using JasperReports Library version 6.20.0-2bc7ab61c56f459e8176eb05c7705e145cd400ad  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Invoice" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="4eedbb89-b4f6-4469-9ab6-f642a1688cf7">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="479"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="521"/>
+	<style name="Title" forecolor="#FFFFFF" fontName="Times New Roman" fontSize="50" isBold="false" pdfFontName="Times-Bold"/>
+	<style name="SubTitle" forecolor="#CCCCCC" fontName="Times New Roman" fontSize="18" isBold="false" pdfFontName="Times-Roman"/>
+	<style name="Column header" forecolor="#666666" fontName="Times New Roman" fontSize="14" isBold="true"/>
+	<style name="Detail" mode="Transparent" fontName="Times New Roman"/>
+	<style name="Row" mode="Transparent" fontName="Times New Roman" pdfFontName="Times-Roman">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{REPORT_COUNT}%2 == 0]]></conditionExpression>
+			<style mode="Opaque" backcolor="#EEEFF0"/>
+		</conditionalStyle>
+	</style>
+	<style name="Table">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+			<topPen lineWidth="1.0" lineColor="#000000"/>
+			<leftPen lineWidth="1.0" lineColor="#000000"/>
+			<bottomPen lineWidth="1.0" lineColor="#000000"/>
+			<rightPen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_TH" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_CH" mode="Opaque" backcolor="#CACED0">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{REPORT_COUNT}%2 == 0]]></conditionExpression>
+			<style backcolor="#D8D8D8"/>
+		</conditionalStyle>
+	</style>
+	<subDataset name="tableDataset" uuid="f13e6d36-5148-4ecc-bbe3-3035def80980">
+		<queryString>
+			<![CDATA[]]>
+		</queryString>
+	</subDataset>
+	<parameter name="INVOICE_ID_" class="java.lang.Long"/>
+	<queryString language="SQL">
+		<![CDATA[SELECT
+    i.id as invoice_id,
+    c.id as customer_id,
+    b.id as business_id,
+    ph.id as header_id,
+    curfrom.id as currency_from_id,
+    curto.id as currency_to_id,
+    i.exchange_rate as xf,
+    i.amount as invoice_amount,
+    i.converted_amount as xf_amount,
+    i.invoice_number as invoice_number,
+    i.invoice_date as invoice_date,
+    i.payment_due as invoice_due,
+    i.thank_message as invoice_thk ,
+    i.header_message as invoice_head,
+    i.footer_message as invoice_foot,
+    i.invoice_title as invoice_tit,
+    c.first_name as customer_first,
+    c.name as customer_last,
+    cc.email as customer_mail,
+    cc.mobile as customer_mob,
+    b.name as business_name,
+    curfrom.code as currency_from_code,
+    curto.code as currency_to_code,
+    phd.name as item,
+    phd.count as item_count,
+    phd.price as item_price,
+    phd.result as item_total
+FROM
+    invoice      i
+    LEFT JOIN pos_header   ph ON i.pos_header_id_ = ph.id
+    LEFT OUTER JOIN pos_header_detail phd on phd.pos_header_id_ = ph.id
+    LEFT OUTER JOIN customer     c ON i.customer_id_ = c.id
+    LEFT OUTER JOIN customer_address ca on ca.customer_id_ = c.id
+    LEFT OUTER JOIN customer_billing cb on cb.customer_address_id_ = ca.id
+    LEFT OUTER JOIN customer_contact cc on cc.customer_id_ = c.id
+    LEFT OUTER JOIN customer_shipping cs on cs.customer_address_id_ = ca.id
+    LEFT JOIN business b on i.business_id_ = b.id
+    LEFT JOIN currency curfrom on i.currency_from_id_ = curfrom.id
+    LEFT JOIN currency curto on i.currency_to_id_ = curto.id
+WHERE
+    i.id =  $P{INVOICE_ID_}]]>
+	</queryString>
+	<field name="INVOICE_ID" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="INVOICE_ID"/>
+		<property name="com.jaspersoft.studio.field.label" value="INVOICE_ID"/>
+	</field>
+	<field name="CUSTOMER_ID" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="CUSTOMER_ID"/>
+		<property name="com.jaspersoft.studio.field.label" value="CUSTOMER_ID"/>
+	</field>
+	<field name="BUSINESS_ID" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="BUSINESS_ID"/>
+		<property name="com.jaspersoft.studio.field.label" value="BUSINESS_ID"/>
+	</field>
+	<field name="HEADER_ID" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="HEADER_ID"/>
+		<property name="com.jaspersoft.studio.field.label" value="HEADER_ID"/>
+	</field>
+	<field name="CURRENCY_FROM_ID" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="CURRENCY_FROM_ID"/>
+		<property name="com.jaspersoft.studio.field.label" value="CURRENCY_FROM_ID"/>
+	</field>
+	<field name="CURRENCY_TO_ID" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="CURRENCY_TO_ID"/>
+		<property name="com.jaspersoft.studio.field.label" value="CURRENCY_TO_ID"/>
+	</field>
+	<field name="XF" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="XF"/>
+		<property name="com.jaspersoft.studio.field.label" value="XF"/>
+	</field>
+	<field name="INVOICE_AMOUNT" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="INVOICE_AMOUNT"/>
+		<property name="com.jaspersoft.studio.field.label" value="INVOICE_AMOUNT"/>
+	</field>
+	<field name="XF_AMOUNT" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="XF_AMOUNT"/>
+		<property name="com.jaspersoft.studio.field.label" value="XF_AMOUNT"/>
+	</field>
+	<field name="INVOICE_NUMBER" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="INVOICE_NUMBER"/>
+		<property name="com.jaspersoft.studio.field.label" value="INVOICE_NUMBER"/>
+	</field>
+	<field name="INVOICE_DATE" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.name" value="INVOICE_DATE"/>
+		<property name="com.jaspersoft.studio.field.label" value="INVOICE_DATE"/>
+	</field>
+	<field name="INVOICE_DUE" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.name" value="INVOICE_DUE"/>
+		<property name="com.jaspersoft.studio.field.label" value="INVOICE_DUE"/>
+	</field>
+	<field name="INVOICE_THK" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="INVOICE_THK"/>
+		<property name="com.jaspersoft.studio.field.label" value="INVOICE_THK"/>
+	</field>
+	<field name="INVOICE_HEAD" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="INVOICE_HEAD"/>
+		<property name="com.jaspersoft.studio.field.label" value="INVOICE_HEAD"/>
+	</field>
+	<field name="INVOICE_FOOT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="INVOICE_FOOT"/>
+		<property name="com.jaspersoft.studio.field.label" value="INVOICE_FOOT"/>
+	</field>
+	<field name="INVOICE_TIT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="INVOICE_TIT"/>
+		<property name="com.jaspersoft.studio.field.label" value="INVOICE_TIT"/>
+	</field>
+	<field name="CUSTOMER_FIRST" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="CUSTOMER_FIRST"/>
+		<property name="com.jaspersoft.studio.field.label" value="CUSTOMER_FIRST"/>
+	</field>
+	<field name="CUSTOMER_LAST" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="CUSTOMER_LAST"/>
+		<property name="com.jaspersoft.studio.field.label" value="CUSTOMER_LAST"/>
+	</field>
+	<field name="CUSTOMER_MAIL" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="CUSTOMER_MAIL"/>
+		<property name="com.jaspersoft.studio.field.label" value="CUSTOMER_MAIL"/>
+	</field>
+	<field name="CUSTOMER_MOB" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="CUSTOMER_MOB"/>
+		<property name="com.jaspersoft.studio.field.label" value="CUSTOMER_MOB"/>
+	</field>
+	<field name="BUSINESS_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="BUSINESS_NAME"/>
+		<property name="com.jaspersoft.studio.field.label" value="BUSINESS_NAME"/>
+	</field>
+	<field name="CURRENCY_FROM_CODE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="CURRENCY_FROM_CODE"/>
+		<property name="com.jaspersoft.studio.field.label" value="CURRENCY_FROM_CODE"/>
+	</field>
+	<field name="CURRENCY_TO_CODE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="CURRENCY_TO_CODE"/>
+		<property name="com.jaspersoft.studio.field.label" value="CURRENCY_TO_CODE"/>
+	</field>
+	<field name="ITEM" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="ITEM"/>
+		<property name="com.jaspersoft.studio.field.label" value="ITEM"/>
+	</field>
+	<field name="ITEM_COUNT" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="ITEM_COUNT"/>
+		<property name="com.jaspersoft.studio.field.label" value="ITEM_COUNT"/>
+	</field>
+	<field name="ITEM_PRICE" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="ITEM_PRICE"/>
+		<property name="com.jaspersoft.studio.field.label" value="ITEM_PRICE"/>
+	</field>
+	<field name="ITEM_TOTAL" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="ITEM_TOTAL"/>
+		<property name="com.jaspersoft.studio.field.label" value="ITEM_TOTAL"/>
+	</field>
+	<title>
+		<band height="132" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="82" width="84" height="25" uuid="57aed2b1-4f4e-40a3-a6ad-54dae8dd4c5a">
+					<property name="local_mesure_unitheight" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Bill to:]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="69" width="556" height="1" uuid="806ce5df-1219-4876-ae0c-ca7405b1f246">
+					<property name="local_mesure_unitheight" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+			</line>
+			<staticText>
+				<reportElement x="348" y="10" width="50" height="20" uuid="0f86baff-6386-4f3f-b3fe-2388707babe8"/>
+				<box rightPadding="4"/>
+				<textElement textAlignment="Left"/>
+				<text><![CDATA[Date due:]]></text>
+			</staticText>
+			<textField pattern="EEEEE dd MMMMM yyyy">
+				<reportElement x="398" y="10" width="147" height="20" uuid="bb10dbe1-0a4f-4722-9953-c163b63cf979"/>
+				<textFieldExpression><![CDATA[$F{INVOICE_DATE}]]></textFieldExpression>
+			</textField>
+			<image hAlign="Center">
+				<reportElement x="0" y="0" width="65" height="60" uuid="94883631-a913-43e2-b182-ab8d77d0181e"/>
+			</image>
+			<textField pattern="EEEEE dd MMMMM yyyy">
+				<reportElement x="398" y="30" width="146" height="20" uuid="3836ce65-eca3-4cad-a6de-b1818def0a2b"/>
+				<textFieldExpression><![CDATA[$F{INVOICE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="348" y="30" width="50" height="20" uuid="0b3f9342-da78-4cfa-9fc5-2301c4749678"/>
+				<box rightPadding="4"/>
+				<textElement textAlignment="Left"/>
+				<text><![CDATA[Invoice #]]></text>
+			</staticText>
+			<textField pattern="EEEEE dd MMMMM yyyy">
+				<reportElement x="95" y="0" width="205" height="25" uuid="034768e1-0cec-444c-b9e7-906ec33f7f97"/>
+				<textElement>
+					<font size="19" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BUSINESS_NAME}]]></textFieldExpression>
+			</textField>
+			<textField pattern="EEEEE dd MMMMM yyyy">
+				<reportElement x="0" y="107" width="180" height="20" uuid="eb4c938a-adbc-4358-a379-55463ef2e170"/>
+				<textFieldExpression><![CDATA[$F{CUSTOMER_FIRST}+", "+$F{CUSTOMER_LAST}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="20"/>
+	</columnHeader>
+	<detail>
+		<band height="20"/>
+	</detail>
+	<lastPageFooter>
+		<band height="183">
+			<textField pattern="EEEEE dd MMMMM yyyy">
+				<reportElement x="0" y="30" width="260" height="101" uuid="86aae29a-b0e2-4c5f-b01f-4ca37708a957"/>
+				<textFieldExpression><![CDATA[$F{INVOICE_THK}]]></textFieldExpression>
+			</textField>
+			<textField pattern="EEEEE dd MMMMM yyyy">
+				<reportElement x="0" y="150" width="556" height="29" backcolor="#E6E8E9" uuid="c6a7f893-9cd1-43e6-96dd-148d57aa4b79"/>
+				<box>
+					<pen lineColor="#E6E8E9"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#E6E8E9"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#E6E8E9"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#E6E8E9"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#E6E8E9"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{INVOICE_FOOT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</lastPageFooter>
+</jasperReport>

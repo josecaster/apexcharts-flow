@@ -43,6 +43,7 @@ import sr.we.shekelflowcore.entity.*;
 import sr.we.shekelflowcore.entity.helper.vo.PosHeaderDetailVO;
 import sr.we.shekelflowcore.entity.helper.vo.PosHeaderVO;
 import sr.we.shekelflowcore.entity.helper.vo.PosStartVO;
+import sr.we.shekelflowcore.enums.Reference;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.POSPrivilege;
 import sr.we.shekelflowcore.settings.util.Constants;
@@ -68,7 +69,7 @@ import java.util.stream.Collectors;
 @Route(value = "pos", layout = MainLayout.class)
 @RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
 @PageTitle("Point of sale")
-public class PosView extends LitTemplate implements BeforeEnterObserver {
+public class PosView extends LitTemplate implements BeforeEnterObserver, IFee {
 
     private final Dialog dialog;
     private final Grid<PosHeader> ticketsGrid;
@@ -159,7 +160,7 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
             }
 
 
-            TransactionDialog transactionDialog = new TransactionDialog(posHeader.getRest(), LocalDate.now(), Long.valueOf(business), business2.getCurrency(), business2.getCurrency(), PaymentTransaction.Reference.POS, posHeader.getId());
+            TransactionDialog transactionDialog = new TransactionDialog(posHeader.getRest(), LocalDate.now(), Long.valueOf(business), business2.getCurrency(), business2.getCurrency(), Reference.POS, posHeader.getId());
             transactionDialog.disableAmount();
             transactionDialog.setOnSave(() -> {
                 return null;
@@ -201,7 +202,7 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
                     lineAwesomeIcon = new LineAwesomeIcon("la la-chevron-circle-down");
                 }
                 lineAwesomeIcon.addClickListener(f -> {
-                    TransactionDialog transactionDialog = new TransactionDialog(posHeader.getRest(), LocalDate.now(), Long.valueOf(business), business2.getCurrency(), business2.getCurrency(), PaymentTransaction.Reference.POS, posHeader.getId());
+                    TransactionDialog transactionDialog = new TransactionDialog(posHeader.getRest(), LocalDate.now(), Long.valueOf(business), business2.getCurrency(), business2.getCurrency(), Reference.POS, posHeader.getId());
 //                    transactionDialog.disableAmount();
                     transactionDialog.setOnSave(() -> {
                         return null;
@@ -555,11 +556,11 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
         }
 
         Product product = productOrService.getProduct();
-        Services services = productOrService.getServices();
-        String value = product != null ? product.getId().toString() : services.getId().toString();
-        String title = product != null ? product.getTitle() : services.getName();
+        Items items = productOrService.getServices();
+        String value = product != null ? product.getId().toString() : items.getId().toString();
+        String title = product != null ? product.getTitle() : items.getName();
         double procent = product != null ? (product.getPrice() == null ? 0D : product.getPrice().doubleValue()) : //
-                (services.getPrice() == null ? 0D : services.getPrice().doubleValue());
+                (items.getPrice() == null ? 0D : items.getPrice().doubleValue());
 
 
         H2 h2 = new H2(title);
@@ -569,7 +570,7 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
         valueSpan.addClassNames("font-semibold", "text-3xl");
 
 
-        layout.add(h2, valueSpan);
+        layout.add(h2/*, valueSpan*/);
 
 
         String build = value;
@@ -664,15 +665,17 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
         return feeMap;
     }
 
-    public void addFeeMap(String key, Object value) {
-        if (feeMap == null) {
-            feeMap = new HashMap<>();
-        }
-        feeMap.put(key, value);
-    }
 
     public List<Item> getItemList() {
         return itemList;
+    }
+
+    @Override
+    public void addFeeMap(String title, String toString) {
+        if (feeMap == null) {
+            feeMap = new HashMap<>();
+        }
+        feeMap.put(title, toString);
     }
 
     private void startNewTicket() {

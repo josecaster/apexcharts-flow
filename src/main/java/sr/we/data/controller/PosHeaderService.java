@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.RestTemplate;
 import sr.we.shekelflowcore.entity.PosHeader;
+import sr.we.shekelflowcore.entity.helper.adapter.LocalDateAdapter;
 import sr.we.shekelflowcore.entity.helper.vo.PosHeaderVO;
 import sr.we.shekelflowcore.settings.Routes;
 
@@ -40,7 +41,8 @@ public class PosHeaderService extends MyController {
     }
 
     public PosHeader create(String accessToken, PosHeaderVO vo) {
-        String body = new GsonBuilder().create().toJson(vo);
+        String body = new GsonBuilder()
+                .registerTypeAdapter(LocalDate.class, new LocalDateAdapter()).create().toJson(vo);
         RestTemplate restTemplate = new RestTemplate();
         String fooResourceUrl
                 = configProperties.getRest() + Routes.POS_HEADER_CREATE;
@@ -53,7 +55,8 @@ public class PosHeaderService extends MyController {
     }
 
     public PosHeader edit(String accessToken, PosHeaderVO vo) {
-        String body = new GsonBuilder().create().toJson(vo);
+        String body = new GsonBuilder()
+                .registerTypeAdapter(LocalDate.class, new LocalDateAdapter()).create().toJson(vo);
         RestTemplate restTemplate = new RestTemplate();
         String fooResourceUrl
                 = configProperties.getRest() + Routes.POS_HEADER_EDIT;

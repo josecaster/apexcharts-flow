@@ -157,7 +157,7 @@ public class AddProducts extends LitTemplate {
         productTitleLayout.setProduct(product);
         productPriceLayout.setProduct(product);
         productType.setProduct(product);
-        productInventoryLayout.setProduct(product);
+//        productInventoryLayout.setProduct(product);//TODO
         addProductTitle.setText("Edit product");
     }
 

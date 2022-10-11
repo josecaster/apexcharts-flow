@@ -12,6 +12,7 @@ import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.template.Id;
+import com.vaadin.flow.dom.ThemeList;
 import com.vaadin.flow.router.*;
 import org.apache.commons.lang3.StringUtils;
 import sr.we.ContextProvider;
@@ -78,6 +79,8 @@ public class RequestsView extends LitTemplate implements BeforeEnterObserver , A
 //                UI.getCurrent().navigate(LRView.getLocation(business, loanId), queryParameters);
             }
         });
+        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+        grid.setClassName("resonate");
         requestsGridLayout.add(grid);
         grid.setAllRowsVisible(true);
     }
@@ -107,70 +110,26 @@ public class RequestsView extends LitTemplate implements BeforeEnterObserver , A
 //        date.addClassName("date");
         header.add(name, date);
 
-        if (eligible != null) {
-            Span pending = new Span("Not Eligible");
-            pending.getElement().getThemeList().add("badge error");
-            pending.getElement().getStyle().set("height","fit-content");
-
-            Span confirmed = new Span("Eligible");
-            confirmed.getElement().getThemeList().add("badge success");
-            confirmed.getElement().getStyle().set("height","fit-content");
-
-            if (eligible) {
-                card.add(confirmed);
-            } else {
-                card.add(pending);
-            }
-        } //else {
-        switch (status) {
-            case REQUESTED -> {
-                Span pending = new Span("Requested");
-                pending.getElement().getThemeList().add("badge");
-                pending.getElement().getStyle().set("height","fit-content");
-                card.add(pending);
-            }
-            case ELIGIBLE -> {
-                Span approved = new Span("Eligible");
-                approved.getElement().getThemeList().add("badge success");
-                approved.getElement().getStyle().set("height","fit-content");
-                card.add(approved);
-            }
-            case REVIEW -> {
-                Span review = new Span("Review");
-                review.getElement().getThemeList().add("badge contrast");
-                review.getElement().getStyle().set("height","fit-content");
-                card.add(review);
-            }
-            case INPUT -> {
-                Span input = new Span("Waiting for input");
-                input.getElement().getThemeList().add("badge error");
-                input.getElement().getStyle().set("height","fit-content");
-                card.add(input);
-            }
-            case CLOSED -> {
-                Span approved = new Span("Closed");
-                approved.getElement().getThemeList().add("badge success");
-                approved.getElement().getStyle().set("height","fit-content");
-                card.add(approved);
-            }
-            case APPROVED -> {
-                Span approved = new Span("Approved");
-                approved.getElement().getThemeList().add("badge success");
-                approved.getElement().getStyle().set("height","fit-content");
-                card.add(approved);
-            }
-            case REPAYMENT -> {
-                Span review = new Span("Repayment");
-                review.getElement().getThemeList().add("badge contrast");
-                review.getElement().getStyle().set("height","fit-content");
-                card.add(review);
-            }
-            case PROVIDE -> {
-                Span review = new Span("Provision");
-                review.getElement().getThemeList().add("badge contrast");
-                review.getElement().getStyle().set("height","fit-content");
-                card.add(review);
-            }
+        Span loanRequestStatusSpan = new Span();
+        loanRequestStatusSpan.setWidth("85px");
+        card.add(loanRequestStatusSpan);
+        loanRequestStatusSpan.setVisible(true);
+        loanRequestStatusSpan.setText(loanRequest.getStatus().name());
+        ThemeList themeList = loanRequestStatusSpan.getElement().getThemeList();
+        themeList.add("badge");
+        if (loanRequest.getStatus().compareTo(LoanRequest.Status.REQUESTED) == 0) {
+            themeList.add("primary");
+        } else if (loanRequest.getStatus().compareTo(LoanRequest.Status.APPROVED) == 0) {
+            themeList.add("success");
+        }
+        if (loanRequest.getStatus().compareTo(LoanRequest.Status.CANCEL) == 0) {
+            themeList.add("error");
+        }
+        if (loanRequest.getStatus().compareTo(LoanRequest.Status.ARCHIVE) == 0) {
+            themeList.add("tertiary");
+        }
+        if (loanRequest.getStatus().compareTo(LoanRequest.Status.DONE) == 0) {
+            themeList.add("primary success");
         }
 //        }
 

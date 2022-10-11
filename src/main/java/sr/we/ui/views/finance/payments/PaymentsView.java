@@ -10,8 +10,8 @@ import sr.we.demo.about.AboutView;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Currency;
 import sr.we.shekelflowcore.entity.LoanRequest;
-import sr.we.shekelflowcore.entity.PaymentTransaction;
 import sr.we.shekelflowcore.entity.Role;
+import sr.we.shekelflowcore.enums.Reference;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.PaymentsPrivilege;
 import sr.we.ui.views.MainLayout;
@@ -39,7 +39,7 @@ public class PaymentsView extends PaymentsForm implements BeforeEnterObserver, A
         LoanRequestService loanService = ContextProvider.getBean(LoanRequestService.class);
         List<LoanRequest> list = loanService.list(AuthenticatedUser.token(), Long.valueOf(businessStringId), null);
         if (list != null) {
-            list = list.stream().filter(f -> f.getStatus().compareTo(LoanRequest.Status.REPAYMENT) == 0).collect(Collectors.toList());
+            list = list.stream().filter(f -> f.getStatus().compareTo(LoanRequest.Status.APPROVED) == 0).collect(Collectors.toList());
             grid.setItems(list);
         } else {
 
@@ -68,7 +68,7 @@ public class PaymentsView extends PaymentsForm implements BeforeEnterObserver, A
         businessId = Long.valueOf(this.businessStringId);
         Currency fromCurrency = null;
         Currency selectedCurrency = null;
-        PaymentTransaction.Reference reference = PaymentTransaction.Reference.LOAN_REQUEST_PLAN_DETAIL;
+        Reference reference = Reference.LOAN_REQUEST_PLAN_DETAIL;
         transactionForm = new TransactionForm(rest, now, businessId, fromCurrency, selectedCurrency, reference, null);
         layout.add(transactionForm);
     }

@@ -36,7 +36,8 @@ import sr.we.ui.views.dashboard.DashboardView;
 import sr.we.ui.views.finance.loanrequests.RequestsView;
 import sr.we.ui.views.finance.loans.LoanView;
 import sr.we.ui.views.finance.payments.PaymentsView;
-import sr.we.ui.views.finance.transactions.TransactionGrid;
+import sr.we.ui.views.finance.transactions.TransactionsView;
+import sr.we.ui.views.invoice.InvoiceView;
 import sr.we.ui.views.login.NotActiveDialog;
 import sr.we.ui.views.person.PersonView;
 import sr.we.ui.views.personform.PersonFormView;
@@ -320,28 +321,35 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         }
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(TransactionsPrivilege.class), Privileges.READ)) {
             //current.access(() -> {
-                MenuItemInfo transactions = new MenuItemInfo("Transactions", "icons/menus/icons8_transaction_48px.png", TransactionGrid.class);
+                MenuItemInfo transactions = new MenuItemInfo("Transactions", "icons/menus/icons8_transaction_48px.png", TransactionsView.class);
                 list.add(transactions);
+//            });
+        }
+
+        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(InvoicesPrivilege.class), Privileges.READ)) {
+            //current.access(() -> {
+            MenuItemInfo transactions = new MenuItemInfo("Invoices", "icons/menus/icons8_invoice_48px.png", InvoiceView.class);
+            list.add(transactions);
 //            });
         }
 
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(POSPrivilege.class), Privileges.INSERT)) {
             //current.access(() -> {
-            MenuItemInfo transactions = new MenuItemInfo("POS", "icons/menus/icons8_cash_register_48px.png", PosView.class);
+            MenuItemInfo transactions = new MenuItemInfo("Point of sale", "icons/menus/icons8_cash_register_48px.png", PosView.class);
             list.add(transactions);
 //            });
         }
 
-        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(ProductsPrivilege.class), Privileges.READ)) {
+        /*if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(ProductsPrivilege.class), Privileges.READ)) {
             //current.access(() -> {
                 MenuItemInfo products = new MenuItemInfo("Products", "icons/menus/icons8_product_48px.png", ProductView.class);
                 list.add(products);
 //            });
-        }
+        }*/
 
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(ServicesPrivilege.class), Privileges.READ)) {
             //current.access(() -> {
-                MenuItemInfo products = new MenuItemInfo("Services", "icons/menus/icons8_service_48px.png", ServiceView.class);
+                MenuItemInfo products = new MenuItemInfo("Products & Services", "icons/menus/icons8_product_48px.png", ServiceView.class);
                 list.add(products);
 //            });
         }

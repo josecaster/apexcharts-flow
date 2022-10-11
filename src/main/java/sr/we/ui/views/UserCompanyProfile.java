@@ -47,8 +47,8 @@ public class UserCompanyProfile extends Button {
         dialog.getElement().getStyle().set("top", "0px");
         dialog.getElement().getStyle().set("left", "0px");
 
-        Image img = new Image("images/seaqns-icon-inv.png", "seaqns icon");
-        img.setWidth("75px");
+        Image img = new Image("images/seaqns-icon.png", "seaqns icon");
+        img.setWidth("36px");
         setIcon(img);
 
 //        margin-left: var(--lumo-space-s);

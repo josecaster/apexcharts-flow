@@ -2,6 +2,7 @@ package sr.we.ui.views.finance.transactions;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
@@ -23,10 +24,9 @@ import sr.we.ui.views.finance.loans.tabs.LTabDashboard;
 import javax.annotation.security.RolesAllowed;
 import java.util.Optional;
 
-@Route(value = "transaction", layout = MainLayout.class)
-@RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
+
 //@PreserveOnRefresh
-public class TransactionGrid extends VerticalLayout implements AfterNavigationObserver, HasDynamicTitle, BeforeEnterObserver {
+public class TransactionGrid extends VerticalLayout  {
 
     Grid<PaymentTransaction> grid = new Grid<>();
     private String business;
@@ -35,7 +35,8 @@ public class TransactionGrid extends VerticalLayout implements AfterNavigationOb
 //        addClassName("loans-view");
 //        layout.setSizeFull();
         grid.setAllRowsVisible(true);
-//        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
+        grid.setClassName("resonate");
+        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
         grid.addColumn(PaymentTransaction::getPaymentDate).setHeader("Payment date");
         grid.addColumn(f -> f.getPaymentMethod().getDescription()).setHeader("Payment method");
         grid.addColumn(f -> f.getAccount().getName()).setHeader("Account");
@@ -125,29 +126,18 @@ public class TransactionGrid extends VerticalLayout implements AfterNavigationOb
 //        return card;
 //    }
 
-    @Override
-    public void afterNavigation(AfterNavigationEvent event) {
+    public void afterNavigation() {
         PaymentTransactionService loanService = ContextProvider.getBean(PaymentTransactionService.class);
         grid.setItems(loanService.list(AuthenticatedUser.token(), Long.valueOf(business)));
 
     }
 
 
-    @Override
-    public String getPageTitle() {
-        return "Payment Transactions";
+    public String getBusiness() {
+        return business;
     }
 
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        UserAccessService userAccesService = ContextProvider.getBean(UserAccessService.class);
-        boolean hasAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new TransactionsPrivilege(), Privileges.READ);
-        if(!hasAccess){
-            UI.getCurrent().navigate(AboutView.class);
-        }
-        Optional<String> business1 = event.getRouteParameters().get("business");
-        if (business1.isPresent()) {
-            business = business1.get();
-        }
+    public void setBusiness(String business) {
+        this.business = business;
     }
 }

@@ -32,11 +32,12 @@ import java.util.*;
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
+@Deprecated
 @Tag("product-view")
 @JsModule("./src/views/products/product-view.ts")
-@Route(value = "products", layout = MainLayout.class)
-@RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
-public class ProductView extends LitTemplate implements BeforeEnterObserver {
+//@Route(value = "products", layout = MainLayout.class)
+//@RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
+public class ProductView extends LitTemplate /*implements BeforeEnterObserver*/ {
 
     private final Grid<Product> grid;
     @Id("product-grid-layout")
@@ -100,7 +101,7 @@ public class ProductView extends LitTemplate implements BeforeEnterObserver {
         productGridLayout.add(grid);
     }
 
-    @Override
+    /*@Override
     public void beforeEnter(BeforeEnterEvent event) {
         UserAccessService userAccesService = ContextProvider.getBean(UserAccessService.class);
         boolean hasAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new ProductsPrivilege(), Privileges.READ);
@@ -115,6 +116,6 @@ public class ProductView extends LitTemplate implements BeforeEnterObserver {
         ProductService productService = ContextProvider.getBean(ProductService.class);
         List<Product> list = productService.list(AuthenticatedUser.token(), Long.valueOf(business));
         grid.setItems(list);
-    }
+    }*/
 
 }

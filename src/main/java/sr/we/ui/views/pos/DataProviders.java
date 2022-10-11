@@ -5,10 +5,10 @@ import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import sr.we.ContextProvider;
 import sr.we.data.controller.ProductService;
-import sr.we.data.controller.ServicesService;
+import sr.we.data.controller.ItemsService;
 import sr.we.security.AuthenticatedUser;
+import sr.we.shekelflowcore.entity.Items;
 import sr.we.shekelflowcore.entity.Product;
-import sr.we.shekelflowcore.entity.Services;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,20 +18,20 @@ public class DataProviders extends Div {
 
 
 
-    static CallbackDataProvider<ProductOrService, String> getServices(String business) {
+    public static CallbackDataProvider<ProductOrService, String> getServices(String business) {
         CallbackDataProvider<ProductOrService, String> dataProvider;
         dataProvider = DataProvider.fromFilteringCallbacks(query -> {
             int pageSize = query.getPageSize();
             int page = query.getPage();
 
             List<ProductOrService> list = new ArrayList<>();
-            ServicesService productService = ContextProvider.getBean(ServicesService.class);
-            List<Services> list1 = productService.list(AuthenticatedUser.token(), Long.valueOf(business));
+            ItemsService productService = ContextProvider.getBean(ItemsService.class);
+            List<Items> list1 = productService.list(AuthenticatedUser.token(), Long.valueOf(business));
             list = list1.stream().map(ProductOrService::new).collect(Collectors.toList());
             return list.stream();
         }, query -> {
-            ServicesService productService = ContextProvider.getBean(ServicesService.class);
-            List<Services> list1 = productService.list(AuthenticatedUser.token(), Long.valueOf(business));
+            ItemsService productService = ContextProvider.getBean(ItemsService.class);
+            List<Items> list1 = productService.list(AuthenticatedUser.token(), Long.valueOf(business));
             return list1.size();
         });
         return dataProvider;
@@ -76,22 +76,22 @@ public class DataProviders extends Div {
         return dataProvider;
     }
 
-    static DataProvider<ProductOrServiceGrid, Void> getServicesGrid(String business) {
+    public static DataProvider<ProductOrServiceGrid, Void> getServicesGrid(String business) {
         DataProvider<ProductOrServiceGrid, Void> dataProvider;
         dataProvider = DataProvider.fromCallbacks(query -> {
             int pageSize = query.getPageSize();
             int page = query.getPage();
 
             List<ProductOrService> list = new ArrayList<>();
-            ServicesService productService = ContextProvider.getBean(ServicesService.class);
-            List<Services> list1 = productService.list(AuthenticatedUser.token(), Long.valueOf(business));
+            ItemsService productService = ContextProvider.getBean(ItemsService.class);
+            List<Items> list1 = productService.list(AuthenticatedUser.token(), Long.valueOf(business));
             list = list1.stream().map(ProductOrService::new).collect(Collectors.toList());
 
             List<ProductOrServiceGrid> list2 = toGrid(list);
             return list2.stream();
         }, query -> {
-            ServicesService productService = ContextProvider.getBean(ServicesService.class);
-            List<Services> list1 = productService.list(AuthenticatedUser.token(), Long.valueOf(business));
+            ItemsService productService = ContextProvider.getBean(ItemsService.class);
+            List<Items> list1 = productService.list(AuthenticatedUser.token(), Long.valueOf(business));
             return rowSize(list1);
         });
         return dataProvider;

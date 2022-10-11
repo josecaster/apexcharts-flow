@@ -6,6 +6,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.littemplate.LitTemplate;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.dom.Element;
@@ -29,7 +30,7 @@ public class StaffForm extends LitTemplate {
     @Id("permission-state-btn")
     private Button permissionStateBtn;
     @Id("permission-form")
-    private FormLayout permissionForm;
+    private VerticalLayout permissionForm;
     @Id("last-name")
     private TextField lastName;
 
@@ -56,7 +57,7 @@ public class StaffForm extends LitTemplate {
         return permissionStateBtn;
     }
 
-    public FormLayout getPermissionForm() {
+    public VerticalLayout getPermissionForm() {
         return permissionForm;
     }
 

@@ -10,7 +10,7 @@ import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.textfield.TextField;
-import sr.we.shekelflowcore.entity.helper.Build;
+import sr.we.shekelflowcore.entity.helper.Executable;
 import sr.we.shekelflowcore.entity.helper.vo.CalculationComponentVO;
 
 import java.util.List;
@@ -43,7 +43,7 @@ public class ServiceComponentsFormulaForm extends LitTemplate {
     @Id("formula-active-chk")
     private Checkbox formulaActiveChk;
 
-    private Build onSave;
+    private Executable onSave;
     private CalculationComponentVO calculationComponentVO;
     @Id("formula-test-btn")
     private Button formulaTestBtn;
@@ -110,7 +110,7 @@ public class ServiceComponentsFormulaForm extends LitTemplate {
         }
     }
 
-    public void setOnSave(Build onSave) {
+    public void setOnSave(Executable onSave) {
         this.onSave = onSave;
     }
 

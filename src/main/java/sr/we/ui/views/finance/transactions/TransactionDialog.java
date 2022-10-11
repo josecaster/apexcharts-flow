@@ -3,31 +3,18 @@ package sr.we.ui.views.finance.transactions;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.textfield.BigDecimalField;
-import com.vaadin.flow.component.textfield.TextArea;
 import sr.we.ContextProvider;
-import sr.we.data.controller.ExchangeRateService;
-import sr.we.data.controller.PaymentTransactionService;
 import sr.we.data.controller.UserAccessService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Currency;
 import sr.we.shekelflowcore.entity.PaymentTransaction;
-import sr.we.shekelflowcore.entity.helper.Build;
-import sr.we.shekelflowcore.entity.helper.vo.PaymentTransactionVO;
-import sr.we.shekelflowcore.exception.ValidationException;
+import sr.we.shekelflowcore.entity.helper.Executable;
+import sr.we.shekelflowcore.enums.Reference;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.TransactionsPrivilege;
 import sr.we.ui.components.MyDialog;
-import sr.we.ui.components.finance.AccountSelect;
-import sr.we.ui.components.finance.PaymentMethodSelect;
-import sr.we.ui.components.general.CurrencySelect;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -36,7 +23,7 @@ public class TransactionDialog extends MyDialog {
 
     private final TransactionForm transactionForm;
 
-    public TransactionDialog(BigDecimal rest, LocalDate initDate, Long businessId, Currency fromCurrency, Currency selectedCurrency, PaymentTransaction.Reference reference, Long referenceId) {
+    public TransactionDialog(BigDecimal rest, LocalDate initDate, Long businessId, Currency fromCurrency, Currency selectedCurrency, Reference reference, Long referenceId) {
 
         setHeaderTitle("Record a payment");
         Button closeButton = new Button(new Icon("lumo", "cross"), (e) -> {
@@ -85,14 +72,14 @@ public class TransactionDialog extends MyDialog {
         transactionForm.setNextReferenceId(id);
     }
 
-    private Build refresh, onSave;
+    private Executable refresh, onSave;
 
-    public void setRefresh(Build refresh) {
+    public void setRefresh(Executable refresh) {
         this.refresh = refresh;
         transactionForm.setRefresh(refresh);
     }
 
-    public void setOnSave(Build onSave) {
+    public void setOnSave(Executable onSave) {
         this.onSave = onSave;
     }
 }

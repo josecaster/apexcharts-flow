@@ -2,27 +2,23 @@ package sr.we.ui.components.finance;
 
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.AnchorTarget;
-import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.data.provider.Query;
 import sr.we.ContextProvider;
 import sr.we.data.controller.AccountService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Account;
-import sr.we.shekelflowcore.entity.PaymentTransaction;
 import sr.we.shekelflowcore.entity.helper.vo.AccountVO;
-import sr.we.shekelflowcore.enums.ChartOfAccounts;
+import sr.we.shekelflowcore.enums.Reference;
 import sr.we.ui.views.account.CabAccountViewNew;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class AccountSelect extends Select<Account> {
 
 
-    public AccountSelect(Long businessId, PaymentTransaction.Reference reference) {
+    public AccountSelect(Long businessId, Reference reference) {
         AccountService pojoService = ContextProvider.getBean(AccountService.class);
         String token = AuthenticatedUser.token();
 

@@ -1,9 +1,9 @@
 package sr.we.ui.views.pos;
 
+import sr.we.shekelflowcore.entity.Items;
 import sr.we.shekelflowcore.entity.Product;
 import sr.we.shekelflowcore.entity.ProductsInventory;
 import sr.we.shekelflowcore.entity.ProductsInventoryDetail;
-import sr.we.shekelflowcore.entity.Services;
 
 import java.util.Optional;
 import java.util.Set;
@@ -11,14 +11,14 @@ import java.util.Set;
 public class ProductOrService {
 
     private Product product;
-    private Services services;
+    private Items items;
 
     public ProductOrService(Product product) {
         this.product = product;
     }
 
-    public ProductOrService(Services services) {
-        this.services = services;
+    public ProductOrService(Items items) {
+        this.items = items;
     }
 
     public Product getProduct() {
@@ -29,12 +29,12 @@ public class ProductOrService {
         this.product = product;
     }
 
-    public Services getServices() {
-        return services;
+    public Items getServices() {
+        return items;
     }
 
-    public void setServices(Services services) {
-        this.services = services;
+    public void setServices(Items items) {
+        this.items = items;
     }
 
     public Set<ProductsInventoryDetail> getDetailedInventory(){

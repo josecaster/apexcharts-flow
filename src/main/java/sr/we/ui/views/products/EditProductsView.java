@@ -24,9 +24,10 @@ import java.util.Optional;
 
 import static sr.we.ContextProvider.getBean;
 
-@Route(value = "edit-products", layout = MainLayout.class)
-@RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
-public class EditProductsView extends AddProducts implements BeforeEnterObserver {
+@Deprecated
+//@Route(value = "edit-products", layout = MainLayout.class)
+//@RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
+public class EditProductsView extends AddProducts /*implements BeforeEnterObserver*/ {
 
 
 
@@ -40,7 +41,7 @@ public class EditProductsView extends AddProducts implements BeforeEnterObserver
         return MainLayout.getLocation(business) + "/edit-products";
     }
 
-    @Override
+    /*@Override
     public void beforeEnter(BeforeEnterEvent event) {
         UserAccessService userAccesService = ContextProvider.getBean(UserAccessService.class);
         boolean hasAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new ProductsPrivilege(), Privileges.INSERT);
@@ -49,7 +50,7 @@ public class EditProductsView extends AddProducts implements BeforeEnterObserver
         }
         setBusiness(event);
         setProduct(event);
-    }
+    }*/
 
 
 

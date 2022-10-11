@@ -6,10 +6,9 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpStatusCodeException;
 import sr.we.ConfigProperties;
-import sr.we.shekelflowcore.entity.helper.Build;
+import sr.we.shekelflowcore.entity.helper.Executable;
 import sr.we.shekelflowcore.entity.helper.Error;
 import sr.we.shekelflowcore.exception.ExceptionService;
 
@@ -69,9 +68,9 @@ public abstract class MyController {
         return httpEntity;
     }
 
-    public <T> T encapsulate(Build<T> build) {
+    public <T> T encapsulate(Executable<T> executable) {
         try {
-            return build.build();
+            return executable.build();
         } catch (HttpStatusCodeException e) {
             String responseBodyAsString = e.getResponseBodyAsString();
             Error error = new Gson().fromJson(responseBodyAsString, Error.class);

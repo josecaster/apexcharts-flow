@@ -12,6 +12,7 @@ export class ChartOfAccountsView extends LitElement {
       :host {
           display: block;
           height: 100%;
+
       }
       `;
   }
@@ -25,8 +26,8 @@ export class ChartOfAccountsView extends LitElement {
     Add new accounts 
   </vaadin-button>
  </vaadin-horizontal-layout>
- <vaadin-vertical-layout theme="spacing" style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin: var(--lumo-space-s); margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m); align-self: stretch;">
-  <vaadin-tabs style="align-self: center;" orientation="horizontal" id="chart-tab"></vaadin-tabs>
+ <vaadin-vertical-layout theme="spacing" style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin: var(--lumo-space-s); margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m); flex-shrink: 1; flex-grow: 0; align-items: stretch; align-self: center;" id="chart-of-accounts-charts-layout">
+  <vaadin-tabs style="align-self: center;" orientation="horizontal" id="chart-tab" selected="0"></vaadin-tabs>
   <div id="account-view-layout" style="align-self: stretch;"></div>
  </vaadin-vertical-layout>
 </vaadin-vertical-layout>

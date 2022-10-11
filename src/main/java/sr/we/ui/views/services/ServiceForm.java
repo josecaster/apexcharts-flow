@@ -8,7 +8,7 @@ import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.textfield.TextField;
 import org.apache.commons.lang3.StringUtils;
-import sr.we.shekelflowcore.entity.Services;
+import sr.we.shekelflowcore.entity.Items;
 import sr.we.shekelflowcore.entity.helper.vo.ServicesVO;
 
 /**
@@ -21,10 +21,10 @@ import sr.we.shekelflowcore.entity.helper.vo.ServicesVO;
 @JsModule("./src/views/services/service-form.ts")
 public class ServiceForm extends LitTemplate {
 
-    @Id("valid-ckh")
-    private Checkbox validCkh;
+//    @Id("valid-ckh")
+//    private Checkbox validCkh;
     @Id("type-cmb")
-    private ComboBox<Services.Type> typeCmb;
+    private ComboBox<Items.Type> typeCmb;
     @Id("code-fld")
     private TextField codeFld;
     @Id("title-fld")
@@ -35,12 +35,12 @@ public class ServiceForm extends LitTemplate {
      */
     public ServiceForm() {
         // You can initialise any data required for the connected UI components here.
-        validCkh.setValue(true);
-        typeCmb.setItems(Services.Type.ONE_TIME, Services.Type.PERIODICALLY);
+//        validCkh.setValue(true);
+        typeCmb.setItems(Items.Type.ONE_TIME, Items.Type.PERIODICALLY);
 
-        validCkh.addValueChangeListener(f -> {
-            this.servicesVO.setActive(f.getValue());
-        });
+//        validCkh.addValueChangeListener(f -> {
+//            this.servicesVO.setActive(f.getValue());
+//        });
         typeCmb.addValueChangeListener(f -> {
             this.servicesVO.setType(f.getValue());
         });
@@ -53,7 +53,7 @@ public class ServiceForm extends LitTemplate {
     }
 
     private void setServices(ServicesVO services) {
-        validCkh.setValue(services.getActive() != null && services.getActive());
+//        validCkh.setValue(services.getActive() != null && services.getActive());
         typeCmb.setValue(services.getType());
         codeFld.setValue(StringUtils.isBlank(services.getCode()) ? "" : services.getCode());
         titleFld.setValue(StringUtils.isBlank(services.getName()) ? "" : services.getName());

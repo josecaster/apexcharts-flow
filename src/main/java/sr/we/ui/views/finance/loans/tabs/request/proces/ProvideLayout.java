@@ -11,8 +11,8 @@ import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import sr.we.shekelflowcore.entity.Currency;
 import sr.we.shekelflowcore.entity.LoanRequest;
-import sr.we.shekelflowcore.entity.PaymentTransaction;
-import sr.we.shekelflowcore.entity.helper.Build;
+import sr.we.shekelflowcore.entity.helper.Executable;
+import sr.we.shekelflowcore.enums.Reference;
 import sr.we.ui.components.general.CurrencySelect;
 import sr.we.ui.views.finance.transactions.TransactionDialog;
 
@@ -46,7 +46,7 @@ public class ProvideLayout extends LitTemplate {
     private ProgressBar loanProvideProgress;
     @Id("label1")
     private Label label1;
-    private Build refresh;
+    private Executable refresh;
 
     /**
      * Creates a new FrontPage.
@@ -86,7 +86,7 @@ public class ProvideLayout extends LitTemplate {
             Long businessId = loanRequest.getLoan().getBusiness().getId();
             Currency fromCurrency = loanRequest.getCurrency();
             Currency selectedCurrency = vaadinSelect.getValue();
-            PaymentTransaction.Reference reference = PaymentTransaction.Reference.LOAN_REQUEST;
+            Reference reference = Reference.LOAN_REQUEST;
             Long referenceId = loanRequest.getId();
             TransactionDialog transactionDialog = new TransactionDialog(rest, initDate, businessId, fromCurrency, selectedCurrency, reference, referenceId);
             transactionDialog.open();
@@ -96,7 +96,7 @@ public class ProvideLayout extends LitTemplate {
         });
     }
 
-    public void setLoanRequest(LoanRequest loanRequest, Build refresh) {
+    public void setLoanRequest(LoanRequest loanRequest, Executable refresh) {
         this.loanRequest = loanRequest;
         this.refresh = refresh;
         amountFld.setValue(loanRequest.getRest());
@@ -112,6 +112,10 @@ public class ProvideLayout extends LitTemplate {
         if (loanRequest.getRest().compareTo(BigDecimal.ZERO) == 0) {
             amountFld.setEnabled(false);
             vaadinButton.setEnabled(false);
+        }
+        vaadinButton.setVisible(false);
+        if (loanRequest.getStatus().compareTo(LoanRequest.Status.APPROVED) == 0) {
+            vaadinButton.setVisible(true);
         }
     }
 

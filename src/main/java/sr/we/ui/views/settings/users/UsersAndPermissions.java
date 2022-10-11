@@ -4,10 +4,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Hr;
-import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -26,6 +23,7 @@ import sr.we.ui.views.settings.SettingsLayout;
 import javax.annotation.security.RolesAllowed;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 /**
  * A Designer generated component for the users-and-permissions template.
@@ -101,11 +99,13 @@ public class UsersAndPermissions extends LitTemplate implements BeforeEnterObser
             staffLayout.add(hr);
         }
         Person person = usersRoles.getThisUser().getPerson();
-        String name = person.getFirstname() + " " + person.getLastname();
+        String name = person == null ? usersRoles.getThisUser().getUsername() : (person.getFirstname() + " " + person.getLastname());
         Avatar avatar1 = new Avatar(name);
         avatar1.setColorIndex(new Random().nextInt(7 - 1 + 1) + 1);
 
-        RouterLink routerLink = new RouterLink(name,NewStaff.class);
+        String name1 = UUID.randomUUID().toString();
+        RouterLink routerLink = new RouterLink(name,NewStaff.class, new RouteParameters(new RouteParam("id", name1)));
+        UI.getCurrent().getSession().setAttribute(name1,usersRoles);
         String text = "Last login was " + (usersRoles.getThisUser().getLastLogin() == null ? "..." : Constants.SIMPLE_DATE_TIME_FORMAT_24H.format(DateUtil.convertToDateViaInstant(usersRoles.getThisUser().getLastLogin())));
         Label lastLogin = new Label(text);
         VerticalLayout layout = new VerticalLayout(routerLink, lastLogin);

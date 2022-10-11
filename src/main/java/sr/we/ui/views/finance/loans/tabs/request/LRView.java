@@ -26,7 +26,7 @@ import sr.we.data.controller.UserAccessService;
 import sr.we.demo.about.AboutView;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.*;
-import sr.we.shekelflowcore.entity.helper.Build;
+import sr.we.shekelflowcore.entity.helper.Executable;
 import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.LoanRequestAssetsPrivilege;
@@ -44,7 +44,6 @@ import sr.we.ui.views.finance.loans.tabs.request.assets.InputLayout;
 import sr.we.ui.views.finance.loans.tabs.request.assets.LRAssetsLayout;
 import sr.we.ui.views.finance.loans.tabs.request.planning.LRPGenerate;
 import sr.we.ui.views.finance.loans.tabs.request.planning.LRPView;
-import sr.we.ui.views.finance.loans.tabs.request.proces.ProvideLayout;
 
 import javax.annotation.security.RolesAllowed;
 import java.math.BigDecimal;
@@ -150,7 +149,7 @@ public class LRView extends VerticalLayout implements BeforeEnterObserver {
         currency.setText(amount == null ? "" : amount.toPlainString());
         dodo(loanRequestService, status, false);
 
-        loanRequestStatusWizard.addTabListener(new Build() {
+        loanRequestStatusWizard.addTabListener(new Executable() {
             @Override
             public Object build() {
                 LoanRequestService loanRequestService = getBean(LoanRequestService.class);
@@ -161,7 +160,7 @@ public class LRView extends VerticalLayout implements BeforeEnterObserver {
         });
 
 
-        boolean visible = status.compareTo(LoanRequest.Status.REPAYMENT) != 0;
+        boolean visible = status.compareTo(LoanRequest.Status.APPROVED) != 0;
 
         tabs.setVisible(visible);
         if (!visible) {
@@ -186,7 +185,7 @@ public class LRView extends VerticalLayout implements BeforeEnterObserver {
                 card.add(pending);
                 break;
             }
-            case ELIGIBLE -> {
+            /*case ELIGIBLE -> {
                 Span approved = new Span("Eligible");
                 approved.getElement().getThemeList().add("badge success");
                 card.add(approved);
@@ -203,14 +202,14 @@ public class LRView extends VerticalLayout implements BeforeEnterObserver {
                 input.getElement().getThemeList().add("badge error");
                 card.add(input);
                 break;
-            }
+            }*/
         }
 
         loanRequestStatusWizard.setLoanRequestStatus(status1, loanRequest.getId());
         details.removeAll();
 
         switch (status) {
-            case CLOSED -> {
+           /* case CLOSED -> {
                 VerticalLayout layout1 = new VerticalLayout();
                 layout1.setSizeFull();
                 Image img = new Image("images/empty-plant.png", "placeholder plant");
@@ -227,7 +226,7 @@ public class LRView extends VerticalLayout implements BeforeEnterObserver {
                 layout1.getStyle().set("text-align", "center");
                 details.add(layout1);
                 break;
-            }
+            }*/
             case APPROVED -> {
                 VerticalLayout layout1 = new VerticalLayout();
                 layout1.setSizeFull();
@@ -251,7 +250,7 @@ public class LRView extends VerticalLayout implements BeforeEnterObserver {
                 payments(loanRequestService, layout);
                 break;
             }
-            case ELIGIBLE -> {
+           /* case ELIGIBLE -> {
                 payments(loanRequestService, layout);
                 VerticalLayout layout1 = new VerticalLayout();
                 layout1.setSizeFull();
@@ -299,7 +298,7 @@ public class LRView extends VerticalLayout implements BeforeEnterObserver {
 
                 payments(loanRequestService, details);
                 break;
-            }
+            }*/
         }
     }
 
@@ -344,7 +343,7 @@ public class LRView extends VerticalLayout implements BeforeEnterObserver {
         dialog.getHeader().add(closeButton);
         lineAwesomeIcon.addClickListener(f -> {
 
-            LRPGenerate loanRequestsPlanningView = new LRPGenerate(null, loanRequest, new Build() {
+            LRPGenerate loanRequestsPlanningView = new LRPGenerate(null, loanRequest, new Executable() {
                 @Override
                 public Object build() {
                     dialog.close();
@@ -364,7 +363,7 @@ public class LRView extends VerticalLayout implements BeforeEnterObserver {
         loanRequestPlans = loanRequestPlans.stream().sorted(Comparator.comparingLong(LoanRequestPlan::getId)).collect(Collectors.toList());
         for (LoanRequestPlan loanRequestPlan : loanRequestPlans) {
 
-            LRPView loanRequestsPlanningView = new LRPView(loanRequestPlan, loanRequest, new Build() {
+            LRPView loanRequestsPlanningView = new LRPView(loanRequestPlan, loanRequest, new Executable() {
                 @Override
                 public Object build() {
                     UI.getCurrent().getPage().reload();
@@ -391,7 +390,7 @@ public class LRView extends VerticalLayout implements BeforeEnterObserver {
 
         LRAssetsLayout lrAssetsLayout = new LRAssetsLayout(loanRequest);
         Dialog dialog = new Dialog(lrAssetsLayout);
-        lrAssetsLayout.setBuild(new Build() {
+        lrAssetsLayout.setBuild(new Executable() {
             @Override
             public Object build() {
                 dialog.close();

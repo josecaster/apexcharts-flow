@@ -9,14 +9,9 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.dom.Element;
-import sr.we.shekelflowcore.entity.CalculationComponent;
-import sr.we.shekelflowcore.entity.helper.Build;
+import sr.we.shekelflowcore.entity.helper.Executable;
 import sr.we.shekelflowcore.entity.helper.vo.CalculationComponentVO;
 import sr.we.shekelflowcore.entity.helper.vo.ServicesVO;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 /**
  * A Designer generated component for the service-components template.
@@ -54,7 +49,7 @@ public class ServiceComponents extends LitTemplate {
             Animated.animate(serviceComponentsFormulaForm, edit ? Animated.Animation.FADE_IN_UP : Animated.Animation.FADE_IN_RIGHT, Animated.Modifier.FAST);
         });
 
-        serviceComponentsFormulaForm.setOnSave(new Build(){
+        serviceComponentsFormulaForm.setOnSave(new Executable(){
 
             @Override
             public Object build() {

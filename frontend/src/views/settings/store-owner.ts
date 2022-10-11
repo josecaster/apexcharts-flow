@@ -27,7 +27,7 @@ export class StoreOwner extends LitElement {
    <vaadin-horizontal-layout theme="spacing" style="width: 100%;">
     <vaadin-avatar style="align-self: center;" id="avatar"></vaadin-avatar>
     <vaadin-vertical-layout theme="spacing" style="width: 100%; align-self: center;">
-     <a href="https://vaadin.com" id="store-owner-link">Jose Caster</a>
+     <a href="" id="store-owner-link">Jose Caster</a>
      <p id="last-login">Last login was Monday, 25 July 2022 19:36 GMT-3</p>
     </vaadin-vertical-layout>
    </vaadin-horizontal-layout>

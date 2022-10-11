@@ -8,7 +8,6 @@ import '@vaadin/horizontal-layout/src/vaadin-horizontal-layout.js';
 import '@vaadin/button/src/vaadin-button.js';
 import '@vaadin/form-layout/src/vaadin-form-layout.js';
 import '@vaadin/icon/src/vaadin-icon.js';
-import '@vaadin/checkbox/src/vaadin-checkbox.js';
 
 @customElement('service-price')
 export class ServicePrice extends LitElement {
@@ -23,11 +22,7 @@ export class ServicePrice extends LitElement {
 
   render() {
     return html`
-<h5 style="margin: var(--lumo-space-xs);">Pricing</h5>
 <vaadin-vertical-layout theme="spacing" style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin: var(--lumo-space-s); margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m);">
- <vaadin-checkbox id="price-variable-chk" type="checkbox" value="on">
-   Price is varaible 
- </vaadin-checkbox>
  <vaadin-form-layout style="flex-shrink: 1; padding: var(--lumo-space-xs);">
   <vaadin-number-field label="Price" type="text" id="price"></vaadin-number-field>
   <vaadin-number-field label="Compare at price" id="compare-price" type="text"></vaadin-number-field>

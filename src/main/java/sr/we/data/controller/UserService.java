@@ -49,7 +49,7 @@ public class UserService extends MyController {
     }
 
     public ThisUser verify(String token, String verify) {
-        ApplicationUserVerification vo = new ApplicationUserVerification();
+        ApplicationReference vo = new ApplicationReference();
         vo.setToken(verify);
         String body = new GsonBuilder().create().toJson(vo);
         RestTemplate restTemplate = new RestTemplate();

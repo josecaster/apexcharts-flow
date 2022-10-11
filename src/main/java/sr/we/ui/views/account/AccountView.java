@@ -20,7 +20,7 @@ import sr.we.data.controller.AccountService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Account;
 import sr.we.shekelflowcore.entity.helper.vo.AccountVO;
-import sr.we.shekelflowcore.enums.AccountCodes;
+import sr.we.shekelflowcore.enums.ChartOfAccountTypes;
 import sr.we.ui.components.MyDialog;
 import sr.we.ui.views.LineAwesomeIcon;
 
@@ -48,7 +48,7 @@ public class AccountView extends LitTemplate {
     private Button addAccountBtn;
     private Grid<Account> grid;
     private AccountVO vo;
-    private AccountCodes accountCodes;
+    private ChartOfAccountTypes accountCodes;
 
     /**
      * Creates a new AccountView.
@@ -84,7 +84,7 @@ public class AccountView extends LitTemplate {
         });
     }
 
-    public void build(AccountCodes accountCodes, Long businessId) {
+    public void build(ChartOfAccountTypes accountCodes, Long businessId) {
         loanRequestStateView.setBusiness(businessId.toString());
         this.accountCodes = accountCodes;
         accountType.setText(accountCodes.getCaption());

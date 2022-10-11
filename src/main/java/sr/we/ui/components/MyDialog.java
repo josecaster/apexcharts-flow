@@ -8,6 +8,8 @@ import com.vaadin.flow.component.dialog.Dialog;
 
 public class MyDialog extends Dialog {
 
+    private static final String SET_PROPERTY_IN_OVERLAY_JS = "this.$.overlay.$.overlay.style[$0]=$1";
+
     public MyDialog() {
     }
 

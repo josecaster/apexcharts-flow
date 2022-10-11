@@ -10,6 +10,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.template.Id;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
@@ -18,7 +19,7 @@ import sr.we.data.controller.UserAccessService;
 import sr.we.demo.about.AboutView;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Role;
-import sr.we.shekelflowcore.enums.AccountCodes;
+import sr.we.shekelflowcore.enums.ChartOfAccountTypes;
 import sr.we.shekelflowcore.enums.ChartOfAccounts;
 import sr.we.shekelflowcore.security.PrivilegeModeAbstract;
 import sr.we.shekelflowcore.security.Privileges;
@@ -41,7 +42,7 @@ import java.util.Optional;
 @RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
 public class ChartOfAccountsView extends LitTemplate implements BeforeEnterObserver {
 
-    private final List<AccountCodes> list;
+    private final List<ChartOfAccountTypes> list;
     @Id("add-new-accounts-btn")
     private Button addNewAccountsBtn;
     //    @Id("assets-tab")
@@ -61,6 +62,8 @@ public class ChartOfAccountsView extends LitTemplate implements BeforeEnterObser
     @Id("main-char-of-accounts-layout")
     private VerticalLayout mainCharOfAccountsLayout;
     private Long businessId;
+    @Id("chart-of-accounts-charts-layout")
+    private VerticalLayout chartOfAccountsChartsLayout;
 
     /**
      * Creates a new ChartOfAccountsView.
@@ -68,7 +71,7 @@ public class ChartOfAccountsView extends LitTemplate implements BeforeEnterObser
     public ChartOfAccountsView() {
         // You can initialise any data required for the connected UI components here.
 
-        mainCharOfAccountsLayout.setMaxWidth("1000px");
+        chartOfAccountsChartsLayout.setMaxWidth("1000px");
 
         assetsTab = new Tab("Assets");
         lccTab = new Tab("Liabilities & Credit Cards");
@@ -78,7 +81,7 @@ public class ChartOfAccountsView extends LitTemplate implements BeforeEnterObser
 
         chartTab.add(assetsTab, lccTab, incTab, expTab, eqTab);
 
-        list = List.of(AccountCodes.values());
+        list = List.of(ChartOfAccountTypes.values());
         chartTab.addSelectedChangeListener(f -> {
             accountViewLayout.removeAll();
 
@@ -101,10 +104,10 @@ public class ChartOfAccountsView extends LitTemplate implements BeforeEnterObser
     }
 
     private void addAccounts(ChartOfAccounts assets) {
-        List<AccountCodes> collect = list.stream().filter(g -> {
+        List<ChartOfAccountTypes> collect = list.stream().filter(g -> {
             return g.getChartOfAccounts().compareTo(assets) == 0;
         }).toList();
-        for (AccountCodes accountCodes : collect) {
+        for (ChartOfAccountTypes accountCodes : collect) {
             AccountView accountView = new AccountView();
             accountViewLayout.add(accountView);
             accountView.build(accountCodes, businessId);

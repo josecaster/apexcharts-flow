@@ -14,14 +14,9 @@ import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.DataProvider;
 import org.apache.commons.lang3.StringUtils;
-import sr.we.shekelflowcore.entity.Product;
-import sr.we.shekelflowcore.entity.ProductsInventory;
-import sr.we.shekelflowcore.entity.ProductsInventoryDetail;
-import sr.we.shekelflowcore.entity.helper.Build;
-import sr.we.shekelflowcore.entity.helper.vo.IProductInventoryVO;
-import sr.we.shekelflowcore.entity.helper.vo.ProductVO;
-import sr.we.shekelflowcore.entity.helper.vo.ProductsInventoryDetailVO;
-import sr.we.shekelflowcore.entity.helper.vo.ProductsInventoryVO;
+import sr.we.shekelflowcore.entity.helper.Executable;
+import sr.we.shekelflowcore.entity.helper.InterExecutable;
+import sr.we.shekelflowcore.entity.helper.vo.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -48,8 +43,8 @@ public class ProductInventory extends LitTemplate {
     private VerticalLayout inventoryFormLayout;
     @Id("inventroy-grid-layout")
     private VerticalLayout inventroyGridLayout;
-    @Id("track-inventory-chk")
-    private Checkbox trackInventoryChk;
+//    @Id("track-inventory-chk")
+//    private Checkbox trackInventoryChk;
     @Id("total-amt-lbl")
     private H5 totalAmtLbl;
     @Id("done-btn")
@@ -60,7 +55,7 @@ public class ProductInventory extends LitTemplate {
     private Checkbox continueSellingChk;
     @Id("detailed-stock-chk")
     private Checkbox detailedStockChk;
-    private Build build;
+    private Executable executable;
     private DataProvider<ProductsInventoryVO, ?> dataProvider;
     private List<ProductsInventoryDetailVO> productsInventoryDetails;
     @Id("sku")
@@ -73,7 +68,7 @@ public class ProductInventory extends LitTemplate {
      */
     public ProductInventory() {
         // You can initialise any data required for the connected UI components here.
-        trackInventoryChk.setValue(true);
+//        trackInventoryChk.setValue(true);
         inventoryDetailLayout.setVisible(false);
         Grid<ProductsInventoryDetailVO> gridDetail = new Grid<>();
         gridDetail.addComponentColumn(f -> {
@@ -145,8 +140,8 @@ public class ProductInventory extends LitTemplate {
         });
 
         quantityFld.addValueChangeListener(d -> {
-            if (build != null) {
-                build.build();
+            if (executable != null) {
+                executable.build();
             }
         });
         grid.addSelectionListener(f -> {
@@ -155,7 +150,7 @@ public class ProductInventory extends LitTemplate {
                 productsInventory = firstSelectedItem.get();
                 quantityFld.setValue(Double.valueOf(productsInventory.getQuantity()));
                 quantityFld.setMin(quantityFld.getValue());
-                build = new Build() {
+                executable = new Executable() {
                     @Override
                     public Object build() {
                         if (productsInventory.getDetailedStock()) {
@@ -192,9 +187,16 @@ public class ProductInventory extends LitTemplate {
 
         });
 
-        trackInventoryChk.addValueChangeListener(f -> {
-            trackInventory(f.getValue());
-        });
+        trackInventory = (f) -> {
+            trackInventory(f);
+            return null;
+        };
+    }
+
+    private InterExecutable<?,Boolean> trackInventory;
+
+    public InterExecutable<?, Boolean> getTrackInventory() {
+        return trackInventory;
     }
 
     private void refresh(boolean check) {
@@ -227,8 +229,8 @@ public class ProductInventory extends LitTemplate {
         inventoryFormLayout.setVisible(val);
     }
 
-    public void setProduct(Product product) {
-        trackInventoryChk.setValue(product.getTrackInventory() != null && product.getTrackInventory());
+    public void setProduct(ServicesVO product) {
+//        trackInventoryChk.setValue(product.getTrackInventory() != null && product.getTrackInventory());
         if (StringUtils.isNotBlank(product.getSku())) {
             sku.setValue(product.getSku());
         }
@@ -236,7 +238,7 @@ public class ProductInventory extends LitTemplate {
             barcode.setValue(product.getBarcode());
         }
 
-        items = product.getProductsInventoriesVO();
+        items = product.getProductsInventory();
 
         inventoryFormLayout.setVisible(items == null || items.isEmpty());
 
@@ -245,7 +247,7 @@ public class ProductInventory extends LitTemplate {
 
     public IProductInventoryVO getVO() {
         ProductVO productVO = new ProductVO();
-        productVO.setTrackInventory(trackInventoryChk.getValue());
+//        productVO.setTrackInventory(trackInventoryChk.getValue());
         productVO.setSku(sku.getValue());
         productVO.setBarcode(barcode.getValue());
         productVO.setProductsInventory(items);

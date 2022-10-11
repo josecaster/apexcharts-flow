@@ -12,7 +12,7 @@ import sr.we.ContextProvider;
 import sr.we.data.controller.LoanRequestAssetsService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.LoanRequest;
-import sr.we.shekelflowcore.entity.helper.Build;
+import sr.we.shekelflowcore.entity.helper.Executable;
 import sr.we.shekelflowcore.entity.helper.vo.LoanRequestAssetsFilesVO;
 import sr.we.shekelflowcore.entity.helper.vo.LoanRequestAssetsVO;
 import sr.we.ui.components.EmailAddress;
@@ -41,7 +41,7 @@ public class LRAssetsLayout extends StateListenerLayout {
     private String business;
     private final LoanRequest loanRequest;
 
-    private Build build;
+    private Executable executable;
 
 
     public LRAssetsLayout(LoanRequest loanRequest) {
@@ -117,8 +117,8 @@ public class LRAssetsLayout extends StateListenerLayout {
             }
             LoanRequestAssetsService loanRequestAssetsService = ContextProvider.getBean(LoanRequestAssetsService.class);
             loanRequestAssetsService.create(AuthenticatedUser.token(), loanRequestAssetsVO);
-            if(build != null){
-                build.build();
+            if(executable != null){
+                executable.build();
             }
             UI.getCurrent().getPage().reload();
         } catch (IOException e) {
@@ -162,7 +162,7 @@ public class LRAssetsLayout extends StateListenerLayout {
         datePicker.setReadOnly(true);
     }
 
-    public void setBuild(Build build) {
-        this.build = build;
+    public void setBuild(Executable executable) {
+        this.executable = executable;
     }
 }

@@ -1,11 +1,6 @@
 package sr.we.ui.views.finance.loans.tabs;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.splitlayout.SplitLayout;
-import com.vaadin.flow.component.splitlayout.SplitLayoutVariant;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.*;
 import sr.we.ContextProvider;
 import sr.we.data.controller.BusinessService;
@@ -14,6 +9,7 @@ import sr.we.data.controller.UserAccessService;
 import sr.we.demo.about.AboutView;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.*;
+import sr.we.shekelflowcore.enums.Reference;
 import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.TransactionsPrivilege;
@@ -27,7 +23,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Route(value = "payments", layout = LoansView.class)
@@ -49,7 +44,7 @@ public class LTabPayments extends PaymentsForm implements BeforeEnterObserver, A
         LoanRequestService loanService = ContextProvider.getBean(LoanRequestService.class);
         List<LoanRequest> list = loanService.list(AuthenticatedUser.token(), Long.valueOf(businessStringId), Long.valueOf(loanId));
         if(list != null) {
-            list = list.stream().filter(f -> f.getStatus().compareTo(LoanRequest.Status.REPAYMENT) == 0).collect(Collectors.toList());
+            list = list.stream().filter(f -> f.getStatus().compareTo(LoanRequest.Status.APPROVED) == 0).collect(Collectors.toList());
             grid.setItems(list);
         } else {
 
@@ -88,7 +83,7 @@ public class LTabPayments extends PaymentsForm implements BeforeEnterObserver, A
         businessId = Long.valueOf(this.businessStringId);
         Currency fromCurrency = business.getCurrency();
         Currency selectedCurrency = business.getCurrency();
-        PaymentTransaction.Reference reference = PaymentTransaction.Reference.LOAN_REQUEST_PLAN_DETAIL;
+        Reference reference = Reference.LOAN_REQUEST_PLAN_DETAIL;
         transactionForm = new TransactionForm(rest, now, businessId, fromCurrency, selectedCurrency, reference, null);
 
         layout.add(transactionForm);

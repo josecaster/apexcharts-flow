@@ -128,7 +128,7 @@ public class LTabRequests extends TableLayout implements AfterNavigationObserver
                     pending.getElement().getStyle().set("height","fit-content");
                     card.add(pending);
                 }
-                case ELIGIBLE -> {
+                /*case ELIGIBLE -> {
                     Span approved = new Span("Eligible");
                     approved.getElement().getThemeList().add("badge success");
                     approved.getElement().getStyle().set("height","fit-content");
@@ -151,14 +151,14 @@ public class LTabRequests extends TableLayout implements AfterNavigationObserver
                     approved.getElement().getThemeList().add("badge success");
                     approved.getElement().getStyle().set("height","fit-content");
                     card.add(approved);
-                }
+                }*/
                 case APPROVED -> {
                     Span approved = new Span("Approved");
                     approved.getElement().getThemeList().add("badge success");
                     approved.getElement().getStyle().set("height","fit-content");
                     card.add(approved);
                 }
-                case REPAYMENT -> {
+                /*case REPAYMENT -> {
                     Span review = new Span("Repayment");
                     review.getElement().getThemeList().add("badge contrast");
                     review.getElement().getStyle().set("height","fit-content");
@@ -169,7 +169,7 @@ public class LTabRequests extends TableLayout implements AfterNavigationObserver
                     review.getElement().getThemeList().add("badge contrast");
                     review.getElement().getStyle().set("height","fit-content");
                     card.add(review);
-                }
+                }*/
             }
 //        }
 

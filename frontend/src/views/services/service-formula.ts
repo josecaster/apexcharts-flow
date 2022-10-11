@@ -20,14 +20,13 @@ export class ServiceFormula extends LitElement {
 
   render() {
     return html`
-<h5>Price formula</h5>
 <vaadin-vertical-layout theme="spacing" style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin: var(--lumo-space-s); margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m); width: 100%;">
  <label>e.g. ([product_price]/50)+[service_price]</label>
  <div id="formula-layout" style="align-self: stretch;"></div>
  <vaadin-horizontal-layout theme="spacing" style="width: 100%;">
   <label style="align-self: center;">Use [ctrl+shift] to include predefined and user defined components</label>
   <vaadin-button id="test-btn" style="align-self: center;margin-left:auto;" tabindex="0" theme="primary contrast">
-   Test
+    Test 
   </vaadin-button>
  </vaadin-horizontal-layout>
 </vaadin-vertical-layout>

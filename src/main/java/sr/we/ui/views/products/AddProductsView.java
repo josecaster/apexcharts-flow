@@ -25,9 +25,10 @@ import sr.we.ui.views.MainLayout;
 import javax.annotation.security.RolesAllowed;
 import java.util.Optional;
 
-@Route(value = "add-products", layout = MainLayout.class)
-@RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
-public class AddProductsView extends AddProducts implements BeforeEnterObserver {
+@Deprecated
+//@Route(value = "add-products", layout = MainLayout.class)
+//@RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
+public class AddProductsView extends AddProducts /*implements BeforeEnterObserver*/ {
 
 
     /**
@@ -36,7 +37,7 @@ public class AddProductsView extends AddProducts implements BeforeEnterObserver 
     public AddProductsView() {
     }
 
-    @Override
+    /*@Override
     public void beforeEnter(BeforeEnterEvent event) {
         UserAccessService userAccesService = ContextProvider.getBean(UserAccessService.class);
         boolean hasAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new ProductsPrivilege(), Privileges.INSERT);
@@ -44,6 +45,6 @@ public class AddProductsView extends AddProducts implements BeforeEnterObserver 
             UI.getCurrent().navigate(AboutView.class);
         }
         setBusiness(event);
-    }
+    }*/
 
 }

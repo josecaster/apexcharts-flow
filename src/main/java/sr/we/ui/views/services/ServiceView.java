@@ -12,12 +12,12 @@ import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.*;
 import sr.we.ContextProvider;
-import sr.we.data.controller.ServicesService;
+import sr.we.data.controller.ItemsService;
 import sr.we.data.controller.UserAccessService;
 import sr.we.demo.about.AboutView;
 import sr.we.security.AuthenticatedUser;
+import sr.we.shekelflowcore.entity.Items;
 import sr.we.shekelflowcore.entity.Role;
-import sr.we.shekelflowcore.entity.Services;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.ServicesPrivilege;
 import sr.we.ui.views.MainLayout;
@@ -37,7 +37,7 @@ import java.util.*;
 @RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
 public class ServiceView extends LitTemplate implements BeforeEnterObserver {
 
-    private final Grid<Services> grid;
+    private final Grid<Items> grid;
     @Id("product-grid-layout")
     private Div productGridLayout;
     @Id("filter-field")
@@ -63,7 +63,7 @@ public class ServiceView extends LitTemplate implements BeforeEnterObserver {
 
         grid = new Grid();
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
-        grid.addColumn(Services::getName).setHeader("Service name");
+        grid.addColumn(Items::getName).setHeader("Service name");
         grid.addComponentColumn(f -> {
             if (f.getActive()) {
                 Span active = new Span("Active");
@@ -77,10 +77,10 @@ public class ServiceView extends LitTemplate implements BeforeEnterObserver {
                 return archive;
             }
         }).setHeader("Status");
-        grid.addColumn(Services::getType).setHeader("Type");
+        grid.addColumn(Items::getType).setHeader("Type");
         grid.setAllRowsVisible(true);
         grid.addItemDoubleClickListener(f -> {
-            Services service = f.getItem();
+            Items service = f.getItem();
             if (service == null) {
                 return;
             }
@@ -103,8 +103,8 @@ public class ServiceView extends LitTemplate implements BeforeEnterObserver {
         Optional<String> business1 = event.getRouteParameters().get("business");
         business1.ifPresent(s -> business = s);
 
-        ServicesService servicesService = ContextProvider.getBean(ServicesService.class);
-        List<Services> list = servicesService.list(AuthenticatedUser.token(), Long.valueOf(business));
+        ItemsService itemsService = ContextProvider.getBean(ItemsService.class);
+        List<Items> list = itemsService.list(AuthenticatedUser.token(), Long.valueOf(business));
         grid.setItems(list);
     }
 

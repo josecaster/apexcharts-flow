@@ -22,6 +22,20 @@ registerStyles('vaadin-grid', css`
   ::-webkit-scrollbar-thumb {
     background: var(--lumo-primary-color);
   }
+  :host(.resonate) [part~='cell'] {
+    background-color: var(--lumo-light-base-color);
+  }
+  :host(:not([theme~='no-border'])){
+    border-radius: var(--lumo-border-radius);
+  }
+  :host(:not([theme~='no-border']):not([theme~='no-row-borders'])) [part='row']:last-child [part~='header-cell'] {
+    border-top-right-radius: var(--lumo-border-radius);
+  }
+  :host(:not([theme~='no-border']):not([theme~='no-row-borders'])) [part='row']:first-child [part~='header-cell'] {
+    border-top-left-radius: var(--lumo-border-radius);
+  }
+
+
 `);
 
 

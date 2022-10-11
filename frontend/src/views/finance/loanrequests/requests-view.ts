@@ -23,7 +23,7 @@ export class RequestsView extends LitElement {
     return html`
 <vaadin-vertical-layout style="width: 100%; height: 100%; padding: var(--lumo-space-s);">
  <vaadin-horizontal-layout theme="spacing" style="align-self: stretch;">
-  <h2 style="flex-grow: 1;">Loan requests</h2>
+  <h2 style="flex-grow: 1;margin:0px;">Loan requests</h2>
   <vaadin-button id="export-btn" style="align-self: center;" tabindex="0" theme="tertiary">
     Export 
   </vaadin-button>

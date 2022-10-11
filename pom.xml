@@ -3,6 +3,13 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <!-- Project from https://start.vaadin.com/project/6e204fbd-0624-4eee-9a4a-3df1fe4f8e6e -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.6.7</version>
+    </parent>
+
+
     <groupId>sr.we</groupId>
     <artifactId>shekelflow</artifactId>
     <name>ShekelFlow</name>
@@ -15,11 +22,7 @@
         <functionaljava.version>5.0</functionaljava.version>
     </properties>
 
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.6.7</version>
-    </parent>
+
 
     <repositories>
         <!-- The order of definitions matters. Explicitly defining central here to make sure it has the highest priority. -->
@@ -66,6 +69,27 @@
     </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>org.vaadin.addons.HTMLtoCANVAS</groupId>
+            <artifactId>HTMLtoCANVAS</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.vaadin.addons.stefan</groupId>
+            <artifactId>clipboard</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.oracle.database.jdbc</groupId>
+            <artifactId>ojdbc8</artifactId>
+            <version>21.7.0.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.30</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/net.sf.jasperreports/jasperreports -->
         <dependency>
             <groupId>net.sf.jasperreports</groupId>
@@ -265,7 +289,7 @@
     </dependencies>
 
 <!--    add-opens java.base/java.time=ALL-UNNAMED${surefireArgLine} -->
-    <build>
+    <executable>
         <defaultGoal>spring-boot:run</defaultGoal>
         <plugins>
             <plugin>
@@ -281,7 +305,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <!-- Clean build and startup time for Vaadin apps sometimes may exceed
+                <!-- Clean executable and startup time for Vaadin apps sometimes may exceed
                      the default Spring Boot's 30sec timeout.  -->
                 <configuration>
                     <wait>500</wait>
@@ -290,7 +314,7 @@
                 <executions>
                     <execution>
                         <goals>
-                            <goal>build-info</goal>
+                            <goal>executable-info</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -314,13 +338,13 @@
                 </executions>
             </plugin>
         </plugins>
-    </build>
+    </executable>
 
     <profiles>
         <profile>
             <!-- Production mode is activated using -Pproduction -->
             <id>production</id>
-            <build>
+            <executable>
                 <plugins>
                     <plugin>
                         <groupId>com.vaadin</groupId>
@@ -329,7 +353,7 @@
                         <executions>
                             <execution>
                                 <goals>
-                                    <goal>build-frontend</goal>
+                                    <goal>executable-frontend</goal>
                                 </goals>
                                 <phase>compile</phase>
                             </execution>
@@ -339,12 +363,12 @@
                         </configuration>
                     </plugin>
                 </plugins>
-            </build>
+            </executable>
         </profile>
 
         <profile>
             <id>it</id>
-            <build>
+            <executable>
                 <plugins>
                     <plugin>
                         <groupId>org.springframework.boot</groupId>
@@ -385,7 +409,7 @@
                         </configuration>
                     </plugin>
                 </plugins>
-            </build>
+            </executable>
         </profile>
 
     </profiles>

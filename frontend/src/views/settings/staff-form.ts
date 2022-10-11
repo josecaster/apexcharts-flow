@@ -36,7 +36,7 @@ export class StaffForm extends LitElement {
      Select all 
    </vaadin-button>
   </vaadin-horizontal-layout>
-  <vaadin-form-layout id="permission-form"></vaadin-form-layout>
+  <vaadin-vertical-layout id="permission-form"></vaadin-vertical-layout>
  </vaadin-vertical-layout>
  <hr style="width: 100%;">
  <vaadin-horizontal-layout theme="spacing" style="padding: var(--lumo-space-m);">

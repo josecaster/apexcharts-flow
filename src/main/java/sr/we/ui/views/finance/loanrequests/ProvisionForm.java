@@ -8,7 +8,7 @@ import sr.we.ContextProvider;
 import sr.we.data.controller.LoanRequestService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.LoanRequest;
-import sr.we.shekelflowcore.entity.helper.Build;
+import sr.we.shekelflowcore.entity.helper.Executable;
 import sr.we.ui.views.finance.loans.tabs.request.proces.ProvideLayout;
 
 /**
@@ -32,7 +32,7 @@ public class ProvisionForm extends LitTemplate {
 //    @Id("currency-provision-cmb")
 //    private ComboBox<String> currencyProvisionCmb;
     private LoanRequest loanRequest;
-    private Build refresh1;
+    private Executable refresh1;
 
     /**
      * Creates a new ProvisionForm.
@@ -42,9 +42,9 @@ public class ProvisionForm extends LitTemplate {
 
     }
 
-    protected void setLoanRequest(LoanRequest loanRequest, final Build refresh) {
+    protected void setLoanRequest(LoanRequest loanRequest, final Executable refresh) {
         this.loanRequest = loanRequest;
-        refresh1 = new Build() {
+        refresh1 = new Executable() {
             @Override
             public Object build() {
                 refresh.build();

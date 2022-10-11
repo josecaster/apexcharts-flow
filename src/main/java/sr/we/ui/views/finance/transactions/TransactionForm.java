@@ -4,27 +4,25 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H4;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.dom.Element;
-import org.springframework.lang.NonNull;
 import sr.we.ContextProvider;
 import sr.we.data.controller.ExchangeRateService;
 import sr.we.data.controller.PaymentTransactionService;
 import sr.we.data.controller.UserAccessService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Currency;
-import sr.we.shekelflowcore.entity.LoanRequest;
 import sr.we.shekelflowcore.entity.PaymentTransaction;
-import sr.we.shekelflowcore.entity.helper.Build;
+import sr.we.shekelflowcore.entity.helper.Executable;
 import sr.we.shekelflowcore.entity.helper.vo.PaymentTransactionVO;
+import sr.we.shekelflowcore.enums.PlusMin;
+import sr.we.shekelflowcore.enums.Reference;
 import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.CurrencyPrivilege;
-import sr.we.shekelflowcore.security.privileges.TransactionsPrivilege;
 import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.ui.components.TempDatePicker;
 import sr.we.ui.components.finance.AccountSelect;
@@ -46,17 +44,17 @@ public class TransactionForm extends FormLayout {
     private final TextArea memoFld;
     private final DatePicker dateFld;
 
-    private final PaymentTransaction.Reference reference;
+    private final Reference reference;
     private final CurrencySelect currencyFrom;
     private Long referenceId;
-    private final PaymentTransaction.PlusMin plusMin;
+    private final PlusMin plusMin;
     private final Long businessId;
     private Long nextReferenceId;
 
-    private Build refresh;
+    private Executable refresh;
 
 
-    public TransactionForm(BigDecimal rest, LocalDate initDate, Long businessId, Currency fromCurrency, Currency selectedCurrency, PaymentTransaction.Reference reference, Long referenceId) {
+    public TransactionForm(BigDecimal rest, LocalDate initDate, Long businessId, Currency fromCurrency, Currency selectedCurrency, Reference reference, Long referenceId) {
 
         this.businessId = businessId;
         this.reference = reference;
@@ -178,6 +176,8 @@ public class TransactionForm extends FormLayout {
         paymentTransactionVO.setReferenceId(referenceId);
         paymentTransactionVO.setNextReferenceId(nextReferenceId);
         paymentTransactionVO.setBusiness(businessId);
+        paymentTransactionVO.setCurrencyFrom(currencyFrom.getValue().getId());
+        paymentTransactionVO.setCurrencyTo(currencySelect.getValue().getId());
 
         if (paymentTransactionVO.getAccount() != null && paymentTransactionVO.getPaymentDate() != null && paymentTransactionVO.getPaymentMethod() != null && paymentTransactionVO.getExchangeRate() != null) {
             PaymentTransactionService paymentTransactionService = ContextProvider.getBean(PaymentTransactionService.class);
@@ -223,7 +223,7 @@ public class TransactionForm extends FormLayout {
         currencySelect.setValue(currency);
     }
 
-    public void setRefresh(Build refresh) {
+    public void setRefresh(Executable refresh) {
         this.refresh = refresh;
     }
 }

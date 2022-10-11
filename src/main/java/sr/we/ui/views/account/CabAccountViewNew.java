@@ -7,10 +7,9 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
-import sr.we.shekelflowcore.entity.AccountType;
 import sr.we.shekelflowcore.entity.Loan;
 import sr.we.shekelflowcore.entity.Role;
-import sr.we.shekelflowcore.enums.AccountCodes;
+import sr.we.shekelflowcore.enums.ChartOfAccountTypes;
 import sr.we.ui.components.MyDialog;
 import sr.we.ui.views.MainLayout;
 import sr.we.ui.views.dashboard.DashboardView;
@@ -35,7 +34,7 @@ public class CabAccountViewNew extends VerticalLayout implements BeforeEnterObse
     public CabAccountViewNew() {
 
         loanRequestStateView = new AccountNewLayout();
-        loanRequestStateView.setAccountTypeCode(AccountCodes.CAB.name());
+        loanRequestStateView.setAccountTypeCode(ChartOfAccountTypes.CAB.name());
         dialog = new MyDialog(loanRequestStateView);
         dialog.setHeaderTitle("Add account");
         Button closeButton = new Button(new Icon("lumo", "cross"), (e) -> {

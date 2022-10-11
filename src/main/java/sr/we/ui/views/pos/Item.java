@@ -38,20 +38,20 @@ public class Item {
         this.feeDescMap = new HashMap<>();
 
 
-        Services services = posHeaderDetail.getServices();
+        Items items = posHeaderDetail.getServices();
 
-        init(map, feeMap, services);
+        init(map, feeMap, items);
         price = this.posHeaderDetail.getPrice();
         result = this.posHeaderDetail.getResult();
     }
 
     public Item(ProductOrService productOrService, Map<String, Object> map, Map<String, Object> feeMap) {
         this.productOrService = productOrService;
-        Services services = productOrService.getServices();
-        init(map, feeMap, services);
+        Items items = productOrService.getServices();
+        init(map, feeMap, items);
     }
 
-    private void init(Map<String, Object> map, Map<String, Object> feeMap, Services services) {
+    private void init(Map<String, Object> map, Map<String, Object> feeMap, Items items) {
         addCount();
         this.map = map;
         this.descMap = new HashMap<>();
@@ -59,10 +59,10 @@ public class Item {
         this.feeMap = feeMap;
         this.feeDescMap = new HashMap<>();
 
-        if (services != null) {
-            Boolean advancedPricing = services.getVariablePrice();
+        if (items != null) {
+            Boolean advancedPricing = items.getVariablePrice();
             if (!(advancedPricing == null || !advancedPricing)) {
-                Set<CalculationComponent> calculationComponents = services.getCalculationComponents();
+                Set<CalculationComponent> calculationComponents = items.getCalculationComponents();
                 List<CalculationComponent> variables = calculationComponents.stream().filter(f -> f.getType().compareTo(CalculationComponent.Type.VARIABLE) == 0).collect(Collectors.toList());
                 List<CalculationComponent> categories = calculationComponents.stream().filter(f -> f.getCategory().compareTo(CalculationComponent.Category.FEE) == 0).collect(Collectors.toList());
 
@@ -85,7 +85,7 @@ public class Item {
         }
     }
 
-    void addCount() {
+    public void addCount() {
         count++;
     }
 
@@ -109,7 +109,7 @@ public class Item {
         return price;
     }
 
-    BigDecimal getCalcPrice() {
+    public BigDecimal getCalcPrice() {
         itemCount = BigDecimal.valueOf(this.count);
         price = price();
         result = price.multiply(itemCount);
@@ -118,17 +118,17 @@ public class Item {
 
     private BigDecimal price() {
         Product product = productOrService == null ? (posHeaderDetail == null ? null : posHeaderDetail.getProduct()) : productOrService.getProduct();
-        Services services = productOrService == null ? (posHeaderDetail == null ? null : posHeaderDetail.getServices()) : productOrService.getServices();
+        Items items = productOrService == null ? (posHeaderDetail == null ? null : posHeaderDetail.getServices()) : productOrService.getServices();
         if (product != null) {
             return (product.getPrice() == null ? BigDecimal.ZERO : product.getPrice());
-        } else if (services != null) {
-            Boolean advancedPricing = services.getVariablePrice();
+        } else if (items != null) {
+            Boolean advancedPricing = items.getVariablePrice();
             if (advancedPricing == null || !advancedPricing) {
-                return (services.getPrice() == null ? BigDecimal.ZERO : services.getPrice());
+                return (items.getPrice() == null ? BigDecimal.ZERO : items.getPrice());
             } else {
                 CalculationService calculationService = ContextProvider.getBean(CalculationService.class);
                 CalculationParam vo = new CalculationParam();
-                vo.setServiceId(services.getId());
+                vo.setServiceId(items.getId());
                 vo.setMap(map);
                 calculate = calculationService.calculate(AuthenticatedUser.token(), vo);
                 return (calculate.getResult() == null ? BigDecimal.ZERO : calculate.getResult());

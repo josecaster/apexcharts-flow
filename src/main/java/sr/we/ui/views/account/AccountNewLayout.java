@@ -10,7 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import sr.we.ContextProvider;
 import sr.we.data.controller.AccountService;
 import sr.we.security.AuthenticatedUser;
-import sr.we.shekelflowcore.entity.helper.Build;
+import sr.we.shekelflowcore.entity.helper.Executable;
 import sr.we.shekelflowcore.entity.helper.vo.AccountVO;
 import sr.we.ui.components.general.BankSelect;
 import sr.we.ui.views.StateListenerLayout;
@@ -97,20 +97,20 @@ public class AccountNewLayout extends StateListenerLayout {
         redirectToParent();
     }
 
-    private Build build;
+    private Executable executable;
 
     private void redirectToParent() {
 //        QueryParameters queryParameters = QueryParameters.fromString("id=" + loan.getId());
 //        UI.getCurrent().navigate(LoansViewTabRequests.getLocation(business), queryParameters);
-        if(build == null) {
+        if(executable == null) {
             UI.getCurrent().navigate(DashboardView.class, new RouteParameters(new RouteParam("business", business)));
         } else {
-            build.build();
+            executable.build();
         }
     }
 
-    public void setBuild(Build build) {
-        this.build = build;
+    public void setBuild(Executable executable) {
+        this.executable = executable;
     }
 
     @Override

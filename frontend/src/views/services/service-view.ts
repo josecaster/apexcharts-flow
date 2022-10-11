@@ -23,30 +23,30 @@ export class ServiceView extends LitElement {
     return html`
 <vaadin-vertical-layout style="width: 100%; height: 100%; padding: var(--lumo-space-s);">
  <vaadin-horizontal-layout theme="spacing" style="align-self: stretch;">
-  <h2 style="flex-grow: 1;">Services</h2>
+  <h2 style="flex-grow: 1;">Items</h2>
   <vaadin-button id="export-btn" style="align-self: center;" tabindex="0" theme="tertiary">
-    Export
+    Export 
   </vaadin-button>
   <vaadin-button style="align-self: center;" id="import-btn" tabindex="0" theme="tertiary">
-    Import
+    Import 
   </vaadin-button>
   <vaadin-button style="align-self: center;" id="add-product-btn" tabindex="0" theme="primary">
-   Add service
+   Add item
   </vaadin-button>
  </vaadin-horizontal-layout>
  <vaadin-vertical-layout theme="spacing" style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin: var(--lumo-space-s); margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m); align-self: stretch;">
   <vaadin-tabs style="align-self: stretch;" orientation="horizontal" selected="0">
    <vaadin-tab selected>
-     All
+     All 
    </vaadin-tab>
    <vaadin-tab>
-     Active
+     Active 
    </vaadin-tab>
    <vaadin-tab>
-    Inactive
+     Inactive 
    </vaadin-tab>
   </vaadin-tabs>
-  <vaadin-text-field placeholder="Filter products" id="filter-field" style="align-self: stretch;" type="text">
+  <vaadin-text-field placeholder="Filter items" id="filter-field" style="align-self: stretch;" type="text">
    <iron-icon icon="lumo:search" slot="prefix"></iron-icon>
   </vaadin-text-field>
   <div id="product-grid-layout" style="align-self: stretch;"></div>
