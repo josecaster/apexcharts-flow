@@ -32,8 +32,8 @@ public class Item {
         this.map = map;
         this.posHeaderDetail = posHeaderDetail;
         this.descMap = new HashMap<>();
-        this.productOrService = (posHeaderDetail.getProduct() == null ? new ProductOrService(posHeaderDetail.getServices()) : new ProductOrService(posHeaderDetail.getProduct()));
-
+        this.productOrService = new ProductOrService(posHeaderDetail.getServices());
+        count = this.posHeaderDetail.getCount().intValue();
         this.feeMap = feeMap;
         this.feeDescMap = new HashMap<>();
 
@@ -52,7 +52,9 @@ public class Item {
     }
 
     private void init(Map<String, Object> map, Map<String, Object> feeMap, Items items) {
-        addCount();
+        if(count == 0) {
+            addCount();
+        }
         this.map = map;
         this.descMap = new HashMap<>();
 
@@ -63,8 +65,8 @@ public class Item {
             Boolean advancedPricing = items.getVariablePrice();
             if (!(advancedPricing == null || !advancedPricing)) {
                 Set<CalculationComponent> calculationComponents = items.getCalculationComponents();
-                List<CalculationComponent> variables = calculationComponents.stream().filter(f -> f.getType().compareTo(CalculationComponent.Type.VARIABLE) == 0).collect(Collectors.toList());
-                List<CalculationComponent> categories = calculationComponents.stream().filter(f -> f.getCategory().compareTo(CalculationComponent.Category.FEE) == 0).collect(Collectors.toList());
+                List<CalculationComponent> variables = calculationComponents.stream().filter(f -> f.getType() == null || f.getType().compareTo(CalculationComponent.Type.VARIABLE) == 0).collect(Collectors.toList());
+//                List<CalculationComponent> categories = calculationComponents.stream().filter(f -> f.getCategory().compareTo(CalculationComponent.Category.FEE) == 0).collect(Collectors.toList());
 
                 variables.forEach(f -> {
                     boolean b = map.containsKey(f.getCode());
@@ -74,13 +76,13 @@ public class Item {
                     }
                 });
 
-                categories.forEach(f -> {
-                    boolean b = feeMap.containsKey(f.getCode());
-                    feeDescMap.put(f.getCode(), f);
-                    if (!b) {
-                        feeMap.put(f.getCode(), null);
-                    }
-                });
+//                categories.forEach(f -> {
+//                    boolean b = feeMap.containsKey(f.getCode());
+//                    feeDescMap.put(f.getCode(), f);
+//                    if (!b) {
+//                        feeMap.put(f.getCode(), null);
+//                    }
+//                });
             }
         }
     }
@@ -90,7 +92,15 @@ public class Item {
     }
 
     public String getName() {
-        return posHeaderDetail == null ? (productOrService.getProduct() == null ? productOrService.getServices().getName() : productOrService.getProduct().getTitle()) : posHeaderDetail.getName();
+        return posHeaderDetail == null ? productOrService.getServices().getName()  : posHeaderDetail.getName();
+    }
+
+    public void setName(String name){
+        if(posHeaderDetail == null){
+            productOrService.getServices().setName(name);
+        } else {
+            posHeaderDetail.setName(name);
+        }
     }
 
     public BigDecimal getResult() {
@@ -117,11 +127,11 @@ public class Item {
     }
 
     private BigDecimal price() {
-        Product product = productOrService == null ? (posHeaderDetail == null ? null : posHeaderDetail.getProduct()) : productOrService.getProduct();
         Items items = productOrService == null ? (posHeaderDetail == null ? null : posHeaderDetail.getServices()) : productOrService.getServices();
-        if (product != null) {
-            return (product.getPrice() == null ? BigDecimal.ZERO : product.getPrice());
-        } else if (items != null) {
+        if(posHeaderDetail != null && posHeaderDetail.getPrice() != null){
+            return posHeaderDetail.getPrice();
+        }
+        if (items != null) {
             Boolean advancedPricing = items.getVariablePrice();
             if (advancedPricing == null || !advancedPricing) {
                 return (items.getPrice() == null ? BigDecimal.ZERO : items.getPrice());

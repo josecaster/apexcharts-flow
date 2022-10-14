@@ -33,7 +33,7 @@ export class PosView extends LitElement {
      Charge 
    </vaadin-button>
   </vaadin-horizontal-layout>
-  <vaadin-form-layout colspan="2">
+  <vaadin-form-layout colspan="1">
    <vaadin-vertical-layout style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin: var(--lumo-space-s); margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m); width: 100%; height: 514px;" colspan="2">
     <div id="radio-layout" style="align-self: center;"></div>
     <vaadin-combo-box placeholder="Filter products" id="filter-cmb" style="align-self: stretch;" type="text">

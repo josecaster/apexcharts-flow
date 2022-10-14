@@ -79,7 +79,7 @@ public class AddService extends LitTemplate {
     public AddService() {
         // You can initialise any data required for the connected UI components here.
 
-        mainFormLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0px", 1), new FormLayout.ResponsiveStep("500px",3));
+        mainFormLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0px", 1), new FormLayout.ResponsiveStep("500px", 3));
 
         backButton.addClickListener(f -> {
             UI.getCurrent().navigate(ServiceView.class, new RouteParameters(new RouteParam("business", businessString)));
@@ -132,22 +132,20 @@ public class AddService extends LitTemplate {
         });
 
 
-
     }
 
-    protected void setBusiness(BeforeEnterEvent event) {
+    private void setBusiness(BeforeEnterEvent event) {
         Optional<String> business1 = event.getRouteParameters().get("business");
         if (business1.isPresent()) {
             businessString = business1.get();
             BusinessService businessService = ContextProvider.getBean(BusinessService.class);
             business = businessService.get(Long.valueOf(businessString), AuthenticatedUser.token());
-            if (business != null) {
+            if (business != null && (this.items == null || this.items.getCurrency() == null)) {
                 currency = business.getCurrency();
                 servicePrice.setCurrency(currency);
             }
         }
     }
-
 
 
     protected void setService(BeforeEnterEvent event) {
@@ -167,14 +165,14 @@ public class AddService extends LitTemplate {
             throw new ValidationException("No services found");
         }
 
-        setServices();
+        setServices(event);
     }
 
-    protected void setServices() {
+    protected void setServices(BeforeEnterEvent event) {
         servicesVO = new ServicesVO();
         servicesVO.setNew(true);
         List<CalculationComponentVO> items = new ArrayList<>();
-        if(this.items != null){
+        if (this.items != null) {
             servicesVO.setNew(false);
             servicesVO.setId(this.items.getId());
             servicesVO.setCode(this.items.getCode());
@@ -187,7 +185,7 @@ public class AddService extends LitTemplate {
             servicesVO.setCost(this.items.getCost());
             servicesVO.setActive(this.items.getActive());
             servicesVO.setBusiness(this.items.getBusiness().getId());
-            for(CalculationComponent calculationComponent : this.items.getCalculationComponents()){
+            for (CalculationComponent calculationComponent : this.items.getCalculationComponents()) {
                 CalculationComponentVO calculationComponentVO = new CalculationComponentVO();
                 calculationComponentVO.setNew(false);
                 calculationComponentVO.setId(calculationComponent.getId());
@@ -203,14 +201,17 @@ public class AddService extends LitTemplate {
             servicesVO.setBarcode(this.items.getBarcode());
             servicesVO.setTrackInventory(this.items.getTrackInventory());
             servicesVO.setProductsInventory(this.items.getProductsInventoriesVO());
+            servicesVO.setCategory(this.items.getCategory());
+            servicesVO.setCurrency(this.items.getCurrency() == null ? null : this.items.getCurrency().getId());
         }
+
         servicesVO.setCalculationComponentVO(items);
         serviceType.setVO(servicesVO);
         serviceForm.setVO(servicesVO);
         serviceComponents.setVO(servicesVO);
         serviceFormula.setVO(servicesVO);
         servicePrice.setVO(servicesVO);
-
+        setBusiness(event);
 
 
         serviceInventory.setProduct(this.servicesVO);

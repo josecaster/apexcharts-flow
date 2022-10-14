@@ -10,9 +10,9 @@
 @import url('./views/wizard.css');
 @import url('line-awesome/dist/line-awesome/css/line-awesome.min.css');
 
-@import url('@fontsource/poppins');
-/*html {
 @import url('@fontsource/rubik');
+/*html {
+@import url('@fontsource/poppins');
 
           --lumo-border-radius: 0.5em;
             --lumo-space-xl: 2.5rem;

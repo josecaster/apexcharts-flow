@@ -33,6 +33,8 @@ import sr.we.data.controller.InvoiceService;
 import sr.we.data.controller.PosHeaderService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.*;
+import sr.we.shekelflowcore.entity.helper.Executable;
+import sr.we.shekelflowcore.entity.helper.InterExecutable;
 import sr.we.shekelflowcore.entity.helper.vo.InvoiceVO;
 import sr.we.shekelflowcore.entity.helper.vo.PosHeaderDetailVO;
 import sr.we.shekelflowcore.entity.helper.vo.PosHeaderVO;
@@ -63,12 +65,10 @@ import static sr.we.ContextProvider.getBean;
  */
 @Tag("create-invoice-view")
 @JsModule("./src/views/invoice/create-invoice-view.ts")
-public class CreateInvoiceView extends LitTemplate implements IFee {
+public class CreateInvoiceView extends LitTemplate {
 
-    private final Map<String, Object> map;
-    private final CurrencySelect currencySelect;
-    private final BigDecimalField exchangeRateFld;
-    private final Label totalLbl;
+
+
     private final TextArea footerMessageFld;
     private final VerticalLayout customerLayout;
     private final Button addCustomerLabelLayout;
@@ -78,13 +78,6 @@ public class CreateInvoiceView extends LitTemplate implements IFee {
     protected ComboBox<ProductOrService> filterCmb;
     protected String business;
     protected Invoice invoice;
-    private TextField firstNameFld;
-    private TextField lastNameFld;
-    private TextField mobileNumberFld;
-    private EmailField emailFld;
-    private Grid<Item> itemGrid;
-    private Grid<Fee> feeGrid;
-    private Map<String, Object> feeMap;
     @Id("new-invoice-header-details")
     protected Details createInvoiceHeaderDetails;
     @Id("div")
@@ -95,17 +88,12 @@ public class CreateInvoiceView extends LitTemplate implements IFee {
     protected TextArea invoiceNoteTermsFld;
     @Id("new-invoice-main-layout")
     protected VerticalLayout newInvoiceMainLayout;
-    private List<Item> itemList = null;
-    private List<Fee> feeList = null;
     @Id("invoice-table-layout")
     protected Div invoiceTableLayout;
-    private Business business2;
-    private PosHeader posHeader;
     @Id("add-customer-layout")
     protected VerticalLayout addCustomerLayout;
     @Id("invoice-save-continue-btn")
     protected Button invoiceSaveContinueBtn;
-    private CustomerCmb existingCustomersCmb;
     @Id("invoice-number-fld")
     protected TextField invoiceNumberFld;
     @Id("poso-number-fld")
@@ -114,7 +102,18 @@ public class CreateInvoiceView extends LitTemplate implements IFee {
     protected TempDatePicker paymentDateFld;
     @Id("payment-due-fld")
     protected TempDatePicker paymentDueFld;
-    private BigDecimal total;
+    private TextField firstNameFld;
+    private TextField lastNameFld;
+    private TextField mobileNumberFld;
+    private EmailField emailFld;
+    private ItemGrid itemsGrid;
+//    private Grid<Fee> feeGrid;
+//    private Map<String, Object> feeMap;
+
+    private Business business2;
+    private PosHeader posHeader;
+    private CustomerCmb existingCustomersCmb;
+
     private boolean activateListener = true;
 
     /**
@@ -219,7 +218,7 @@ public class CreateInvoiceView extends LitTemplate implements IFee {
 
         invoiceNameFld = new TextField();
         invoiceNameFld.setValue("Invoice");
-        invoiceNameFld.addClassNames(LumoUtility.FontSize.LARGE,LumoUtility.FontWeight.BOLD,LumoUtility.TextAlignment.RIGHT);
+        invoiceNameFld.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.FontWeight.BOLD, LumoUtility.TextAlignment.RIGHT);
         invoiceSummaryFld = new TextField();
         invoiceSummaryFld.setPlaceholder("Write a short summary");
         invoiceSummaryFld.addClassNames(LumoUtility.TextAlignment.RIGHT);
@@ -233,57 +232,13 @@ public class CreateInvoiceView extends LitTemplate implements IFee {
         layout1.add(companyNameLbl);
 
 
+        init();
 
-        map = init();
 
-        HorizontalLayout totalLayout = new HorizontalLayout();
-        totalLayout.setClassName(LumoUtility.Flex.GROW);
-        invoiceTableLayout.add(totalLayout);
-
-        Label totalNameLbl = new Label("Total");
-        currencySelect = new CurrencySelect();
-        exchangeRateFld = new BigDecimalField();
-        totalLbl = new Label("0.00");
-
-        totalNameLbl.getElement().getStyle().set("margin-left", "auto");
-        totalNameLbl.getElement().getStyle().set("font-weight", "bold");
-        totalLbl.getElement().getStyle().set("font-weight", "bold");
-        totalNameLbl.setClassName(LumoUtility.TextAlignment.RIGHT);
-        currencySelect.setLabel(null);
-        currencySelect.setHelperText(null);
-
-        totalLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        totalLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
-
-        totalLayout.add(totalNameLbl);
-        totalLayout.add(currencySelect);
-        totalLayout.add(exchangeRateFld);
-        totalLayout.add(totalLbl);
 
         invoiceSaveContinueBtn.addClickListener(f -> save());
 
-        currencySelect.addValueChangeListener(g -> {
-            if (g.isFromClient()) {
-                if (currencySelect.getValue() == null) {
-                    exchangeRateFld.setValue(BigDecimal.ZERO);
-                    return;
-                }
-                ExchangeRateService exchangeRateService = ContextProvider.getBean(ExchangeRateService.class);
-                try {
-                    BigDecimal exchange = exchangeRateService.exchange(CreateInvoiceView.this.business2.getCurrency().getCode(), g.getValue().getCode(), business2.getId(), AuthenticatedUser.token());
-                    exchangeRateFld.setValue(exchange);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
 
-        exchangeRateFld.addValueChangeListener(h -> {
-            if (activateListener) {
-                BigDecimal val = total.multiply(h.getValue());
-                totalLbl.setText(Constants.CURRENCY_FORMAT.format(val));
-            }
-        });
     }
 
     private void setCustomer(Customer value) {
@@ -309,85 +264,96 @@ public class CreateInvoiceView extends LitTemplate implements IFee {
         }
     }
 
-    private Map<String, Object> init() {
-        final Map<String, Object> map;
-        map = new HashMap<>();
-        feeMap = new HashMap<>();
+    private void init() {
+//        final Map<String, Object> map;
+//        map = new HashMap<>();
+//        feeMap = new HashMap<>();
 
+        itemsGrid = new ItemGrid();
+//        itemsGrid.setExecute(total());
 
-        feeGrid = new Grid<>();
-        feeGrid.setAllRowsVisible(true);
-        feeGrid.setAllRowsVisible(true);
-        feeGrid.setSelectionMode(Grid.SelectionMode.NONE);
-        feeGrid.setClassName("resonate");
-        feeGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
-        feeGrid.addColumn(Fee::getTitle).setFlexGrow(1);
-        feeGrid.addColumn(f -> {
-            BigDecimal price = f.getPrice();
-            return Constants.CURRENCY_FORMAT.format(price == null ? BigDecimal.ZERO : price);
-        }).setFlexGrow(0);
-
-        itemGrid = new Grid<>();
-        itemGrid.setSelectionMode(Grid.SelectionMode.NONE);
-        itemGrid.setAllRowsVisible(true);
-        itemGrid.setClassName("resonate");
-        itemGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
-        itemGrid.addComponentColumn(f -> {
-            TextField textField = new TextField();
-            textField.setWidthFull();
-            textField.setValue(f.getName());
-            return textField;
-        }).setHeader("Title").setFlexGrow(1);
-        itemGrid.addComponentColumn(item -> {
-            NumberField numberField = new NumberField();
-            numberField.setValue((double) item.getCount());
-            numberField.setMin(1);
-            numberField.setWidth("50px");
-            numberField.addValueChangeListener(event -> {
-                if (event.getValue() != null && event.getValue().compareTo((double) 0) == 0) {
-                    itemList.remove(item);
-                } else {
-                    item.setCount(event.getValue() == null ? 1 : event.getValue().intValue());
-                }
-                total();
-                itemGrid.getDataProvider().refreshAll();
-                feeGrid.getDataProvider().refreshAll();
-            });
-            return numberField;
-        }).setHeader("Quantity").setFlexGrow(0);
-        itemGrid.addColumn(item -> {
-            BigDecimal calcPrice = item.getPrice();
-            return Constants.CURRENCY_FORMAT.format(calcPrice == null ? BigDecimal.ZERO : calcPrice);
-        }).setHeader("Price").setFlexGrow(0);
-        itemGrid.addColumn(item -> {
-            BigDecimal calcPrice = item.getResult();
-            return Constants.CURRENCY_FORMAT.format(calcPrice == null ? BigDecimal.ZERO : calcPrice);
-        }).setHeader("Amount").setFlexGrow(0);
-        itemGrid.addComponentColumn(item -> {
-            LineAwesomeIcon lineAwesomeIcon = new LineAwesomeIcon("la la-times");
-            lineAwesomeIcon.addClickListener(clickEvent -> {
-                itemList.remove(item);
-                total();
-                itemGrid.getDataProvider().refreshAll();
-                feeGrid.getDataProvider().refreshAll();
-            });
-            return lineAwesomeIcon;
-        }).setFlexGrow(0);
-        itemGrid.setItemDetailsRenderer(new ComponentRenderer<>(this::getVariableLayout));
-        itemGrid.setDetailsVisibleOnClick(true);
-        itemList = new ArrayList<>();
-        itemGrid.setItems(itemList);
-
-        feeList = new ArrayList<>();
-        feeGrid.setItems(feeList);
+//        feeGrid = new Grid<>();
+//        feeGrid.setAllRowsVisible(true);
+//        feeGrid.setAllRowsVisible(true);
+//        feeGrid.setSelectionMode(Grid.SelectionMode.NONE);
+//        feeGrid.setClassName("resonate");
+//        feeGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+//        feeGrid.addColumn(Fee::getTitle).setFlexGrow(1);
+//        feeGrid.addColumn(f -> {
+//            BigDecimal price = f.getPrice();
+//            return Constants.CURRENCY_FORMAT.format(price == null ? BigDecimal.ZERO : price);
+//        }).setFlexGrow(0);
+//
+//        itemGrid = new Grid<>();
+//        itemGrid.setSelectionMode(Grid.SelectionMode.NONE);
+//        itemGrid.setAllRowsVisible(true);
+//        itemGrid.setClassName("resonate");
+//        itemGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+//        itemGrid.addComponentColumn(f -> {
+//            TextField textField = new TextField();
+//            textField.setWidthFull();
+//            textField.setValue(f.getName());
+//            textField.addValueChangeListener(event -> {
+//                if (StringUtils.isBlank(event.getValue())) {
+//                    textField.setValue(f.getName());
+//                } else {
+//                    f.setName(event.getValue());
+//                }
+//            });
+//            return textField;
+//        }).setHeader("Title").setFlexGrow(1);
+//        itemGrid.addComponentColumn(item -> {
+//            NumberField numberField = new NumberField();
+//            numberField.setValue((double) item.getCount());
+//            numberField.setMin(1);
+//            numberField.setWidth("50px");
+//            numberField.addValueChangeListener(event -> {
+//                if (event.getValue() != null && event.getValue().compareTo((double) 0) == 0) {
+//                    itemList.remove(item);
+//                } else {
+//                    item.setCount(event.getValue() == null ? 1 : event.getValue().intValue());
+//                }
+//                total();
+//                itemGrid.getDataProvider().refreshAll();
+//                feeGrid.getDataProvider().refreshAll();
+//            });
+//            return numberField;
+//        }).setHeader("Quantity").setFlexGrow(0);
+//        itemGrid.addColumn(item -> {
+//            BigDecimal calcPrice = item.getPrice();
+//            return Constants.CURRENCY_FORMAT.format(calcPrice == null ? BigDecimal.ZERO : calcPrice);
+//        }).setHeader("Price").setFlexGrow(0);
+//        itemGrid.addColumn(item -> {
+//            BigDecimal calcPrice = item.getResult();
+//            return Constants.CURRENCY_FORMAT.format(calcPrice == null ? BigDecimal.ZERO : calcPrice);
+//        }).setHeader("Amount").setFlexGrow(0);
+//        itemGrid.addComponentColumn(item -> {
+//            LineAwesomeIcon lineAwesomeIcon = new LineAwesomeIcon("la la-times");
+//            lineAwesomeIcon.addClickListener(clickEvent -> {
+//                if (item.getPosHeaderDetail() != null) {
+//                    removeList.add(item.getPosHeaderDetail().getId());
+//                }
+//                itemList.remove(item);
+//                total();
+//                itemGrid.getDataProvider().refreshAll();
+//                feeGrid.getDataProvider().refreshAll();
+//            });
+//            return lineAwesomeIcon;
+//        }).setFlexGrow(0);
+//        itemGrid.setItemDetailsRenderer(new ComponentRenderer<>(this::getVariableLayout));
+//        itemGrid.setDetailsVisibleOnClick(true);
+//        itemList = new ArrayList<>();
+//        itemGrid.setItems(itemList);
+//
+//        feeList = new ArrayList<>();
+//        removeList = new ArrayList<>();
+//        feeGrid.setItems(feeList);
 
         filterCmb = new ComboBox<>();
         filterCmb.setItemLabelGenerator(l -> {
-            if (l.getProduct() != null) {
-                return l.getProduct().getTitle();
-            } else {
-                return l.getServices().getName();
-            }
+
+            return l.getServices().getName();
+
         });
 
         filterCmb.addValueChangeListener(f -> {
@@ -395,42 +361,11 @@ public class CreateInvoiceView extends LitTemplate implements IFee {
                 return;
             }
             ProductOrService productOrService = f.getValue();
-            Optional<Item> any = itemList.stream().filter(g -> {
-                ProductOrService productOrService1 = g.getProductOrService();
-                if (productOrService1 == null) {
-                    PosHeaderDetail posHeaderDetail = g.getPosHeaderDetail();
-                    if (posHeaderDetail.getServices() != null && productOrService.getServices() != null) {
-                        return posHeaderDetail.getServices().getId().compareTo(productOrService.getServices().getId()) == 0;
-                    } else if (posHeaderDetail.getProduct() != null && productOrService.getProduct() != null) {
-                        return posHeaderDetail.getProduct().getId().compareTo(productOrService.getProduct().getId()) == 0;
-                    }
-                } else {
-                    if (productOrService1.getServices() != null && productOrService.getServices() != null) {
-                        return productOrService1.getServices().getId().compareTo(productOrService.getServices().getId()) == 0;
-                    } else if (productOrService1.getProduct() != null && productOrService.getProduct() != null) {
-                        return productOrService1.getProduct().getId().compareTo(productOrService.getProduct().getId()) == 0;
-                    }
-                }
-                return false;
-            }).findAny();
-            if (any.isPresent()) {
-                Item item = any.get();
-                item.addCount();
-//                total();
-                itemGrid.getDataProvider().refreshAll();
-                getVariableLayout(item);
-                getFeeLayout(item);
-            } else {
-                Item item = new Item(productOrService, map, feeMap);
-                itemList.add(item);
-                itemGrid.getDataProvider().refreshAll();
-//                total();
-                getVariableLayout(item);
-                getFeeLayout(item);
-            }
+            itemsGrid.addItem(productOrService);
+
         });
         filterCmb.setClassName(LumoUtility.Flex.GROW);
-        invoiceTableLayout.add(itemGrid);
+        invoiceTableLayout.add(itemsGrid);
         Label add_item = new Label("Add item: ");
         add_item.setClassName(LumoUtility.TextColor.PRIMARY);
         HorizontalLayout horizontalLayout = new HorizontalLayout(add_item, filterCmb);
@@ -441,101 +376,66 @@ public class CreateInvoiceView extends LitTemplate implements IFee {
                 LumoUtility.Margin.MEDIUM,//
                 LumoUtility.Padding.MEDIUM);//
         invoiceTableLayout.add(horizontalLayout);
-        invoiceTableLayout.add(feeGrid);
-        return map;
+//        invoiceTableLayout.add(feeGrid);TODO
+//        return map;
     }
 
-    private void getFeeLayout(Item item) {
-        if (item.getFeeDescMap() != null && !item.getFeeDescMap().entrySet().isEmpty()) {
-            item.getFeeDescMap().forEach((key, calculationComponent) -> {
-                Fee fee = new Fee(this, calculationComponent);
+//    private void getFeeLayout(Item item) {
+//        if (item.getFeeDescMap() != null && !item.getFeeDescMap().entrySet().isEmpty()) {
+//            item.getFeeDescMap().forEach((key, calculationComponent) -> {
+//                Fee fee = new Fee(this, calculationComponent);
+//
+//                Optional<Fee> any = feeList.stream().filter(g -> g.getTitle().equalsIgnoreCase(fee.getTitle())).findAny();
+//                if (any.isPresent()) {
+//                    any.get().setPrice(fee.getCalcPrice());
+//                } else {
+//                    feeList.add(fee);
+////                    feeGrid.getDataProvider().refreshAll();
+//                }
+//            });
+//        }
+//        total();
+//        feeGrid.getDataProvider().refreshAll();
+//    }
 
-                Optional<Fee> any = feeList.stream().filter(g -> g.getTitle().equalsIgnoreCase(fee.getTitle())).findAny();
-                if (any.isPresent()) {
-                    any.get().setPrice(fee.getCalcPrice());
-                } else {
-                    feeList.add(fee);
-//                    feeGrid.getDataProvider().refreshAll();
-                }
-            });
-        }
-        total();
-        feeGrid.getDataProvider().refreshAll();
-    }
 
-    private VerticalLayout getVariableLayout(Item d) {
-        VerticalLayout layout = new VerticalLayout();
-        layout.setMargin(false);
-        layout.setPadding(false);
-        if (d.getProductOrService().hasDetailedInventory()) {
-            ComboBox<ProductsInventoryDetail> detailCmb = new ComboBox<>();
-            layout.add(detailCmb);
-            detailCmb.setLabel("Product");
-            detailCmb.setPlaceholder("Choose a product");
-            detailCmb.setHelperText("This product requires a detailed selection");
-            detailCmb.setWidthFull();
-            detailCmb.setItems(d.getProductOrService().getDetailedInventory().stream().filter(e -> StringUtils.isNotBlank(e.getUniqueCode())).collect(Collectors.toList()));
-            detailCmb.setItemLabelGenerator(ProductsInventoryDetail::getUniqueCode);
-            detailCmb.setValue(d.getInventoryDetail());
-            detailCmb.addValueChangeListener(f -> {
-                d.setInventoryDetail(f.getValue());
-                itemGrid.getDataProvider().refreshAll();
-//                variableBtn.click();
-                total();
-            });
-        }
-        if (d.getDescMap() != null && !d.getDescMap().entrySet().isEmpty()) {
-            d.getDescMap().forEach((key, calculationComponent) -> {
-                BigDecimalField bigDecimalField = new BigDecimalField();
-                bigDecimalField.setLabel(calculationComponent.getName());
-                bigDecimalField.setPlaceholder(calculationComponent.getCode());
-                bigDecimalField.setWidthFull();
-                bigDecimalField.setValue(StringUtils.isBlank((String) d.getMap().get(key)) ? null : BigDecimal.valueOf(Double.parseDouble((String) d.getMap().get(key))));
-                layout.add(bigDecimalField);
-                bigDecimalField.addValueChangeListener(f -> {
-                    d.getMap().put(key, (f.getValue() == null ? null : f.getValue().toString()));
-                    d.getFeeMap().put(key, (f.getValue() == null ? null : f.getValue().toString()));
-                    itemGrid.getDataProvider().refreshAll();
-                    feeGrid.getDataProvider().refreshAll();
-//                    variableBtn.click();
-                    total();
-                });
-            });
-        }
-        layout.getComponentCount();
-        return layout;
-    }
 
-    private void total() {
-        total = itemList.stream().map(Item::getCalcPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
-        total = total.add(feeList.stream().map(Fee::getCalcPrice).reduce(BigDecimal.ZERO, BigDecimal::add));
-        BigDecimal value = exchangeRateFld.getValue();
-        if (value == null) {
-            value = BigDecimal.ONE;
-        }
-        BigDecimal obj = total == null ? BigDecimal.ZERO : total;
-        String text = Constants.CURRENCY_FORMAT.format(obj.multiply(value));
-        totalLbl.setText(text);
-    }
+//    private InterExecutable<Object, List<Item>> total() {
+//        return new InterExecutable<Object, List<Item>>() {
+//            @Override
+//            public Object build(List<Item> itemList) {
+//                total = itemList.stream().map(Item::getCalcPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
+////        total = total.add(feeList.stream().map(Fee::getCalcPrice).reduce(BigDecimal.ZERO, BigDecimal::add));
+//                BigDecimal value = exchangeRateFld.getValue();
+//                if (value == null) {
+//                    value = BigDecimal.ONE;
+//                }
+//                BigDecimal obj = total == null ? BigDecimal.ZERO : total;
+//                String text = Constants.CURRENCY_FORMAT.format(obj.multiply(value));
+//                totalLbl.setText(text);
+//                return null;
+//            }
+//        };
+//    }
 
-    public Map<String, Object> getFeeMap() {
-        return feeMap;
-    }
-
-    public List<Item> getItemList() {
-        return itemList;
-    }
-
-    @Override
-    public void addFeeMap(String title, String toString) {
-        if (feeMap == null) {
-            feeMap = new HashMap<>();
-        }
-        feeMap.put(title, toString);
-    }
+//    public Map<String, Object> getFeeMap() {
+//        return feeMap;
+//    }
+//
+////    public List<Item> getItemList() {
+////        return itemList;
+////    }
+//
+//    @Override
+//    public void addFeeMap(String title, String toString) {
+//        if (feeMap == null) {
+//            feeMap = new HashMap<>();
+//        }
+//        feeMap.put(title, toString);
+//    }
 
     public void save() {
-        PosHeaderVO vo = getVO();
+        PosHeaderVO vo = itemsGrid.getVO();
         vo.setCharged(false);
 
 
@@ -559,22 +459,18 @@ public class CreateInvoiceView extends LitTemplate implements IFee {
         invoiceVO.setInvoiceNumber(invoiceNumberFld.getValue());
 //        invoiceVO.setInvoiceTitle();
         invoiceVO.setBusiness(business2.getId());
-        invoiceVO.setCustomer(existingCustomersCmb == null ? //
-                (invoice == null ? null : //
-                        (invoice.getCustomer() == null ? null : invoice.getCustomer().getId())//
-                ) : //
-                (existingCustomersCmb.getValue() == null ? null : //
-                        existingCustomersCmb.getValue().getId()));
+        invoiceVO.setCustomer(getCustomerId());
+        vo.setCustomerId(invoiceVO.getCustomer());
         invoiceVO.setPaymentDue(paymentDueFld.getValue());
         invoiceVO.setThankMessage(invoiceNoteTermsFld.getValue());
         invoiceVO.setFooterMessage(footerMessageFld.getValue());
         invoiceVO.setPosoNumber(posoNumberFld.getValue());
         invoiceVO.setPrice(vo.getPrice());
         invoiceVO.setAmount(invoiceVO.getPrice());
-        invoiceVO.setExchangeRate(exchangeRateFld.getValue());
-        invoiceVO.setConvertedAmount(invoiceVO.getPrice().multiply(exchangeRateFld.getValue()));
-        invoiceVO.setCurrencyFrom(business2.getCurrency().getId());
-        invoiceVO.setCurrencyTo(currencySelect.getValue().getId());
+        invoiceVO.setExchangeRate(vo.getExchangeRate());
+        invoiceVO.setConvertedAmount(vo.getConvertedAmount());
+        invoiceVO.setCurrencyFrom(vo.getCurrencyFrom());
+        invoiceVO.setCurrencyTo(vo.getCurrencyTo());
         vo.setInvoiceVO(invoiceVO);
         PosHeaderService posHeaderService = ContextProvider.getBean(PosHeaderService.class);
         if (vo.getId() == null) {
@@ -588,58 +484,18 @@ public class CreateInvoiceView extends LitTemplate implements IFee {
         Map<String, List<String>> map = new HashMap<>();
         map.put("id", strings);
         QueryParameters queryParameters = new QueryParameters(map);
-        UI.getCurrent().navigate(InvoiceSummaryView.getLocation(business),queryParameters);
+        UI.getCurrent().navigate(InvoiceSummaryView.getLocation(business), queryParameters);
     }
 
-    public PosHeaderVO getVO() {
-        List<PosHeaderDetailVO> vos = new ArrayList<>();
-        PosHeaderVO posHeaderVO = new PosHeaderVO();
-        posHeaderVO.setId(posHeader == null ? null : posHeader.getId());
-        posHeaderVO.setNew(posHeaderVO.getId() == null);
-        posHeaderVO.setPosStart(null);
-        posHeaderVO.setCustomerId(null);//TODO
-        posHeaderVO.setDetails(vos);
-        List<PosHeaderDetailVO> collectItems = itemList.stream().map(f -> {
-            PosHeaderDetailVO posHeaderDetailVO = new PosHeaderDetailVO();
-            posHeaderDetailVO.setId(f.getPosHeaderDetail() == null ? null : f.getPosHeaderDetail().getId());
-            posHeaderDetailVO.setNew(posHeaderDetailVO.getId() == null);
-            posHeaderDetailVO.setName(f.getName());
-            posHeaderDetailVO.setCalculationResult(f.getCalculate());
-            posHeaderDetailVO.setResult(f.getResult());
-            posHeaderDetailVO.setCount((long) f.getCount());
-            posHeaderDetailVO.setPrice(f.getPrice());
-            posHeaderDetailVO.setInventoryDetail(f.getInventoryDetail() == null ? null : f.getInventoryDetail().getId());
-            posHeaderDetailVO.setProduct(f.getProductOrService() == null ? //
-                    (f.getPosHeaderDetail() == null ? null : (f.getPosHeaderDetail().getProduct() == null ? null : f.getPosHeaderDetail().getProduct().getId())) //
-                    : (f.getProductOrService().getProduct() == null ? null : f.getProductOrService().getProduct().getId()));//
-            posHeaderDetailVO.setService(f.getProductOrService() == null ? //
-                    (f.getPosHeaderDetail() == null ? null : (f.getPosHeaderDetail().getServices() == null ? null : f.getPosHeaderDetail().getServices().getId())) //
-                    : (f.getProductOrService().getServices() == null ? null : f.getProductOrService().getServices().getId()));//
-            return posHeaderDetailVO;
-        }).toList();
 
-        List<PosHeaderDetailVO> collectFees = feeList.stream().map(f -> {
-            PosHeaderDetailVO posHeaderDetailVO = new PosHeaderDetailVO();
-            posHeaderDetailVO.setId(f.getPosHeaderDetail() == null ? null : f.getPosHeaderDetail().getId());
-            posHeaderDetailVO.setNew(posHeaderDetailVO.getId() == null);
-            posHeaderDetailVO.setName(f.getTitle());
-            posHeaderDetailVO.setCalculationResult(f.getCalculate());
-            posHeaderDetailVO.setResult(f.getPrice());
-            posHeaderDetailVO.setCount(1L);
-            posHeaderDetailVO.setPrice(f.getPrice());
-//            posHeaderDetailVO.setService(f.getCalculationComponent().getServices() == null ? null : f.getCalculationComponent().getServices().getId());
-            posHeaderDetailVO.setCalculationComponent(f.getCalculationComponent().getId());
-            return posHeaderDetailVO;
-        }).toList();
 
-        vos.addAll(collectItems);
-        vos.addAll(collectFees);
-
-        BigDecimal reduce = itemList.stream().map(Item::getCalcPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
-        reduce = reduce.add(feeList.stream().map(Fee::getCalcPrice).reduce(BigDecimal.ZERO, BigDecimal::add));
-        posHeaderVO.setPrice(reduce);
-
-        return posHeaderVO;
+    private Long getCustomerId() {
+        return existingCustomersCmb == null ? //
+                (invoice == null ? null : //
+                        (invoice.getCustomer() == null ? null : invoice.getCustomer().getId())//
+                ) : //
+                (existingCustomersCmb.getValue() == null ? null : //
+                        existingCustomersCmb.getValue().getId());
     }
 
     public void setInvoice(Invoice invoice) {
@@ -658,36 +514,11 @@ public class CreateInvoiceView extends LitTemplate implements IFee {
         invoiceSummaryFld.setValue(StringUtils.isBlank(invoice.getHeaderMessage()) ? "" : invoice.getHeaderMessage());
         companyNameLbl.setText(this.invoice.getBusiness().getName());
         setCustomer(invoice.getCustomer());
-        setTicket(posHeader);
-        BigDecimal obj = invoice.getConvertedAmount() == null ? BigDecimal.ZERO : invoice.getConvertedAmount();
-        total = obj;
-        currencySelect.setValue(invoice.getCurrencyTo());
-        exchangeRateFld.setValue(invoice.getExchangeRate());
-        String text = Constants.CURRENCY_FORMAT.format(obj);
-        totalLbl.setText(text);
-        activateListener = true;
+        itemsGrid.setTicket(posHeader, (invoice.getConvertedAmount() == null ? BigDecimal.ZERO : invoice.getConvertedAmount()), invoice.getExchangeRate(), invoice.getCurrencyTo());
+
     }
 
-    private void setTicket(PosHeader posHeader) {
-//        init();
-//        productTitle.setText("Ticket #" + posHeader.getHeaderSeq());
-        List<Item> collect = posHeader.getPosHeaderDetail().stream().filter(posHeaderDetail -> posHeaderDetail.getServices() != null || posHeaderDetail.getProduct() != null).map(posHeaderDetail -> {
-            //            getVariableLayout(item);
-            return new Item(posHeaderDetail, map, feeMap);
-        }).toList();
-        itemList.clear();
-        itemList.addAll(collect);
-        itemGrid.getDataProvider().refreshAll();
 
-        List<Fee> collect1 = posHeader.getPosHeaderDetail().stream().filter(posHeaderDetail -> posHeaderDetail.getCalculationComponent() != null &&
-                posHeaderDetail.getCalculationComponent().getCategory().compareTo(CalculationComponent.Category.FEE) == 0).map(posHeaderDetail -> new Fee(this, posHeaderDetail, posHeaderDetail.getCalculationComponent())).toList();
-        feeList.clear();
-        feeList.addAll(collect1);
-        feeGrid.getDataProvider().refreshAll();
-
-        BigDecimal reduce = itemList.stream().map(Item::getResult).reduce(BigDecimal.ZERO, BigDecimal::add);
-        reduce = reduce.add(feeList.stream().map(Fee::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add));
-    }
 
     protected void setByPosHeaderId(BeforeEnterEvent event, Long posHeaderId) {
         String token = AuthenticatedUser.token();
@@ -705,9 +536,16 @@ public class CreateInvoiceView extends LitTemplate implements IFee {
     public void setBusiness2(Business business2) {
         activateListener = false;
         this.business2 = business2;
-        currencySelect.setValue(business2.getCurrency());
-        exchangeRateFld.setValue(BigDecimal.ONE);
+        itemsGrid.setBusiness(business2);
         companyNameLbl.setText(this.business2.getName());
         activateListener = true;
+        InvoiceService loanRequestService = getBean(InvoiceService.class);
+        String token = AuthenticatedUser.token();
+        InvoiceSetting settings = loanRequestService.getSettings(business2.getId(), token);
+        if(settings != null) {
+            invoiceNoteTermsFld.setValue(settings.getThankMessage());
+            footerMessageFld.setValue(settings.getFooterMessage());
+            invoiceSummaryFld.setValue(settings.getHeaderMessage());
+        }
     }
 }

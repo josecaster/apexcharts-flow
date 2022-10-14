@@ -10,24 +10,24 @@ import java.util.Set;
 
 public class ProductOrService {
 
-    private Product product;
+//    private Product product;
     private Items items;
 
-    public ProductOrService(Product product) {
-        this.product = product;
-    }
+//    public ProductOrService(Product product) {
+//        this.product = product;
+//    }
 
     public ProductOrService(Items items) {
         this.items = items;
     }
 
-    public Product getProduct() {
-        return product;
-    }
+//    public Product getProduct() {
+//        return product;
+//    }
 
-    public void setProduct(Product product) {
-        this.product = product;
-    }
+//    public void setProduct(Product product) {
+//        this.product = product;
+//    }
 
     public Items getServices() {
         return items;
@@ -38,8 +38,8 @@ public class ProductOrService {
     }
 
     public Set<ProductsInventoryDetail> getDetailedInventory(){
-        if (product != null) {
-            Set<ProductsInventory> productsInventories = product.getProductsInventories();
+        if (items != null) {
+            Set<ProductsInventory> productsInventories = items.getProductsInventories();
             if (productsInventories != null && !productsInventories.isEmpty()) {
                 Optional<ProductsInventory> any1 = productsInventories.stream().filter(g -> g.getDetailedStock() != null && g.getDetailedStock()).findAny();
                 if (any1.isPresent()) {

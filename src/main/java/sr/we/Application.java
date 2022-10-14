@@ -28,8 +28,8 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
  *
  */
 @SpringBootApplication(exclude = { ErrorMvcAutoConfiguration.class, SecurityAutoConfiguration.class })
-@NpmPackage(value = "@fontsource/poppins", version = "4.5.0")
-//@NpmPackage(value = "@fontsource/rubik", version = "4.5.11")
+//@NpmPackage(value = "@fontsource/poppins", version = "4.5.0")
+@NpmPackage(value = "@fontsource/rubik", version = "4.5.11")
 @Theme(value = "shekelflow")
 @PWA(name = "ShekelFlow", shortName = "ShekelFlow", offlineResources = {})
 @Push

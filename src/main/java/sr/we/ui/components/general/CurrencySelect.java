@@ -9,8 +9,11 @@ import sr.we.shekelflowcore.entity.Country;
 import sr.we.shekelflowcore.entity.Currency;
 
 import java.util.List;
+import java.util.Optional;
 
 public class CurrencySelect extends Select<Currency> {
+
+    private List<Currency> currencies;
 
     public CurrencySelect() {
         load();
@@ -20,7 +23,7 @@ public class CurrencySelect extends Select<Currency> {
         PojoService pojoService = ContextProvider.getBean(PojoService.class);
         String token = AuthenticatedUser.token();
 
-        List<Currency> currencies = pojoService.listCurrency(token);
+        currencies = pojoService.listCurrency(token);
         setItems(currencies);
 
         setItemLabelGenerator((f) -> f.getName());
@@ -31,5 +34,23 @@ public class CurrencySelect extends Select<Currency> {
 
     public String getTranslation() {
         return getTranslation("sr.we.business.currency");
+    }
+
+    public void setValueId(Long currency) {
+        if(currency == null){
+            setValue(null);
+            return;
+        }
+        Optional<Currency> any = getCurrency(currency);
+        if(any.isPresent()){
+            setValue(any.get());
+        } else {
+            setValue(null);
+        }
+    }
+
+    public Optional<Currency> getCurrency(Long currency) {
+        Optional<Currency> any = currencies.stream().filter(f -> f.getId().compareTo(currency) == 0).findAny();
+        return any;
     }
 }

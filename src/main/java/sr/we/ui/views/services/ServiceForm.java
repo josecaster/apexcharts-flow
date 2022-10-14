@@ -21,10 +21,6 @@ import sr.we.shekelflowcore.entity.helper.vo.ServicesVO;
 @JsModule("./src/views/services/service-form.ts")
 public class ServiceForm extends LitTemplate {
 
-//    @Id("valid-ckh")
-//    private Checkbox validCkh;
-    @Id("type-cmb")
-    private ComboBox<Items.Type> typeCmb;
     @Id("code-fld")
     private TextField codeFld;
     @Id("title-fld")
@@ -36,14 +32,14 @@ public class ServiceForm extends LitTemplate {
     public ServiceForm() {
         // You can initialise any data required for the connected UI components here.
 //        validCkh.setValue(true);
-        typeCmb.setItems(Items.Type.ONE_TIME, Items.Type.PERIODICALLY);
-
-//        validCkh.addValueChangeListener(f -> {
-//            this.servicesVO.setActive(f.getValue());
+//        typeCmb.setItems(Items.Type.ONE_TIME, Items.Type.PERIODICALLY);
+//
+////        validCkh.addValueChangeListener(f -> {
+////            this.servicesVO.setActive(f.getValue());
+////        });
+//        typeCmb.addValueChangeListener(f -> {
+//            this.servicesVO.setType(f.getValue());
 //        });
-        typeCmb.addValueChangeListener(f -> {
-            this.servicesVO.setType(f.getValue());
-        });
         codeFld.addValueChangeListener(f -> {
             this.servicesVO.setCode(f.getValue());
         });
@@ -54,7 +50,7 @@ public class ServiceForm extends LitTemplate {
 
     private void setServices(ServicesVO services) {
 //        validCkh.setValue(services.getActive() != null && services.getActive());
-        typeCmb.setValue(services.getType());
+//        typeCmb.setValue(services.getType());
         codeFld.setValue(StringUtils.isBlank(services.getCode()) ? "" : services.getCode());
         titleFld.setValue(StringUtils.isBlank(services.getName()) ? "" : services.getName());
     }

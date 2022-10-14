@@ -6,10 +6,9 @@ import '@vaadin/horizontal-layout/src/vaadin-horizontal-layout.js';
 import '@vaadin/button/src/vaadin-button.js';
 import '@vaadin/form-layout/src/vaadin-form-layout.js';
 import '@vaadin/icon/src/vaadin-icon.js';
-import '@vaadin/form-layout/src/vaadin-form-item.js';
 import '@vaadin/text-field/src/vaadin-text-field.js';
 import '@vaadin/vaadin-form-layout/vaadin-form-item.js';
-import '@vaadin/combo-box/src/vaadin-combo-box.js';
+import '@vaadin/form-layout/src/vaadin-form-item.js';
 
 @customElement('service-form')
 export class ServiceForm extends LitElement {
@@ -32,10 +31,6 @@ export class ServiceForm extends LitElement {
   <vaadin-form-item>
    <label slot="label">Title</label>
    <vaadin-text-field placeholder="fill in a service name" style="width: 100%;" type="text" id="title-fld"></vaadin-text-field>
-  </vaadin-form-item>
-  <vaadin-form-item>
-   <label slot="label">Type</label>
-   <vaadin-combo-box style="flex-shrink: 0; flex-grow: 1; width: 100%;" placeholder="choose a suitable service type" id="type-cmb"></vaadin-combo-box>
   </vaadin-form-item>
  </vaadin-form-layout>
 </vaadin-vertical-layout>

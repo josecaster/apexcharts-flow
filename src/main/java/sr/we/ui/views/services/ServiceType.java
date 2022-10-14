@@ -54,6 +54,15 @@ public class ServiceType extends LitTemplate {
         });
 
         categoryGroup.setItems(List.of(Items.Category.values()));
+        categoryGroup.addValueChangeListener(f -> {
+            servicesVO.setCategory(f.getValue());
+            if(f.getValue() != null && f.getValue().compareTo(Items.Category.SERVICE) == 0){
+                serviceTrackInventoryChk.setValue(false);
+                serviceTrackInventoryChk.setVisible(false);
+            } else {
+                serviceTrackInventoryChk.setVisible(true);
+            }
+        });
     }
 
 
@@ -63,6 +72,7 @@ public class ServiceType extends LitTemplate {
         servicesVO.setActive(serviceTrackActiveChk.getValue());
         servicesVO.setTrackInventory(serviceTrackInventoryChk.getValue());
         servicesVO.setVariablePrice(serviceTrackAdvancedPricingChk.getValue());
+        servicesVO.setCategory(categoryGroup.getValue());
         return servicesVO;
     }
 
@@ -72,6 +82,7 @@ public class ServiceType extends LitTemplate {
         serviceTrackActiveChk.setValue(servicesVO.getActive() != null && servicesVO.getActive());
         serviceTrackInventoryChk.setValue(servicesVO.getTrackInventory() != null && servicesVO.getTrackInventory());
         serviceTrackAdvancedPricingChk.setValue(servicesVO.getVariablePrice() != null && servicesVO.getVariablePrice());
+        categoryGroup.setValue(servicesVO.getCategory());
     }
 
     public void trackInventroy(InterExecutable<?, Boolean> trackInventory) {

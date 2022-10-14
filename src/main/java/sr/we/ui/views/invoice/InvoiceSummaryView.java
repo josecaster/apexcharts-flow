@@ -213,6 +213,7 @@ public class InvoiceSummaryView extends LitTemplate implements BeforeEnterObserv
             public InputStream createInputStream() {
                 Map<String, Object> map = new HashMap<String, Object>();
                 map.put("INVOICE_ID_", invoice.getId());
+                map.put("INVOICE_DUE", invoice.getRest());
                 try {
                     byte[] exportReportMap = ((MyReportEngine) ContextProvider.getBean(MyReportEngine.class)).exportInvoice(map);
                     return new ByteArrayInputStream(exportReportMap);

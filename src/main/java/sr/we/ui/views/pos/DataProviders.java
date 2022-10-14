@@ -37,44 +37,44 @@ public class DataProviders extends Div {
         return dataProvider;
     }
 
-    static DataProvider<ProductOrServiceGrid, Void> getProductsGrid(String business) {
-        DataProvider<ProductOrServiceGrid, Void> dataProvider;
-        dataProvider = DataProvider.fromCallbacks(query -> {
-            int pageSize = query.getPageSize();
-            int page = query.getPage();
+//    static DataProvider<ProductOrServiceGrid, Void> getProductsGrid(String business) {
+//        DataProvider<ProductOrServiceGrid, Void> dataProvider;
+//        dataProvider = DataProvider.fromCallbacks(query -> {
+//            int pageSize = query.getPageSize();
+//            int page = query.getPage();
+//
+//            List<ProductOrService> list = new ArrayList<>();
+//            ProductService productService = ContextProvider.getBean(ProductService.class);
+////            List<Product> list1 = productService.list(AuthenticatedUser.token(), Long.valueOf(business));
+////            list = list1.stream().map(ProductOrService::new).collect(Collectors.toList());
+//            List<ProductOrServiceGrid> productOrServiceGrids = toGrid(list);
+//            return productOrServiceGrids.stream();
+//        }, query -> {
+//            ProductService productService = ContextProvider.getBean(ProductService.class);
+//            List<Product> list1 = productService.list(AuthenticatedUser.token(), Long.valueOf(business));
+//            return rowSize(list1);
+//        });
+//        return dataProvider;
+//    }
 
-            List<ProductOrService> list = new ArrayList<>();
-            ProductService productService = ContextProvider.getBean(ProductService.class);
-            List<Product> list1 = productService.list(AuthenticatedUser.token(), Long.valueOf(business));
-            list = list1.stream().map(ProductOrService::new).collect(Collectors.toList());
-            List<ProductOrServiceGrid> productOrServiceGrids = toGrid(list);
-            return productOrServiceGrids.stream();
-        }, query -> {
-            ProductService productService = ContextProvider.getBean(ProductService.class);
-            List<Product> list1 = productService.list(AuthenticatedUser.token(), Long.valueOf(business));
-            return rowSize(list1);
-        });
-        return dataProvider;
-    }
-
-    static CallbackDataProvider<ProductOrService, String> getProducts(String business) {
-        CallbackDataProvider<ProductOrService, String> dataProvider;
-        dataProvider = DataProvider.fromFilteringCallbacks(query -> {
-            int pageSize = query.getPageSize();
-            int page = query.getPage();
-
-            List<ProductOrService> list = new ArrayList<>();
-            ProductService productService = ContextProvider.getBean(ProductService.class);
-            List<Product> list1 = productService.list(AuthenticatedUser.token(), Long.valueOf(business));
-            list = list1.stream().map(ProductOrService::new).collect(Collectors.toList());
-            return list.stream();
-        }, query -> {
-            ProductService productService = ContextProvider.getBean(ProductService.class);
-            List<Product> list1 = productService.list(AuthenticatedUser.token(), Long.valueOf(business));
-            return list1.size();
-        });
-        return dataProvider;
-    }
+//    static CallbackDataProvider<ProductOrService, String> getProducts(String business) {
+//        CallbackDataProvider<ProductOrService, String> dataProvider;
+//        dataProvider = DataProvider.fromFilteringCallbacks(query -> {
+//            int pageSize = query.getPageSize();
+//            int page = query.getPage();
+//
+//            List<ProductOrService> list = new ArrayList<>();
+//            ProductService productService = ContextProvider.getBean(ProductService.class);
+////            List<Product> list1 = productService.list(AuthenticatedUser.token(), Long.valueOf(business));
+////            list = list1.stream().map(ProductOrService::new).collect(Collectors.toList());
+//            return list.stream();
+//        }, query -> {
+//            ProductService productService = ContextProvider.getBean(ProductService.class);
+//            List<Product> list1 = productService.list(AuthenticatedUser.token(), Long.valueOf(business));
+//            return list1.size();
+//        });
+//        return dataProvider;
+//    }
 
     public static DataProvider<ProductOrServiceGrid, Void> getServicesGrid(String business) {
         DataProvider<ProductOrServiceGrid, Void> dataProvider;

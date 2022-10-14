@@ -36,8 +36,8 @@ public class AddServiceView extends AddService implements BeforeEnterObserver {
         if (!hasAccess) {
             UI.getCurrent().navigate(AboutView.class);
         }
-        setBusiness(event);
-        setServices();
+
+        setServices(event);
     }
 
 

@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.RestTemplate;
 import sr.we.shekelflowcore.entity.Invoice;
+import sr.we.shekelflowcore.entity.InvoiceSetting;
 import sr.we.shekelflowcore.entity.helper.vo.InvoiceVO;
 import sr.we.shekelflowcore.settings.Routes;
 
@@ -50,6 +51,15 @@ public class InvoiceService extends MyController {
 
         return encapsulate(() -> {
             ResponseEntity<Invoice> exchange = restTemplate.exchange(configProperties.getRest() + Routes.INVOICE_GET + "?id=" + id, HttpMethod.GET, getAuthHttpEntity(accessToken), Invoice.class);
+            return exchange.getBody();
+        });
+    }
+
+    public InvoiceSetting getSettings(Long businessId, String accessToken) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        return encapsulate(() -> {
+            ResponseEntity<InvoiceSetting> exchange = restTemplate.exchange(configProperties.getRest() + Routes.INVOICE_GET_SETTING + "?businessId=" + businessId, HttpMethod.GET, getAuthHttpEntity(accessToken), InvoiceSetting.class);
             return exchange.getBody();
         });
     }

@@ -12,38 +12,25 @@ import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.template.Id;
-import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.router.*;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.InputStreamFactory;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import net.sf.jasperreports.engine.JRException;
 import org.apache.commons.lang3.StringUtils;
+import org.vaadin.HTMLtoCANVAS.HTML2CANVAS;
 import sr.we.ContextProvider;
-import sr.we.data.controller.BusinessService;
 import sr.we.data.controller.InvoiceService;
-import sr.we.data.controller.UserAccessService;
 import sr.we.data.report.MyReportEngine;
-import sr.we.demo.about.AboutView;
-import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Invoice;
 import sr.we.shekelflowcore.entity.PosHeader;
-import sr.we.shekelflowcore.entity.Role;
-import sr.we.shekelflowcore.exception.ValidationException;
-import sr.we.shekelflowcore.security.Privileges;
-import sr.we.shekelflowcore.security.privileges.POSPrivilege;
 import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.shekelflowcore.settings.util.DateUtil;
-import sr.we.ui.views.LineAwesomeIcon;
-import sr.we.ui.views.MainLayout;
-import sr.we.ui.views.ReRouteLayout;
 import sr.we.ui.views.pos.Item;
 
-import javax.annotation.security.RolesAllowed;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -54,7 +41,7 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * A Designer generated component for the invoice-pre-view template.
- *
+ * <p>
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
@@ -66,6 +53,7 @@ public class InvoicePreView extends LitTemplate implements BeforeEnterObserver {
 
     private final Grid<Item> itemGrid;
     private final List<Item> itemList;
+    private final Map<String, Object> map, feeMap;
     @Id("invoice-preview-title-h2")
     private H2 invoicePreviewTitleH2;
     @Id("invoice-preview-table-layout")
@@ -97,10 +85,9 @@ public class InvoicePreView extends LitTemplate implements BeforeEnterObserver {
     private Label invoicerPreviewCompanyLbl;
     @Id("invoice-preview-status-span")
     private Span invoicePreviewStatusSpan;
-
-    private final Map<String, Object> map, feeMap;
     @Id("invoice-preview-report-layout")
     private VerticalLayout invoicePreviewReportLayout;
+    private String invoiceToken;
 
     /**
      * Creates a new InvoicePreView.
@@ -114,11 +101,51 @@ public class InvoicePreView extends LitTemplate implements BeforeEnterObserver {
 
         Anchor anchor = new Anchor("", invoiceSummaryDownloadBtn);
         anchor.setTarget(AnchorTarget.BLANK);
+        UI current = UI.getCurrent();
         anchor.setHref(new StreamResource("Invoice" + UUID.randomUUID() + ".pdf", new InputStreamFactory() {
 
             @Override
             public InputStream createInputStream() {
-//                UI current = UI.getCurrent();
+
+//                Element e = invoicePreviewReportLayout.getElement();
+//                String id = e.getAttribute("id");
+//                if (StringUtils.isEmpty(id)) {
+//                    e.setAttribute("id", "elementForScreenShot");
+//                    id = e.getAttribute("id");
+//                }
+//
+//                StateNode node = e.getNode();
+//                e.addEventListener("blobReady", (l) -> {
+//                    Util.getJavaScriptReturn(node, "blobValue.valueOf()").then((jsonValue) -> {
+//                        current.access(() -> {
+//                            Image image = new Image(jsonValue.asString(), "adfs");
+//                            image.setWidth("1000px");
+//                            Dialog dialog = new Dialog(image);
+//                            dialog.setSizeFull();
+//                            dialog.open();
+//                        });
+//                    });
+//                });
+//                Util.getJavaScriptInvoke(node, "let element = document.querySelector('#" + id + "');\nasync function  makeScreenshot() \n{\n  return new Promise((resolve, reject) => {  \n    resolve(html2canvas(element));\n  });\n}\n\nfunction send(canvas) {\n   blobValue = canvas.toDataURL();\n    element.dispatchEvent(new Event('blobReady'));\n}\n\nmakeScreenshot().then((canvas) =>{\n  send(canvas);\n});\n\n");
+
+//                CompletableFuture<?> completableFuture = HTML2CANVAS.takeScreenShot(invoicePreviewReportLayout.getElement());
+//                completableFuture.thenRun(() -> {
+//                    try {
+////                        Image image = new Image(completableFuture.get(), "adfs");
+////                        add(image);
+//                        String src = (String) completableFuture.get();
+////                        current.access(() -> {
+//
+//                            Image image = new Image(src, "adfs");
+//                            image.setWidth("1000px");
+//                            Dialog dialog = new Dialog(image);
+//                            dialog.setSizeFull();
+//                            dialog.open();
+////                        });
+//                    } catch (InterruptedException | ExecutionException ignored) {
+//                    }
+//                });
+
 //                CompletableFuture<String> completableFuture = HTML2CANVAS.takeScreenShot(invoicePreviewReportLayout.getElement());
 //                completableFuture.thenRun(() -> {
 //                    try {
@@ -126,7 +153,9 @@ public class InvoicePreView extends LitTemplate implements BeforeEnterObserver {
 //
 //                        current.access(() -> {
 //                            Image image = new Image(src, "adfs");
+//                            image.setWidth("1000px");
 //                            Dialog dialog = new Dialog(image);
+//                            dialog.setSizeFull();
 //                            dialog.open();
 //                        });
 //                    } catch (InterruptedException | ExecutionException ignored) {
@@ -134,11 +163,12 @@ public class InvoicePreView extends LitTemplate implements BeforeEnterObserver {
 //                });
                 Map<String, Object> map = new HashMap<String, Object>();
                 map.put("INVOICE_ID_", invoice.getId());
+                map.put("INVOICE_DUE", invoice.getRest());
                 try {
                     byte[] exportReportMap = ((MyReportEngine) ContextProvider.getBean(MyReportEngine.class)).exportInvoice(map);
                     return new ByteArrayInputStream(exportReportMap);
-                } catch (JRException e) {
-                    throw new RuntimeException(e);
+                } catch (JRException l) {
+                    throw new RuntimeException(l);
                 }
             }
 
@@ -170,8 +200,6 @@ public class InvoicePreView extends LitTemplate implements BeforeEnterObserver {
         invoicePreviewTableLayout.add(itemGrid);
     }
 
-    private String invoiceToken;
-
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         Optional<String> business1 = event.getRouteParameters().get("token");
@@ -183,9 +211,9 @@ public class InvoicePreView extends LitTemplate implements BeforeEnterObserver {
 
 
     private void setInvoice(Invoice invoice) {
-        invoicePreviewTitleH2.setText("Invoice #"+invoice.getInvoiceNumber()+" from "+invoice.getBusiness().getName());
+        invoicePreviewTitleH2.setText("Invoice #" + invoice.getInvoiceNumber() + " from " + invoice.getBusiness().getName());
         invoicePreviewHeaderParagraph.setText(StringUtils.isBlank(invoice.getHeaderMessage()) ? "N.A." : invoice.getHeaderMessage());
-        invoicePreviewAmountDueHeaderH1.setText(invoice.getCurrencyTo().getCode() +" "+ (invoice.getRest() == null ? "?" : Constants.CURRENCY_FORMAT.format(invoice.getRest())));
+        invoicePreviewAmountDueHeaderH1.setText(invoice.getCurrencyTo().getCode() + " " + (invoice.getRest() == null ? "?" : Constants.CURRENCY_FORMAT.format(invoice.getRest())));
         invoicePreviewHeaderBilltoLbl.setText(invoice.getCustomer() == null ? "None" : (invoice.getCustomer().getName() + " " + invoice.getCustomer().getFirstName()));
 
         invoicePreviewStatusSpan.getElement().getThemeList().remove("success");
@@ -206,31 +234,43 @@ public class InvoicePreView extends LitTemplate implements BeforeEnterObserver {
         }
 
         invoicerPreviewNotesTa.setValue(StringUtils.isBlank(invoice.getThankMessage()) ? "" : invoice.getThankMessage());
-        invoicerPreviewInvnumberLbl.setText(StringUtils.isBlank(invoice.getInvoiceNumber()) ? "" : ("# "+invoice.getInvoiceNumber()));
-        invoicerPreviewPosoLbl.setText(StringUtils.isBlank(invoice.getPosoNumber()) ? "" : ("# "+invoice.getPosoNumber()));
+        invoicerPreviewInvnumberLbl.setText(StringUtils.isBlank(invoice.getInvoiceNumber()) ? "" : ("# " + invoice.getInvoiceNumber()));
+        invoicerPreviewPosoLbl.setText(StringUtils.isBlank(invoice.getPosoNumber()) ? "" : ("# " + invoice.getPosoNumber()));
         invoicerPreviewCompanyLbl.setText(invoice.getBusiness().getName());
         invoicerPreviewFooterLbl.setText(StringUtils.isBlank(invoice.getFooterMessage()) ? "" : invoice.getFooterMessage());
         invoicerPreviewInvdateLbl.setText(invoice.getInvoiceDate() == null ? "" : Constants.SIMPLE_DATE_FORMAT.format(DateUtil.convertToDateViaInstant(invoice.getInvoiceDate())));
-        invoicerPreviewPaydueLbl.setText(invoice.getPaymentDue()== null ? "" : Constants.SIMPLE_DATE_FORMAT.format(DateUtil.convertToDateViaInstant(invoice.getPaymentDue())));
+        invoicerPreviewPaydueLbl.setText(invoice.getPaymentDue() == null ? "" : Constants.SIMPLE_DATE_FORMAT.format(DateUtil.convertToDateViaInstant(invoice.getPaymentDue())));
 
         setTicket(invoice.getPosHeader());
+        discount(invoice);
         total(invoice);
         due(invoice);
 
     }
 
     private void due(Invoice invoice) {
-        Label total = new Label("Amount due "+ invoice.getCurrencyTo().getCode() + " "+ (invoice.getRest() == null ? "?" : Constants.CURRENCY_FORMAT.format(invoice.getRest())));
-        total.getElement().getStyle().set("margin-left","auto");
+        Label total = new Label("Amount due " + invoice.getCurrencyTo().getCode() + " " + (invoice.getRest() == null ? "?" : Constants.CURRENCY_FORMAT.format(invoice.getRest())));
+        total.getElement().getStyle().set("margin-left", "auto");
         HorizontalLayout horizontalLayout = new HorizontalLayout(total);
         horizontalLayout.setWidthFull();
         invoicePreviewTotalLayout.add(horizontalLayout);
     }
 
+    private void discount(Invoice invoice) {
+        if(invoice.getPosHeader().getDiscount() != null && invoice.getPosHeader().getDiscount().compareTo(BigDecimal.ZERO) != 0) {
+            Label total = new Label("Discount " + Constants.CURRENCY_FORMAT.format(invoice.getPosHeader().getDiscount()));
+            total.getElement().getStyle().set("margin-left", "auto");
+            total.getElement().getStyle().set("font-weight", "bold");
+            HorizontalLayout horizontalLayout = new HorizontalLayout(total);
+            horizontalLayout.setWidthFull();
+            invoicePreviewTotalLayout.add(horizontalLayout);
+        }
+    }
+
     private void total(Invoice invoice) {
-        Label total = new Label("Total "+ invoice.getCurrencyTo().getCode() + " "+ (invoice.getConvertedAmount() == null ? "?" : Constants.CURRENCY_FORMAT.format(invoice.getConvertedAmount())));
-        total.getElement().getStyle().set("margin-left","auto");
-        total.getElement().getStyle().set("font-weight","bold");
+        Label total = new Label("Total " + invoice.getCurrencyTo().getCode() + " " + (invoice.getConvertedAmount() == null ? "?" : Constants.CURRENCY_FORMAT.format(invoice.getConvertedAmount().subtract(invoice.getPosHeader().getDiscount() == null ? BigDecimal.ZERO : invoice.getPosHeader().getDiscount().multiply(invoice.getPosHeader().getExchangeRate())))));
+        total.getElement().getStyle().set("margin-left", "auto");
+        total.getElement().getStyle().set("font-weight", "bold");
         HorizontalLayout horizontalLayout = new HorizontalLayout(total);
         horizontalLayout.setWidthFull();
         invoicePreviewTotalLayout.add(horizontalLayout);
