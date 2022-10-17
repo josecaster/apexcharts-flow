@@ -6,11 +6,14 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.RestTemplate;
+import sr.we.shekelflowcore.entity.ApplicationScheduledTask;
 import sr.we.shekelflowcore.entity.Invoice;
 import sr.we.shekelflowcore.entity.InvoiceSetting;
+import sr.we.shekelflowcore.entity.helper.adapter.LocalDateAdapter;
 import sr.we.shekelflowcore.entity.helper.vo.InvoiceVO;
 import sr.we.shekelflowcore.settings.Routes;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -92,19 +95,30 @@ public class InvoiceService extends MyController {
             return exchange.getBody();
         });
     }
-//
-//    public Business edit(String accessToken, BusinessVO vo){
-//        String body = new GsonBuilder().create().toJson(vo);
-//        RestTemplate restTemplate = new RestTemplate();
-//        String fooResourceUrl
-//                = configProperties.getRest()+ Services.BUSINESS_EDIT;
-//        HttpEntity<String> httpEntity = getAuthHttpEntity(body,accessToken);
-//
-//        return encapsulate(() -> {
-//            ResponseEntity<Business> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.POST, httpEntity, Business.class);
-//            return exchange.getBody();
-//        });
-//    }
+
+    public ApplicationScheduledTask scheduleInvoice(InvoiceVO vo, String accessToken) {
+        return encapsulate(() -> {
+            String body = new GsonBuilder()
+                    .registerTypeAdapter(LocalDate.class, new LocalDateAdapter()).create().toJson(vo);
+            RestTemplate restTemplate = new RestTemplate();
+            String fooResourceUrl
+                    = configProperties.getRest() + Routes.INVOICE_SCHEDULE;
+            HttpEntity<String> httpEntity = getAuthHttpEntity(body, accessToken);
+            ResponseEntity<ApplicationScheduledTask> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.POST, httpEntity, ApplicationScheduledTask.class);
+            return exchange.getBody();
+        });
+    }
 
 
+    public Invoice status(InvoiceVO vo, String accessToken) {
+        return encapsulate(() -> {
+            String body = new GsonBuilder().create().toJson(vo);
+            RestTemplate restTemplate = new RestTemplate();
+            String fooResourceUrl
+                    = configProperties.getRest() + Routes.INVOICE_CHANGE_STATUS;
+            HttpEntity<String> httpEntity = getAuthHttpEntity(body, accessToken);
+            ResponseEntity<Invoice> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.POST, httpEntity, Invoice.class);
+            return exchange.getBody();
+        });
+    }
 }

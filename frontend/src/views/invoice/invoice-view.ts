@@ -38,7 +38,7 @@ export class InvoiceView extends LitElement {
      Unpaid 
    </vaadin-tab>
    <vaadin-tab>
-     Draft 
+    Paid
    </vaadin-tab>
    <vaadin-tab>
      All invoices 

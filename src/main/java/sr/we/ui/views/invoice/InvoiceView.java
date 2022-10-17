@@ -75,15 +75,15 @@ public class InvoiceView extends LitTemplate  implements BeforeEnterObserver, Af
                 LineAwesomeIcon invoiceViewStatusSpan = new LineAwesomeIcon();
                 invoiceViewStatusSpan.removeClassName("menu-item-icon");
                 if (invoice.isFullyPayed()) {
-                    invoiceViewStatusSpan.setText("Paid");
+                    invoiceViewStatusSpan.setText(invoice.getStatus().getDisplay()+" : Paid");
                     invoiceViewStatusSpan.getElement().getThemeList().add("badge success");
                 } else {
 
                     if (invoice.getPaymentDue().isBefore(LocalDate.now())) {
-                        invoiceViewStatusSpan.setText("Overdue");
+                        invoiceViewStatusSpan.setText(invoice.getStatus().getDisplay()+" : Overdue");
                         invoiceViewStatusSpan.getElement().getThemeList().add("badge error");
                     } else {
-                        invoiceViewStatusSpan.setText("Pending");
+                        invoiceViewStatusSpan.setText(invoice.getStatus().getDisplay()+" : Pending");
                         invoiceViewStatusSpan.getElement().getThemeList().add("badge contrast");
                     }
                 }

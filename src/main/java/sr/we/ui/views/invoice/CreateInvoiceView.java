@@ -52,6 +52,7 @@ import sr.we.ui.views.pos.ProductOrService;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -546,6 +547,9 @@ public class CreateInvoiceView extends LitTemplate {
             invoiceNoteTermsFld.setValue(settings.getThankMessage());
             footerMessageFld.setValue(settings.getFooterMessage());
             invoiceSummaryFld.setValue(settings.getHeaderMessage());
+            invoiceNumberFld.setValue(String.valueOf(settings.getCurrentInvoiceNumber() == null ? 0 : settings.getCurrentInvoiceNumber()+1));
+            paymentDateFld.setValue(LocalDate.now());
+            paymentDueFld.setValue(LocalDate.now().plusDays(14));
         }
     }
 }
