@@ -16,7 +16,7 @@ public class BusinessOrganisationTypeSelect extends Select<BusinessOrganisationT
         PojoService pojoService = ContextProvider.getBean(PojoService.class);
         String token = AuthenticatedUser.token();
 
-        List<BusinessOrganisationType> businessOrganisationTypes = pojoService.listBusinessOrganisationType(token);
+        List<BusinessOrganisationType> businessOrganisationTypes = pojoService.listBusinessOrganisationType(token).getResult();
         setItems(businessOrganisationTypes);
 
         setItemLabelGenerator((f) -> f.getName());

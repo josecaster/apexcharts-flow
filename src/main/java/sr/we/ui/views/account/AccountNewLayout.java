@@ -14,7 +14,7 @@ import sr.we.shekelflowcore.entity.helper.Executable;
 import sr.we.shekelflowcore.entity.helper.vo.AccountVO;
 import sr.we.ui.components.general.BankSelect;
 import sr.we.ui.views.StateListenerLayout;
-import sr.we.ui.components.general.CurrencySelect;
+import sr.we.ui.components.general.BusinessCurrencySelect;
 import sr.we.ui.views.dashboard.DashboardView;
 
 public class AccountNewLayout extends StateListenerLayout {
@@ -23,7 +23,7 @@ public class AccountNewLayout extends StateListenerLayout {
     private final TextField nameFld;
     private final TextField accountId;
     private final TextArea descriptionFld;
-    private final CurrencySelect currencyFld;
+    private final BusinessCurrencySelect currencyFld;
     private final BankSelect bankSelect;
 
     private final FormLayout layout;
@@ -41,7 +41,7 @@ public class AccountNewLayout extends StateListenerLayout {
 
         nameFld = new TextField();
         accountId = new TextField();
-        currencyFld = new CurrencySelect();
+        currencyFld = new BusinessCurrencySelect();
         bankSelect = new BankSelect(null);
         descriptionFld = new TextArea();
 

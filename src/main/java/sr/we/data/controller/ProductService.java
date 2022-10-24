@@ -1,12 +1,14 @@
 package sr.we.data.controller;
 
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.RestTemplate;
 import sr.we.shekelflowcore.entity.Product;
+import sr.we.shekelflowcore.entity.helper.PagingResult;
 import sr.we.shekelflowcore.entity.helper.vo.ProductVO;
 import sr.we.shekelflowcore.settings.Routes;
 
@@ -26,14 +28,14 @@ public class ProductService extends MyController {
         });
     }
 
-    public List<Product> list(String accessToken, Long businessId) {
+    public PagingResult<Product> list(String accessToken, Long businessId) {
         RestTemplate restTemplate = new RestTemplate();
         String fooResourceUrl = configProperties.getRest() + Routes.PRODUCT_LIST + "?businessId=" + businessId;
         HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
 
         return encapsulate(() -> {
-            ResponseEntity<Product[]> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, Product[].class);
-            return Arrays.asList(exchange.getBody());
+            ResponseEntity<String> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, String.class);
+            return transform(exchange,new TypeToken<PagingResult<Product>>(){}.getType());
         });
     }
 

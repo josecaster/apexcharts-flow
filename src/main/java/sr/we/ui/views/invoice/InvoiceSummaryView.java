@@ -7,6 +7,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.formlayout.FormLayout.FormItem;
 import com.vaadin.flow.component.html.*;
@@ -21,6 +22,7 @@ import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.QueryParameters;
@@ -50,11 +52,14 @@ import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.POSPrivilege;
 import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.shekelflowcore.settings.util.DateUtil;
+import sr.we.ui.components.BreadCrumb;
 import sr.we.ui.components.ConfirmationDialog;
+import sr.we.ui.components.MyDialog;
 import sr.we.ui.views.LineAwesomeIcon;
 import sr.we.ui.views.MainLayout;
 import sr.we.ui.views.ReRouteLayout;
 import sr.we.ui.views.finance.transactions.TransactionDialog;
+import sr.we.ui.views.finance.transactions.TransactionsCmb;
 
 import javax.annotation.security.RolesAllowed;
 import java.io.ByteArrayInputStream;
@@ -75,6 +80,7 @@ import static sr.we.ContextProvider.getBean;
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
+@BreadCrumb(titleKey = "sr.we.invoices.view", parentNavigationTarget = InvoiceView.class)
 @Route(value = "invoice-view", layout = MainLayout.class)
 @RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
 @Tag("invoice-summary-view")
@@ -121,6 +127,7 @@ public class InvoiceSummaryView extends LitTemplate implements BeforeEnterObserv
     protected String business;
     protected Business business2;
     protected Invoice invoice;
+    protected InvoiceSetting invoiceSetting;
     protected Long posHeaderId;
     @Id("invoice-summary-share-link-btn")
     protected Button invoiceSummaryShareLinkBtn;
@@ -151,10 +158,15 @@ public class InvoiceSummaryView extends LitTemplate implements BeforeEnterObserv
     protected FormItem invoiceViewEndFormItem;
     @Id("invoice-view-end-span")
     protected Span invoiceViewEndSpan;
+    private Dialog dialog;
     private IntegerField integerField;
     private DatePicker datePicker;
     @Id("invoice-status-btn")
     private Button invoiceStatusBtn;
+    @Id("settings-btn")
+    private Button settingsBtn;
+    @Id("is-transactions-layout")
+    private TransactionsCmb isTransactionsLayout;
 
     /**
      * Creates a new InvoiceSummaryView.
@@ -260,6 +272,15 @@ public class InvoiceSummaryView extends LitTemplate implements BeforeEnterObserv
                 Map<String, Object> map = new HashMap<String, Object>();
                 map.put("INVOICE_ID_", invoice.getId());
                 map.put("INVOICE_DUE", invoice.getRest());
+                if (StringUtils.isNotBlank(invoice.getHeaderColor1())) {
+                    map.put("HEADER_COLOR_1", invoice.getHeaderColor1());
+                }
+                if (StringUtils.isNotBlank(invoice.getHeaderColor2())) {
+                    map.put("HEADER_COLOR_2", invoice.getHeaderColor2());
+                }
+                if (StringUtils.isNotBlank(invoice.getFooterColor1())) {
+                    map.put("FOOTER_COLOR_1", invoice.getFooterColor1());
+                }
                 try {
                     byte[] exportReportMap = ((MyReportEngine) ContextProvider.getBean(MyReportEngine.class)).exportInvoice(map);
                     return new ByteArrayInputStream(exportReportMap);
@@ -388,6 +409,30 @@ public class InvoiceSummaryView extends LitTemplate implements BeforeEnterObserv
             }
         });
 
+
+        settingsBtn.setIcon(new LineAwesomeIcon("la la-cog"));
+        settingsBtn.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY);
+        settingsBtn.addClickListener(f -> {
+            if (dialog == null) {
+                dialog = new MyDialog();
+                ColorPickerView colorPickerView = new ColorPickerView();
+                colorPickerView.setValues(invoice, invoiceSetting);
+                dialog.add(colorPickerView);
+                Button cancel = new Button("Cancel", (e) -> dialog.close());
+                Button save = new Button("Save", (e) -> {
+                    colorPickerView.save();
+                    dialog.close();
+                    setByPosHeaderId(null, posHeaderId);
+                });
+
+
+                dialog.getFooter().add(cancel);
+                dialog.getFooter().add(save);
+            }
+            dialog.open();
+
+
+        });
 
         invoiceSummaryBtnLayout.add(anchor);
         invoiceViewCreateLayout.setMaxWidth("1000px");
@@ -589,7 +634,7 @@ public class InvoiceSummaryView extends LitTemplate implements BeforeEnterObserv
     protected void setByPosHeaderId(BeforeEnterEvent event, Long posHeaderId) {
         String token = AuthenticatedUser.token();
         InvoiceService loanRequestService = getBean(InvoiceService.class);
-        invoice = loanRequestService.get(posHeaderId, token);
+        invoice = loanRequestService.getByPosHeader(posHeaderId, token);
         if (invoice == null) {
             if (event != null) {
                 event.forwardTo(ReRouteLayout.class);
@@ -600,16 +645,14 @@ public class InvoiceSummaryView extends LitTemplate implements BeforeEnterObserv
     }
 
     protected void setInvoice(Invoice invoice) {
-
+        InvoiceService loanRequestService = getBean(InvoiceService.class);
+        invoiceSetting = loanRequestService.getSettings(business2.getId(), AuthenticatedUser.token());
         if (invoice.getRest().compareTo(BigDecimal.ZERO) == 0) {
             invoiceStatusBtn.setText("Close invoice");
             invoiceStatusBtn.setThemeName("tertiary success");
         } else if (invoice.getPaymentTransactions() != null && !invoice.getPaymentTransactions().isEmpty()) {
             invoiceStatusBtn.setVisible(false);
         }
-
-
-
 
 
         if (invoice.getMainInvoiceId_() != null) {
@@ -662,8 +705,11 @@ public class InvoiceSummaryView extends LitTemplate implements BeforeEnterObserv
             invoiceViewStartScheduleBtn.setVisible(false);
             invoiceSummaryPaymentBtn.setVisible(false);
             invoiceViewEditInvoiceBtn.setVisible(false);
+            settingsBtn.setVisible(false);
             invoiceViewEnableScheduleChk.setVisible(false);
         }
+
+        isTransactionsLayout.loadCmb(invoice.getPaymentTransactions());
 
     }
 

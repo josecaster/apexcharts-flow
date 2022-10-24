@@ -8,48 +8,47 @@ import com.vaadin.flow.component.board.Row;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.H5;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.textfield.BigDecimalField;
-import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.component.textfield.EmailField;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import org.apache.commons.lang3.StringUtils;
 import sr.we.ContextProvider;
-import sr.we.data.controller.BusinessService;
-import sr.we.data.controller.PosHeaderService;
-import sr.we.data.controller.PosStartService;
-import sr.we.data.controller.UserAccessService;
+import sr.we.data.controller.*;
 import sr.we.demo.about.AboutView;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.*;
 import sr.we.shekelflowcore.entity.helper.InterExecutable;
-import sr.we.shekelflowcore.entity.helper.vo.PosHeaderDetailVO;
-import sr.we.shekelflowcore.entity.helper.vo.PosHeaderVO;
-import sr.we.shekelflowcore.entity.helper.vo.PosStartVO;
+import sr.we.shekelflowcore.entity.helper.adapter.CustomerBody;
+import sr.we.shekelflowcore.entity.helper.vo.*;
 import sr.we.shekelflowcore.enums.Reference;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.POSPrivilege;
 import sr.we.shekelflowcore.settings.util.Constants;
-import sr.we.ui.views.LineAwesomeIcon;
+import sr.we.ui.components.BreadCrumb;
+import sr.we.ui.components.MyDialog;
 import sr.we.ui.views.MainLayout;
+import sr.we.ui.views.finance.loanrequests.CustomerCmb;
 import sr.we.ui.views.finance.transactions.TransactionDialog;
 import sr.we.ui.views.invoice.ItemGrid;
 
@@ -57,7 +56,9 @@ import javax.annotation.security.RolesAllowed;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -66,6 +67,7 @@ import java.util.stream.Collectors;
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
+@BreadCrumb(titleKey = "sr.we.point.of.sale")
 @Tag("pos-view")
 @JsModule("./src/views/pos/pos-view.ts")
 @Route(value = "pos", layout = MainLayout.class)
@@ -74,7 +76,8 @@ import java.util.stream.Collectors;
 public class PosView extends LitTemplate implements BeforeEnterObserver {
 
     private final Dialog dialog;
-    private final Grid<PosHeader> ticketsGrid;
+    private final TicketsView ticketsGrid;
+    private final List<PosHeader> ticketsList;
     @Id("board-layout")
     private Div boardLayout;
     @Id("main-form-layout")
@@ -87,8 +90,6 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
     private Div itemsLayout;
     @Id("total-header-lbl")
     private H5 totalHeaderLbl;
-    @Id("total-amount-footer-lbl")
-    private Label totalAmountFooterLbl;
     @Id("variable-btn")
     private Button variableBtn;
     @Id("fee-layout")
@@ -104,7 +105,7 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
     private PosStart posStart;
     private Grid<ProductOrServiceGrid> grid;
     private ItemGrid itemsGrid;
-//    private Grid<Fee> feeGrid;
+    //    private Grid<Fee> feeGrid;
 //    private Map<String, Object> map, feeMap;
 //    private List<Item> itemList = null;
 //    private List<Fee> feeList = null;
@@ -113,9 +114,11 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
     private Business business2;
     @Id("tickets-layout")
     private Div ticketsLayout;
-    private final List<PosHeader> ticketsList;
     @Id("top-bar-layout")
     private Element topBarLayout;
+    @Id("customer-btn")
+    private Button customerBtn;
+    private Customer customer;
 
     /**
      * Creates a new PosView.
@@ -140,6 +143,7 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
 
         saveBtn.addClickListener(f -> {
             PosHeaderVO vo = getVO();
+            vo.setPosStart(posStart == null ? null : posStart.getId());
             vo.setCharged(false);
             PosHeaderService posHeaderService = ContextProvider.getBean(PosHeaderService.class);
             PosHeader posHeader = null;
@@ -166,14 +170,14 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
             transactionDialog.disableAmount();
             transactionDialog.setOnSave(() -> {
                 PosStartService posStartService = ContextProvider.getBean(PosStartService.class);
-                List<PosStart> list = posStartService.list(Long.valueOf(business), targetDate.toLocalDate(), AuthenticatedUser.token());
+                List<PosStart> list = posStartService.list(Long.valueOf(business), targetDate.toLocalDate(), AuthenticatedUser.token()).getResult();
                 posStart = list.get(0);
                 refreshTickets();
                 return null;
             });
             transactionDialog.setRefresh(() -> {
                 PosStartService posStartService = ContextProvider.getBean(PosStartService.class);
-                List<PosStart> list = posStartService.list(Long.valueOf(business), targetDate.toLocalDate(), AuthenticatedUser.token());
+                List<PosStart> list = posStartService.list(Long.valueOf(business), targetDate.toLocalDate(), AuthenticatedUser.token()).getResult();
                 posStart = list.get(0);
                 refreshTickets();
                 startNewTicket();
@@ -183,77 +187,77 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
         });
 
 
-        dialog = new Dialog();
+        dialog = new MyDialog();
 
-        ticketsLayout.removeAll();
-        ticketsGrid = new Grid<>();
+//        ticketsLayout.removeAll();
+        ticketsGrid = new TicketsView();
         ticketsLayout.add(ticketsGrid);
         ticketsList = new ArrayList<>();
-        ticketsGrid.setItems(ticketsList);
-        ticketsGrid.addColumn(f -> {
-            return "Ticket #" + f.getHeaderSeq();
-        }).setHeader("ID");
-        ticketsGrid.addColumn(PosHeader::getNote).setHeader("Note");
-        ticketsGrid.addColumn(f -> Constants.CURRENCY_FORMAT.format(f.getPrice())).setHeader("Price");
-        ticketsGrid.addColumn(f -> Constants.CURRENCY_FORMAT.format(f.getRest())).setHeader("Rest");
-        ticketsGrid.addComponentColumn(new ValueProvider<PosHeader, LineAwesomeIcon>() {
-            @Override
-            public LineAwesomeIcon apply(PosHeader posHeader) {
-                if (posHeader.getRest().compareTo(BigDecimal.ZERO) == 0) {
-                    LineAwesomeIcon lineAwesomeIcon = new LineAwesomeIcon("la la-check");
-                    lineAwesomeIcon.getElement().getThemeList().add("badge primary success");
-                    return lineAwesomeIcon;
-                }
-                LineAwesomeIcon lineAwesomeIcon = null;
-                if (posHeader.getPaymentTransactions() != null && !posHeader.getPaymentTransactions().isEmpty()) {
-                    lineAwesomeIcon = new LineAwesomeIcon("la la-check");
-                } else {
-                    lineAwesomeIcon = new LineAwesomeIcon("la la-chevron-circle-down");
-                }
-                lineAwesomeIcon.addClickListener(f -> {
-                    TransactionDialog transactionDialog = new TransactionDialog(posHeader.getRest(), LocalDate.now(), Long.valueOf(business), business2.getCurrency(), business2.getCurrency(), Reference.POS, posHeader.getId());
-//                    transactionDialog.disableAmount();
-                    transactionDialog.setOnSave(() -> {
-                        PosStartService posStartService = ContextProvider.getBean(PosStartService.class);
-                        List<PosStart> list = posStartService.list(Long.valueOf(business), targetDate.toLocalDate(), AuthenticatedUser.token());
-                        posStart = list.get(0);
-                        refreshTickets();
-                        return null;
-                    });
-                    transactionDialog.setRefresh(() -> {
-//                        String placeholder = ticketNumber();
-//                        posHeaderCmb.setPlaceholder(placeholder);
-//                        productTitle.setText("New " + placeholder);
-                        PosStartService posStartService = ContextProvider.getBean(PosStartService.class);
-                        List<PosStart> list = posStartService.list(Long.valueOf(business), targetDate.toLocalDate(), AuthenticatedUser.token());
-                        posStart = list.get(0);
-                        refreshTickets();
-                        startNewTicket();
-                        return null;
-                    });
-                    transactionDialog.open();
-//                    BigDecimal rest = detail.getFactor().subtract(detail.getTransactionsAmount());
-//                    LocalDate initDate = detail.getInitDate();
-//                    Long businessId = loanRequest.getLoan().getBusiness().getId();
-////                    LoanRequestService loanRequestService = ContextProvider.getBean(LoanRequestService.class);
-////                    LoanRequest loanRequest1 = loanRequestService.get(loanRequestPlan.getLoanRequestId(), AuthenticatedUser.token());
-//                    Currency fromCurrency = loanRequest.getLoan().getCurrency();
-//                    Currency selectedCurrency = loanRequest.getCurrency();
-//                    PaymentTransaction.Reference reference = PaymentTransaction.Reference.LOAN_REQUEST_PLAN_DETAIL;
-//                    Long referenceId = detail.getId();
-//                    PaymentTransaction.PlusMin plusMin = PaymentTransaction.PlusMin.PLUS;
-//                    TransactionDialog transactionDialog = new TransactionDialog(rest, initDate, businessId, fromCurrency, selectedCurrency, reference, referenceId, plusMin);
-//                    transactionDialog.setNextReferenceId(loanRequest.getId());
-//                    transactionDialog.setRefresh(refresh);
+//        ticketsGrid.setItems(ticketsList);
+//        ticketsGrid.addColumn(f -> {
+//            return "Ticket #" + f.getHeaderSeq();
+//        }).setHeader("ID");
+//        ticketsGrid.addColumn(PosHeader::getNote).setHeader("Note");
+//        ticketsGrid.addColumn(f -> Constants.CURRENCY_FORMAT.format(f.getPrice())).setHeader("Price");
+//        ticketsGrid.addColumn(f -> Constants.CURRENCY_FORMAT.format(f.getRest())).setHeader("Rest");
+//        ticketsGrid.addComponentColumn(new ValueProvider<PosHeader, LineAwesomeIcon>() {
+//            @Override
+//            public LineAwesomeIcon apply(PosHeader posHeader) {
+//                if (posHeader.getRest().compareTo(BigDecimal.ZERO) == 0) {
+//                    LineAwesomeIcon lineAwesomeIcon = new LineAwesomeIcon("la la-check");
+//                    lineAwesomeIcon.getElement().getThemeList().add("badge primary success");
+//                    return lineAwesomeIcon;
+//                }
+//                LineAwesomeIcon lineAwesomeIcon = null;
+//                if (posHeader.getPaymentTransactions() != null && !posHeader.getPaymentTransactions().isEmpty()) {
+//                    lineAwesomeIcon = new LineAwesomeIcon("la la-check");
+//                } else {
+//                    lineAwesomeIcon = new LineAwesomeIcon("la la-chevron-circle-down");
+//                }
+//                lineAwesomeIcon.addClickListener(f -> {
+//                    TransactionDialog transactionDialog = new TransactionDialog(posHeader.getRest(), LocalDate.now(), Long.valueOf(business), business2.getCurrency(), business2.getCurrency(), Reference.POS, posHeader.getId());
+////                    transactionDialog.disableAmount();
+//                    transactionDialog.setOnSave(() -> {
+//                        PosStartService posStartService = ContextProvider.getBean(PosStartService.class);
+//                        List<PosStart> list = posStartService.list(Long.valueOf(business), targetDate.toLocalDate(), AuthenticatedUser.token());
+//                        posStart = list.get(0);
+//                        refreshTickets();
+//                        return null;
+//                    });
+//                    transactionDialog.setRefresh(() -> {
+////                        String placeholder = ticketNumber();
+////                        posHeaderCmb.setPlaceholder(placeholder);
+////                        productTitle.setText("New " + placeholder);
+//                        PosStartService posStartService = ContextProvider.getBean(PosStartService.class);
+//                        List<PosStart> list = posStartService.list(Long.valueOf(business), targetDate.toLocalDate(), AuthenticatedUser.token());
+//                        posStart = list.get(0);
+//                        refreshTickets();
+//                        startNewTicket();
+//                        return null;
+//                    });
 //                    transactionDialog.open();
-                });
+////                    BigDecimal rest = detail.getFactor().subtract(detail.getTransactionsAmount());
+////                    LocalDate initDate = detail.getInitDate();
+////                    Long businessId = loanRequest.getLoan().getBusiness().getId();
+//////                    LoanRequestService loanRequestService = ContextProvider.getBean(LoanRequestService.class);
+//////                    LoanRequest loanRequest1 = loanRequestService.get(loanRequestPlan.getLoanRequestId(), AuthenticatedUser.token());
+////                    Currency fromCurrency = loanRequest.getLoan().getCurrency();
+////                    Currency selectedCurrency = loanRequest.getCurrency();
+////                    PaymentTransaction.Reference reference = PaymentTransaction.Reference.LOAN_REQUEST_PLAN_DETAIL;
+////                    Long referenceId = detail.getId();
+////                    PaymentTransaction.PlusMin plusMin = PaymentTransaction.PlusMin.PLUS;
+////                    TransactionDialog transactionDialog = new TransactionDialog(rest, initDate, businessId, fromCurrency, selectedCurrency, reference, referenceId, plusMin);
+////                    transactionDialog.setNextReferenceId(loanRequest.getId());
+////                    transactionDialog.setRefresh(refresh);
+////                    transactionDialog.open();
+//                });
+//
+//                lineAwesomeIcon.getElement().getThemeList().add("badge primary error");
+//                return lineAwesomeIcon;
+//            }
+//        }).setHeader("Record Payment");
 
-                lineAwesomeIcon.getElement().getThemeList().add("badge primary error");
-                return lineAwesomeIcon;
-            }
-        }).setHeader("Record Payment");
-
-        variableBtn.addClickListener(f-> {
+        variableBtn.addClickListener(f -> {
             PosHeaderVO vo = getVO();
             vo.setCharged(false);
             PosHeaderService posHeaderService = ContextProvider.getBean(PosHeaderService.class);
@@ -267,6 +271,90 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
             refreshTickets();
             ticketsGrid.scrollIntoView();
         });
+
+
+        ContextMenu contextMenu = new ContextMenu(customerBtn);
+        contextMenu.setOpenOnClick(true);
+        contextMenu.addItem("Create new customer", g -> {
+            VerticalLayout customerLayout = new VerticalLayout();
+            TextField firstNameFld = new TextField();
+            TextField lastNameFld = new TextField();
+            TextField mobileNumberFld = new TextField();
+            EmailField emailFld = new EmailField();
+
+            firstNameFld.setPlaceholder("Firstname");
+            lastNameFld.setPlaceholder("Name");
+            mobileNumberFld.setPlaceholder("Mobile number");
+            emailFld.setPlaceholder("Email-address");
+
+            firstNameFld.setWidthFull();
+            lastNameFld.setWidthFull();
+            mobileNumberFld.setWidthFull();
+            emailFld.setWidthFull();
+
+            customerLayout.add(firstNameFld, lastNameFld, mobileNumberFld, emailFld);
+            Dialog dialog1 = new MyDialog();
+            dialog1.setHeaderTitle("Add new customer");
+            dialog1.add(customerLayout);
+            Button cancel = new Button("Cancel", (e) -> dialog1.close());
+            cancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+            dialog1.getFooter().add(cancel);
+            Button save = new Button("Save");
+            save.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
+            dialog1.getFooter().add(save);
+            dialog1.open();
+
+
+            save.addClickListener(f -> {
+                CustomerVO customerVO = new CustomerVO();
+                customerVO.setNew(true);
+                customerVO.setFirstName(firstNameFld.getValue());
+                customerVO.setName(lastNameFld.getValue());
+                customerVO.setBusiness(business2.getId());
+
+                CustomerBody customerBody = new CustomerBody();
+                customerBody.setNew(true);
+                customerBody.setCustomerVO(customerVO);
+                CustomerContactVO customerContactVO = new CustomerContactVO();
+                customerContactVO.setMobile(mobileNumberFld.getValue());
+                customerContactVO.setEmail(emailFld.getValue());
+
+                customerBody.setCustomerContactVO(customerContactVO);
+                CustomerService customerService = ContextProvider.getBean(CustomerService.class);
+
+                customerBody.setCustomerBillingVO(new CustomerBillingVO());
+                customerBody.setCustomerShippingVO(new CustomerShippingVO());
+                customerBody.setShippingAddressVO(new CustomerAddressVO());
+                customerBody.setBillingAddressVO(new CustomerAddressVO());
+                Customer customer1 = customerService.create(AuthenticatedUser.token(), customerBody);
+                setCustomer(customer1);
+                dialog1.close();
+            });
+
+        });
+        contextMenu.addItem("Choose existing customer", g -> {
+            CustomerCmb existingCustomersCmb = new CustomerCmb();
+            existingCustomersCmb.setWidthFull();
+            existingCustomersCmb.setPlaceholder("Choose existing customer");
+            existingCustomersCmb.load(business2.getId());
+            Dialog dialog1 = new MyDialog();
+            dialog1.setHeaderTitle("Select customer");
+            dialog1.add(existingCustomersCmb);
+            Button cancel = new Button("Cancel", (e) -> dialog1.close());
+            cancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+            dialog1.getFooter().add(cancel);
+            Button save = new Button("Save");
+            save.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
+            dialog1.getFooter().add(save);
+            dialog1.open();
+
+            existingCustomersCmb.addValueChangeListener(f -> setCustomer(f.getValue()));
+        });
+    }
+
+    private void setCustomer(Customer customer) {
+        this.customer = customer;
+        customerBtn.setText(customer.getName() + ", " + customer.getFirstName());
     }
 
     private void init() {
@@ -291,13 +379,13 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
 //            if (l.getProduct() != null) {
 //                return l.getProduct().getTitle();
 //            } else {
-                return l.getServices().getName();
+            return l.getServices().getName();
 //            }
         });
 
 //        productservicesRadio.addValueChangeListener(f -> {
-            CallbackDataProvider<ProductOrService, String> dataProvider = null;
-            DataProvider<ProductOrServiceGrid, Void> dataProviderGrid = null;
+        CallbackDataProvider<ProductOrService, String> dataProvider = null;
+        DataProvider<ProductOrServiceGrid, Void> dataProviderGrid = null;
 //            if (f.getValue().compareTo(Radio.PRODUCTS) == 0) {
 //                filterCmb.setPlaceholder("Filter products");
 //
@@ -305,15 +393,15 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
 //                dataProvider = DataProviders.getProducts(business);
 //                dataProviderGrid = DataProviders.getProductsGrid(business);
 //            } else {
-                filterCmb.setPlaceholder("Filter services");
+        filterCmb.setPlaceholder("Filter services");
 
 
-                dataProvider = DataProviders.getServices(business);
-                dataProviderGrid = DataProviders.getServicesGrid(business);
+        dataProvider = DataProviders.getServices(business);
+        dataProviderGrid = DataProviders.getServicesGrid(business);
 //            }
 //
-            filterCmb.setItems(dataProvider);
-            grid.setItems(dataProviderGrid);
+        filterCmb.setItems(dataProvider);
+        grid.setItems(dataProviderGrid);
 //        });
 
 //        productservicesRadio.setValue(Radio.SERVICES);
@@ -336,6 +424,11 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
         itemsGrid.setBusiness(business2);
         itemsLayout.removeAll();
         itemsLayout.add(itemsGrid);
+        itemsLayout.setHeightFull();
+        itemsGrid.setAllRowsVisible(false);
+        itemsGrid.setHeightFull();
+        itemsGrid.addThemeVariants(GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_COMPACT);
+        itemsGrid.removeThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 //        itemGrid.setSelectionMode(Grid.SelectionMode.NONE);
 //        itemGrid.setHeight("300px");
 //        itemGrid.addThemeVariants( GridVariant.LUMO_ROW_STRIPES, GridVariant.LUMO_WRAP_CELL_CONTENT, GridVariant.LUMO_COMPACT);
@@ -456,13 +549,18 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
 //    }
 
     public PosHeaderVO getVO() {
-        List<PosHeaderDetailVO> vos = new ArrayList<>();
-        PosHeaderVO posHeaderVO = new PosHeaderVO();
+//        List<PosHeaderDetailVO> vos = new ArrayList<>();
+        /*PosHeaderVO posHeaderVO = new PosHeaderVO();
         posHeaderVO.setId(posHeaderCmb.getValue() == null ? null : posHeaderCmb.getValue().getId());
         posHeaderVO.setNew(posHeaderVO.getId() == null);
         posHeaderVO.setPosStart(posStart == null ? null : posStart.getId());
-        posHeaderVO.setCustomerId(null);//TODO
-        posHeaderVO.setDetails(vos);
+        posHeaderVO.setDetails(vos);*/
+
+
+        PosHeaderVO vo = itemsGrid.getVO();
+        vo.setCustomerId(customer == null ? null : customer.getId());
+        vo.setPosStart(posStart == null ? null : posStart.getId());
+        vo.setCharged(false);
 //        List<PosHeaderDetailVO> collectItems = itemList.stream().map(f -> {
 //            PosHeaderDetailVO posHeaderDetailVO = new PosHeaderDetailVO();
 //            posHeaderDetailVO.setId(f.getPosHeaderDetail() == null ? null : f.getPosHeaderDetail().getId());
@@ -496,19 +594,19 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
 //            return posHeaderDetailVO;
 //        }).collect(Collectors.toList());
 
-        vos.addAll(itemsGrid.itemListVo());
+//        vos.addAll(itemsGrid.itemListVo());
 //        vos.addAll(collectFees);
 
-        BigDecimal reduce = itemsGrid.getItemList().stream().map(Item::getCalcPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
+        /*BigDecimal reduce = itemsGrid.getItemList().stream().map(Item::getCalcPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
 //        reduce = reduce.add(feeList.stream().map(Fee::getCalcPrice).reduce(BigDecimal.ZERO, BigDecimal::add));
         posHeaderVO.setPrice(reduce);
-        posHeaderVO.setRemoveList(itemsGrid.getRemoveList());
+        posHeaderVO.setRemoveList(itemsGrid.getRemoveList());*/
 
-        return posHeaderVO;
+        return vo;
     }
 
     private InterExecutable<Object, List<Item>> total() {
-        return new InterExecutable<Object, List<Item>>(){
+        return new InterExecutable<Object, List<Item>>() {
 
             @Override
             public Object build(List<Item> items) {
@@ -516,7 +614,6 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
 //        reduce = reduce.add(feeList.stream().map(Fee::getCalcPrice).reduce(BigDecimal.ZERO, BigDecimal::add));
                 String text = Constants.CURRENCY_FORMAT.format(reduce == null ? BigDecimal.ZERO : reduce);
                 totalHeaderLbl.setText("Total " + text);
-                totalAmountFooterLbl.setText(text);
                 return null;
             }
         };
@@ -594,7 +691,7 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
         business2 = businessService.get(Long.valueOf(business), AuthenticatedUser.token());
         PosStartService posStartService = ContextProvider.getBean(PosStartService.class);
         targetDate = LocalDateTime.now();
-        List<PosStart> list = posStartService.list(Long.valueOf(business), targetDate.toLocalDate(), AuthenticatedUser.token());
+        List<PosStart> list = posStartService.list(Long.valueOf(business), targetDate.toLocalDate(), AuthenticatedUser.token()).getResult();
         if (list == null || list.isEmpty()) {
 
             dialog.setCloseOnOutsideClick(false);
@@ -650,13 +747,26 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
     private void refreshTickets() {
         ticketsList.clear();
         ticketsList.addAll(posStart.getPosHeader().stream().filter(f -> f.getCharged() == null || !f.getCharged()).collect(Collectors.toList()));
-        ticketsGrid.getDataProvider().refreshAll();
+        ticketsGrid.setTickets(ticketsList, business2, () -> {
+            PosStartService posStartService = ContextProvider.getBean(PosStartService.class);
+            List<PosStart> list = posStartService.list(business2.getId(), targetDate.toLocalDate(), AuthenticatedUser.token()).getResult();
+            posStart = list.get(0);
+            refreshTickets();
+            return null;
+        }, () -> {
+            PosStartService posStartService = ContextProvider.getBean(PosStartService.class);
+            List<PosStart> list = posStartService.list(business2.getId(), targetDate.toLocalDate(), AuthenticatedUser.token()).getResult();
+            posStart = list.get(0);
+            refreshTickets();
+            startNewTicket();
+            return null;
+        });
     }
 
     private void startNewTicket() {
         init();
         PosStartService posStartService = ContextProvider.getBean(PosStartService.class);
-        List<PosStart> list = posStartService.list(Long.valueOf(business), targetDate.toLocalDate(), AuthenticatedUser.token());
+        List<PosStart> list = posStartService.list(Long.valueOf(business), targetDate.toLocalDate(), AuthenticatedUser.token()).getResult();
         if (list != null && !list.isEmpty()) {
             posStart = list.get(0);
         }
@@ -665,7 +775,6 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
         productTitle.setText("New " + placeholder);
         String text = "0.00";
         totalHeaderLbl.setText("Total " + text);
-        totalAmountFooterLbl.setText(text);
     }
 
     private String ticketNumber() {
@@ -682,7 +791,6 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
 //        reduce = reduce.add(feeList.stream().map(Fee::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add));
         String text = Constants.CURRENCY_FORMAT.format(reduce == null ? BigDecimal.ZERO : reduce);
         totalHeaderLbl.setText("Total " + text);
-        totalAmountFooterLbl.setText(text);
     }
 
 }

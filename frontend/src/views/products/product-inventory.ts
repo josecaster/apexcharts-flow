@@ -20,7 +20,7 @@ export class ProductInventory extends LitElement {
 
   render() {
     return html`
-<vaadin-vertical-layout style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin: var(--lumo-space-s); margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m);">
+<vaadin-vertical-layout style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin: var(--lumo-space-s); margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m);" class="shadow-s">
  <vaadin-form-layout style="flex-grow: 0; flex-shrink: 1; align-self: stretch;">
   <vaadin-text-field label="SKU" placeholder="Stock keeping unit" type="text" colspan="1" id="sku"></vaadin-text-field>
   <vaadin-text-field label="Barcode" placeholder="Barcode" type="text" colspan="1" id="barcode"></vaadin-text-field>

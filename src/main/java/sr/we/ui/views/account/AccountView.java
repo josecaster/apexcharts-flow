@@ -111,7 +111,7 @@ public class AccountView extends LitTemplate {
             @Override
             public void run() {
                 AccountService accountService = ContextProvider.getBean(AccountService.class);
-                List<Account> list = accountService.list(token, vo);
+                List<Account> list = accountService.list(token, vo).getResult();
                 current.access(() -> {
                     if (list != null && !list.isEmpty()) {
                         grid.setItems(list);

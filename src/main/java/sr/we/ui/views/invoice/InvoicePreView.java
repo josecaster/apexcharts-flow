@@ -26,9 +26,11 @@ import sr.we.ContextProvider;
 import sr.we.data.controller.InvoiceService;
 import sr.we.data.report.MyReportEngine;
 import sr.we.shekelflowcore.entity.Invoice;
+import sr.we.shekelflowcore.entity.InvoiceSetting;
 import sr.we.shekelflowcore.entity.PosHeader;
 import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.shekelflowcore.settings.util.DateUtil;
+import sr.we.ui.components.BreadCrumb;
 import sr.we.ui.views.pos.Item;
 
 import java.io.ByteArrayInputStream;
@@ -45,6 +47,7 @@ import java.util.concurrent.ExecutionException;
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
+@BreadCrumb(titleKey = "sr.we.invoices.preview",parentNavigationTarget = InvoiceView.class)
 @Route(value = "invoice/:token")
 @AnonymousAllowed
 @Tag("invoice-pre-view")
@@ -61,6 +64,7 @@ public class InvoicePreView extends LitTemplate implements BeforeEnterObserver {
     @Id("invoice-preview-total-layout")
     private VerticalLayout invoicePreviewTotalLayout;
     private Invoice invoice;
+//    private InvoiceSetting invoiceSetting;
     @Id("invoice-preview-download-btn-layout")
     private Div invoicePreviewDownloadBtnLayout;
     @Id("invoice-preview-header-paragraph")
@@ -164,6 +168,17 @@ public class InvoicePreView extends LitTemplate implements BeforeEnterObserver {
                 Map<String, Object> map = new HashMap<String, Object>();
                 map.put("INVOICE_ID_", invoice.getId());
                 map.put("INVOICE_DUE", invoice.getRest());
+                if(invoice != null){
+                    if(StringUtils.isNotBlank(invoice.getHeaderColor1())){
+                        map.put("HEADER_COLOR_1", invoice.getHeaderColor1());
+                    }
+                    if(StringUtils.isNotBlank(invoice.getHeaderColor2())){
+                        map.put("HEADER_COLOR_2", invoice.getHeaderColor2());
+                    }
+                    if(StringUtils.isNotBlank(invoice.getFooterColor1())){
+                        map.put("FOOTER_COLOR_1", invoice.getFooterColor1());
+                    }
+                }
                 try {
                     byte[] exportReportMap = ((MyReportEngine) ContextProvider.getBean(MyReportEngine.class)).exportInvoice(map);
                     return new ByteArrayInputStream(exportReportMap);
@@ -202,8 +217,8 @@ public class InvoicePreView extends LitTemplate implements BeforeEnterObserver {
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        Optional<String> business1 = event.getRouteParameters().get("token");
-        business1.ifPresent(s -> invoiceToken = s);
+        Optional<String> token = event.getRouteParameters().get("token");
+        token.ifPresent(s -> invoiceToken = s);
         InvoiceService invoiceService = ContextProvider.getBean(InvoiceService.class);
         invoice = invoiceService.getByToken(invoiceToken);
         setInvoice(invoice);

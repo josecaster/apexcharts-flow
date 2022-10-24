@@ -15,6 +15,7 @@ import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.TransactionsPrivilege;
+import sr.we.ui.components.BreadCrumb;
 import sr.we.ui.views.MainLayout;
 
 import javax.annotation.security.RolesAllowed;
@@ -26,6 +27,8 @@ import java.util.Optional;
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
+
+@BreadCrumb(titleKey = "sr.we.transactions")
 @Route(value = "transaction", layout = MainLayout.class)
 @RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
 @Tag("transactions-view")

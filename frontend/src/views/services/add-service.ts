@@ -24,11 +24,7 @@ export class AddService extends LitElement {
     return html`
 <vaadin-vertical-layout style="background: #f6f6f7; padding: var(--lumo-space-m); width: 100%; flex-direction: column;">
  <vaadin-horizontal-layout theme="spacing" style="align-self: stretch; margin:0px; padding: 0px;">
-  <vaadin-button style="align-self: center; margin: 0px; padding: 0px;" tabindex="0" id="back-button">
-    . 
-  </vaadin-button>
-  <h2 id="add-product-title" style="flex-grow: 1; flex-shrink: 0; align-self: center; margin:0px; padding: 0px;">Add item</h2>
-  <vaadin-button id="save-btn" style="align-self: center; padding: 0px; margin: 0px;" tabindex="0" theme="primary">
+  <vaadin-button id="save-btn" style=" align-self: center; padding: 0px;  margin-left:auto;" tabindex="0" theme="primary">
     Save 
   </vaadin-button>
  </vaadin-horizontal-layout>
@@ -36,23 +32,23 @@ export class AddService extends LitElement {
  <vaadin-form-layout id="main-form-layout">
   <vaadin-form-layout colspan="2">
    <vaadin-form-item colspan="2">
-    <service-form style="width: 100%;" id="service-form" colspan="2"></service-form>
+    <service-form style="width: 100%;" id="service-form" colspan="2" class="shadow-s "></service-form>
     <label slot="label">Main</label>
    </vaadin-form-item>
    <vaadin-form-item colspan="2">
-    <product-inventory id="service-inventory" style="width: 100%;" colspan="2"></product-inventory>
+    <product-inventory id="service-inventory" style="width: 100%;" colspan="2" class="shadow-s"></product-inventory>
     <label slot="label">Inventory</label>
    </vaadin-form-item>
    <vaadin-form-item colspan="2">
-    <service-price id="service-price" style="width: 100%;" colspan="2"></service-price>
+    <service-price id="service-price" style="width: 100%;" colspan="2" class="shadow-s"></service-price>
     <label slot="label">Price</label>
    </vaadin-form-item>
    <vaadin-form-item id="ser-comp-layout" colspan="2">
-    <service-components id="service-components" style="width: 100%;" colspan="2"></service-components>
+    <service-components id="service-components" style="width: 100%;" colspan="2" class="shadow-s"></service-components>
     <label slot="label">Price components</label>
    </vaadin-form-item>
    <vaadin-form-item id="serv-formula-layout" colspan="2">
-    <service-formula id="service-formula" style="width: 100%;" colspan="2"></service-formula>
+    <service-formula id="service-formula" style="width: 100%;" colspan="2" class="shadow-s"></service-formula>
     <label slot="label">Advanced price</label>
    </vaadin-form-item>
   </vaadin-form-layout>

@@ -2,11 +2,13 @@ package sr.we.ui.views.pos;
 
 import sr.we.ContextProvider;
 import sr.we.data.controller.CalculationService;
+import sr.we.data.controller.ExchangeRateService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.*;
 import sr.we.shekelflowcore.entity.helper.adapter.CalculationParam;
 import sr.we.shekelflowcore.entity.helper.adapter.CalculationResult;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +28,9 @@ public class Item {
     private BigDecimal result, itemCount;
     private BigDecimal price;
     private PosHeaderDetail posHeaderDetail;
+    private BigDecimal exchange;
+    private Currency currencyTo;
+    private boolean recalcRate = true;
 
     public Item(PosHeaderDetail posHeaderDetail, Map<String, Object> map, Map<String, Object> feeMap) {
         addCount();
@@ -43,16 +48,19 @@ public class Item {
         init(map, feeMap, items);
         price = this.posHeaderDetail.getPrice();
         result = this.posHeaderDetail.getResult();
+        exchange = this.posHeaderDetail.getExchangeRate();
+        currencyTo = this.posHeaderDetail.getCurrencyTo();
     }
 
     public Item(ProductOrService productOrService, Map<String, Object> map, Map<String, Object> feeMap) {
         this.productOrService = productOrService;
         Items items = productOrService.getServices();
+        setCurrency(items.getBusiness().getCurrency());
         init(map, feeMap, items);
     }
 
     private void init(Map<String, Object> map, Map<String, Object> feeMap, Items items) {
-        if(count == 0) {
+        if (count == 0) {
             addCount();
         }
         this.map = map;
@@ -92,11 +100,11 @@ public class Item {
     }
 
     public String getName() {
-        return posHeaderDetail == null ? productOrService.getServices().getName()  : posHeaderDetail.getName();
+        return posHeaderDetail == null ? productOrService.getServices().getName() : posHeaderDetail.getName();
     }
 
-    public void setName(String name){
-        if(posHeaderDetail == null){
+    public void setName(String name) {
+        if (posHeaderDetail == null) {
             productOrService.getServices().setName(name);
         } else {
             posHeaderDetail.setName(name);
@@ -123,12 +131,29 @@ public class Item {
         itemCount = BigDecimal.valueOf(this.count);
         price = price();
         result = price.multiply(itemCount);
+
+        if (currencyTo != null) {
+            if (currencyTo.getId().compareTo(productOrService.getServices().getCurrency().getId()) != 0) {
+                try {
+                    if (recalcRate || exchange == null) {
+                        ExchangeRateService exchangeRateService = ContextProvider.getBean(ExchangeRateService.class);
+                        exchange = exchangeRateService.exchange(productOrService.getServices().getCurrency().getCode(), currencyTo.getCode(), productOrService.getServices().getBusiness().getId(), AuthenticatedUser.token());
+                    }
+                    if (exchange == null) {
+                        exchange = BigDecimal.ONE;
+                    }
+                    result = result.multiply(exchange);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
         return result;
     }
 
     private BigDecimal price() {
         Items items = productOrService == null ? (posHeaderDetail == null ? null : posHeaderDetail.getServices()) : productOrService.getServices();
-        if(posHeaderDetail != null && posHeaderDetail.getPrice() != null){
+        if (posHeaderDetail != null && posHeaderDetail.getPrice() != null) {
             return posHeaderDetail.getPrice();
         }
         if (items != null) {
@@ -185,5 +210,22 @@ public class Item {
 
     public PosHeaderDetail getPosHeaderDetail() {
         return posHeaderDetail;
+    }
+
+    public void setCurrency(Currency currencyTo) {
+        this.currencyTo = currencyTo;
+    }
+
+    public Currency getCurrencyTo() {
+        return currencyTo;
+    }
+
+    public BigDecimal getExchange() {
+        return exchange;
+    }
+
+    public void setExchange(BigDecimal value) {
+        exchange = value;
+        recalcRate = false;
     }
 }

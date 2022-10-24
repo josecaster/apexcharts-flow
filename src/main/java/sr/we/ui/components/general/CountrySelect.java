@@ -19,7 +19,7 @@ public class CountrySelect extends Select<Country> {
         PojoService pojoService = ContextProvider.getBean(PojoService.class);
         String token = AuthenticatedUser.token();
 
-        countries = pojoService.listCountry(token);
+        countries = pojoService.listCountry(token).getResult();
         setItems(countries);
 
         setItemLabelGenerator(MappedSuperClassReference::getName);

@@ -5,6 +5,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -12,12 +13,15 @@ import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.page.History;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.spring.SpringVaadinSession;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.env.PropertyResolver;
 import sr.we.ContextProvider;
 import sr.we.CustomErrorHandler;
 import sr.we.data.controller.UserAccessService;
@@ -29,8 +33,10 @@ import sr.we.shekelflowcore.entity.helper.Token;
 import sr.we.shekelflowcore.security.PrivilegeModeAbstract;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.*;
+import sr.we.ui.components.BreadCrumb;
 import sr.we.ui.views.account.ChartOfAccountsView;
 import sr.we.ui.views.business.BusinessView;
+import sr.we.ui.views.currencyexchange.CurrencyExchangeView;
 import sr.we.ui.views.customers.CustomersView;
 import sr.we.ui.views.dashboard.DashboardView;
 import sr.we.ui.views.finance.loanrequests.RequestsView;
@@ -42,6 +48,7 @@ import sr.we.ui.views.login.NotActiveDialog;
 import sr.we.ui.views.person.PersonView;
 import sr.we.ui.views.personform.PersonFormView;
 import sr.we.ui.views.pos.PosView;
+import sr.we.ui.views.pos.TicketsGridView;
 import sr.we.ui.views.products.ProductView;
 import sr.we.ui.views.services.ServiceView;
 
@@ -63,7 +70,7 @@ import java.util.stream.Collectors;
 @Route("")
 @RoutePrefix("n/a/:business")
 @PreserveOnRefresh
-public class MainLayout extends AppLayout implements BeforeEnterObserver {
+public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterNavigationObserver {
 
     private static Optional<String> business;
     private final Dialog dialog;
@@ -201,14 +208,50 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         constructed = true;
     }
 
+//    private Component createHeaderContent() {
+//        DrawerToggle toggle = new DrawerToggle();
+//        toggle.addClassNames("view-toggle");
+//        toggle.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
+//        toggle.getElement().setAttribute("aria-label", "Menu toggle");
+//
+//
+//        viewTitle.addClassNames("view-title");
+//
+//        roleSelect = new Select<>();
+//        roleSelect.setReadOnly(true);
+//        roleSelect.setItemLabelGenerator(Role::getDescription);
+//        roleSelect.addValueChangeListener(f -> {
+////            if(f.getValue() == null){
+////                return;
+////            }
+////            UserService userService = ContextProvider.getBean(UserService.class);
+////            userService.select(AuthenticatedUser.token(), Long.valueOf(businessId), f.getValue());
+//        });
+//        HorizontalLayout horizontalLayout = new HorizontalLayout(roleSelect);
+//        horizontalLayout.setPadding(false);
+//        horizontalLayout.setMargin(false);
+//        horizontalLayout.setWidthFull();
+//        horizontalLayout.setAlignItems(FlexComponent.Alignment.END);
+//        horizontalLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+//        Header header = new Header(toggle, viewTitle, horizontalLayout);
+//        header.addClassNames("view-header");
+//
+//        return header;
+//    }
+
     private Component createHeaderContent() {
         DrawerToggle toggle = new DrawerToggle();
         toggle.addClassNames("view-toggle");
         toggle.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
         toggle.getElement().setAttribute("aria-label", "Menu toggle");
 
+//		viewTitle = new H1();
+//		viewTitle.addClassNames("view-title");
+        breadCrumbLayout = new HorizontalLayout();
+//        UIUtils.setTextColor("white", breadCrumbLayout);
+        breadCrumbLayout.setWidthFull();
 
-        viewTitle.addClassNames("view-title");
+//        initAccountMenu();
 
         roleSelect = new Select<>();
         roleSelect.setReadOnly(true);
@@ -226,11 +269,14 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         horizontalLayout.setWidthFull();
         horizontalLayout.setAlignItems(FlexComponent.Alignment.END);
         horizontalLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-        Header header = new Header(toggle, viewTitle, horizontalLayout);
-        header.addClassNames("view-header");
 
+        Header header = new Header(toggle, breadCrumbLayout, horizontalLayout);
+        header.addClassNames("view-header");
+        header.addClassName(LumoUtility.Padding.Right.MEDIUM);
         return header;
     }
+
+    private HorizontalLayout breadCrumbLayout;
 
     private Component createDrawerContent() {
         String token = AuthenticatedUser.token();
@@ -307,6 +353,12 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
             list.add(loans);
 //            });
         }
+        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(CurrencyExchangePrivilege.class), Privileges.READ)) {
+            //current.access(() -> {
+            MenuItemInfo customers = new MenuItemInfo(getTranslation("sr.we.currency.exchange"), "icons/menus/icons8_currency_exchange_48px.png", CurrencyExchangeView.class);
+            list.add(customers);
+//            });
+        }
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(CustomerPrivilege.class), Privileges.READ)) {
             //current.access(() -> {
                 MenuItemInfo customers = new MenuItemInfo(getTranslation("sr.we.customers"), "icons/menus/icons8_customer_48px.png", CustomersView.class);
@@ -336,6 +388,13 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(POSPrivilege.class), Privileges.INSERT)) {
             //current.access(() -> {
             MenuItemInfo transactions = new MenuItemInfo("Point of sale", "icons/menus/icons8_cash_register_48px.png", PosView.class);
+            list.add(transactions);
+//            });
+        }
+
+        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(POSPrivilege.class), Privileges.READ)) {
+            //current.access(() -> {
+            MenuItemInfo transactions = new MenuItemInfo("Tickets", "icons/menus/icons8_receipt_48px.png", TicketsGridView.class);
             list.add(transactions);
 //            });
         }
@@ -390,13 +449,49 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         return layout;
     }
 
+//    @Override
+//    protected void afterNavigation() {
+//        super.afterNavigation();
+//        viewTitle.setText(getCurrentPageTitle());
+//        if (dialog != null && dialog.isOpened()) {
+//            dialog.close();
+//        }
+//    }
+
     @Override
-    protected void afterNavigation() {
-        super.afterNavigation();
-        viewTitle.setText(getCurrentPageTitle());
-        if (dialog != null && dialog.isOpened()) {
-            dialog.close();
+    public void afterNavigation(AfterNavigationEvent event) {
+        breadCrumbLayout.removeAll();
+        breadCrumbLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+        BreadCrumb breadCrumb = event.getLocationChangeEvent().getRouteTargetChain().get(0).getClass()
+                .getAnnotation(BreadCrumb.class);
+        if (breadCrumb != null) {
+            // get parent route and title
+            Class<? extends Component> parentNavigationTarget = breadCrumb.parentNavigationTarget();
+            if (parentNavigationTarget != BreadCrumb.NONE.class) {
+                List<RouteData> routes = RouteConfiguration.forSessionScope().getAvailableRoutes();
+                Optional<RouteData> optional = routes.stream()
+                        .filter(p -> p.getNavigationTarget() == parentNavigationTarget).findFirst();
+                BreadCrumb parentBreadcrumb = breadCrumb.parentNavigationTarget().getAnnotation(BreadCrumb.class);
+                String titleKey = parentBreadcrumb.titleKey();
+                Anchor anchor = new Anchor(optional.get().getTemplate(),
+                        getTranslation(titleKey));
+//                UIUtils.setTextColor("white", anchor);
+                Button back = new Button("Go Back");
+                back.addClickListener(f -> {
+                    History history = UI.getCurrent().getPage().getHistory();
+                    history.back();
+                });
+                breadCrumbLayout.add(back, new Span("/"));
+            }
+
+            String titleKey = breadCrumb.titleKey();
+            Span viewTitle = new Span(getTranslation(titleKey ));
+            viewTitle.addClassNames(LumoUtility.FontWeight.BOLD, LumoUtility.FontSize.LARGE);
+            breadCrumbLayout.add(viewTitle);
+
         }
+
+//		}
     }
 
     private String getCurrentPageTitle() {

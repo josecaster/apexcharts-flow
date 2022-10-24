@@ -105,7 +105,7 @@ public class LTabSettings extends TableLayout implements AfterNavigationObserver
     @Override
     public void afterNavigation(AfterNavigationEvent event) {
         LoanAssetsService loanService = ContextProvider.getBean(LoanAssetsService.class);
-        grid.setItems(loanService.list(AuthenticatedUser.token(), Long.valueOf(loanId)));
+        grid.setItems(loanService.list(AuthenticatedUser.token(), Long.valueOf(loanId)).getResult());
 
     }
 

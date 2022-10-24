@@ -44,8 +44,6 @@ import static sr.we.ContextProvider.getBean;
 @JsModule("./src/views/services/add-service.ts")
 public class AddService extends LitTemplate {
 
-    @Id("back-button")
-    private Button backButton;
     @Id("save-btn")
     private Button saveBtn;
     @Id("service-form")
@@ -80,12 +78,6 @@ public class AddService extends LitTemplate {
         // You can initialise any data required for the connected UI components here.
 
         mainFormLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0px", 1), new FormLayout.ResponsiveStep("500px", 3));
-
-        backButton.addClickListener(f -> {
-            UI.getCurrent().navigate(ServiceView.class, new RouteParameters(new RouteParam("business", businessString)));
-        });
-        backButton.setIcon(new LineAwesomeIcon("la la-arrow-left"));
-        backButton.addThemeVariants(ButtonVariant.LUMO_CONTRAST, ButtonVariant.LUMO_ICON);
 
         saveBtn.addClickListener(f -> {
 //            ServicesVO servicesVO = serviceForm.getVO();

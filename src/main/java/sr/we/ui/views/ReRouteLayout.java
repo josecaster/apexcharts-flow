@@ -87,7 +87,7 @@ public class ReRouteLayout extends VerticalLayout implements BeforeEnterObserver
         Token token = thisUser1.getToken();
         BusinessService businessService = ContextProvider.getBean(BusinessService.class);
 
-        List<Business> businesses = businessService.list(token.getToken());
+        List<Business> businesses = businessService.list(token.getToken()).getResult();
         if (businesses == null) {
             businesses = new ArrayList<>();
         }

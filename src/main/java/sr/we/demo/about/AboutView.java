@@ -32,7 +32,7 @@ public class AboutView extends VerticalLayout {
         Button title = new Button("Test");
         title.addClickListener(f -> {
             BusinessService businessService = ContextProvider.getBean(BusinessService.class);
-            businessService.list(token);
+            businessService.list(token).getResult();
         });
 
         add(title);

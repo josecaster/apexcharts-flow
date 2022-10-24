@@ -2,26 +2,15 @@ package sr.we.ui.views.finance.loans;
 
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.*;
 import sr.we.ContextProvider;
-import sr.we.data.controller.LoanService;
 import sr.we.data.controller.UserAccessService;
 import sr.we.demo.about.AboutView;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Role;
-import sr.we.shekelflowcore.entity.helper.vo.LoanVO;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.LoanPrivilege;
-import sr.we.shekelflowcore.security.privileges.TransactionsPrivilege;
 import sr.we.ui.views.MainLayout;
-import sr.we.ui.components.general.CurrencySelect;
-import sr.we.ui.components.finance.FrequencyRangeField;
-import sr.we.ui.views.StateListenerLayout;
-import sr.we.ui.components.finance.FactorField;
-import sr.we.ui.components.finance.FormulaField;
 
 import javax.annotation.security.RolesAllowed;
 import java.util.Optional;

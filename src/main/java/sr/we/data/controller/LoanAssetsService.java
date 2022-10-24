@@ -1,17 +1,24 @@
 package sr.we.data.controller;
 
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.RestTemplate;
+import sr.we.shekelflowcore.entity.Business;
 import sr.we.shekelflowcore.entity.LoanAssets;
+import sr.we.shekelflowcore.entity.helper.PagingResult;
+import sr.we.shekelflowcore.entity.helper.adapter.ByteArrayAdapter;
 import sr.we.shekelflowcore.entity.helper.adapter.LocalDateAdapter;
+import sr.we.shekelflowcore.entity.helper.adapter.LocalDateTimeAdapter;
 import sr.we.shekelflowcore.entity.helper.vo.LoanAssetsVO;
 import sr.we.shekelflowcore.settings.Routes;
 
+import java.lang.reflect.Type;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,7 +35,7 @@ public class LoanAssetsService extends MyController {
         });
     }
 
-    public List<LoanAssets> list(String accessToken, Long loanId) {
+    public PagingResult<LoanAssets> list(String accessToken, Long loanId) {
 
 
         return encapsulate(() -> {
@@ -39,8 +46,12 @@ public class LoanAssetsService extends MyController {
                 fooResourceUrl += "?loanId=" + loanId;
             }
             HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
-            ResponseEntity<LoanAssets[]> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, LoanAssets[].class);
-            return Arrays.asList(exchange.getBody());
+            ResponseEntity<String> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, String.class);
+            String content = exchange.getBody();
+            Type collectionType = new TypeToken<PagingResult<LoanAssets>>(){}.getType();
+            PagingResult<LoanAssets> myJson = new GsonBuilder().registerTypeAdapter(LocalDate.class, new LocalDateAdapter()).registerTypeAdapter(byte[].class, new ByteArrayAdapter())
+                    .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter()).create().fromJson(content, collectionType);
+            return myJson;
         });
     }
 

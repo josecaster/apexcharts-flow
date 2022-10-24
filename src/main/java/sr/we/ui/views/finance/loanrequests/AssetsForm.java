@@ -23,7 +23,7 @@ import sr.we.shekelflowcore.entity.helper.Executable;
 import sr.we.shekelflowcore.entity.helper.vo.LoanRequestAssetsFilesVO;
 import sr.we.shekelflowcore.entity.helper.vo.LoanRequestAssetsVO;
 import sr.we.ui.components.finance.LoanAssetsSelect;
-import sr.we.ui.components.general.CurrencySelect;
+import sr.we.ui.components.general.BusinessCurrencySelect;
 import sr.we.util.FileBuffer;
 
 import java.io.ByteArrayOutputStream;
@@ -60,7 +60,7 @@ public class AssetsForm extends LitTemplate {
     @Id("asset-type-cmb")
     private LoanAssetsSelect assetTypeCmb;
     @Id("asset-currency-cmb1")
-    private CurrencySelect assetCurrencyCmb1;
+    private BusinessCurrencySelect assetCurrencyCmb1;
     @Id("asset-value-fld1")
     private NumberField assetValueFld1;
     @Id("add-assets-detail")

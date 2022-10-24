@@ -9,7 +9,7 @@ import com.vaadin.flow.component.textfield.NumberField;
 import sr.we.shekelflowcore.entity.Currency;
 import sr.we.shekelflowcore.entity.helper.InterExecutable;
 import sr.we.shekelflowcore.entity.helper.vo.ServicesVO;
-import sr.we.ui.components.general.CurrencySelect;
+import sr.we.ui.components.general.BusinessCurrencySelect;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -34,7 +34,7 @@ public class ServicePrice extends LitTemplate {
     private NumberField costPerItem;
     private final InterExecutable<?, Boolean> advancedPrice;
     @Id("item-currency")
-    private CurrencySelect itemCurrency;
+    private BusinessCurrencySelect itemCurrency;
     private boolean change;
     private ServicesVO servicesVO;
 

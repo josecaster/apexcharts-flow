@@ -23,9 +23,8 @@ import sr.we.shekelflowcore.entity.helper.InterExecutable;
 import sr.we.shekelflowcore.entity.helper.vo.PosHeaderDetailVO;
 import sr.we.shekelflowcore.entity.helper.vo.PosHeaderVO;
 import sr.we.shekelflowcore.settings.util.Constants;
-import sr.we.ui.components.general.CurrencySelect;
+import sr.we.ui.components.general.BusinessCurrencySelect;
 import sr.we.ui.views.LineAwesomeIcon;
-import sr.we.ui.views.pos.Fee;
 import sr.we.ui.views.pos.Item;
 import sr.we.ui.views.pos.ProductOrService;
 
@@ -37,13 +36,13 @@ import java.util.stream.Collectors;
 public class ItemGrid extends Grid<Item> {
 
     private final BigDecimalField discountFld;
-    private final CurrencySelect currencySelect;
+    private final BusinessCurrencySelect currencySelect;
     private final BigDecimalField exchangeRateFld;
     private final Label totalLbl;
-    private List<Item> itemList = null;
-    private List<Fee> feeList = null;
-    private List<Long> removeList = null;
     private final Map<String, Object> map;
+    private List<Item> itemList = null;
+    //    private List<Fee> feeList = null;
+    private List<Long> removeList = null;
     private BigDecimal total;
 
     private boolean activateListener = false;
@@ -114,7 +113,6 @@ public class ItemGrid extends Grid<Item> {
         itemList = new ArrayList<>();
         setItems(itemList);
 
-        feeList = new ArrayList<>();
         removeList = new ArrayList<>();
 //        feeGrid.setItems(feeList);//TODO
 
@@ -159,7 +157,7 @@ public class ItemGrid extends Grid<Item> {
         invoiceTableLayout.add(totalLayout);
 
         Label totalNameLbl = new Label("Total");
-        currencySelect = new CurrencySelect();
+        currencySelect = new BusinessCurrencySelect();
         exchangeRateFld = new BigDecimalField();
         totalLbl = new Label("0.00");
 
@@ -205,8 +203,26 @@ public class ItemGrid extends Grid<Item> {
 
     private VerticalLayout getVariableLayout(Item d) {
         VerticalLayout layout = new VerticalLayout();
-        layout.setMargin(false);
-        layout.setPadding(false);
+        layout.setClassName("my-cart-base");
+        layout.setMargin(true);
+        layout.setPadding(true);
+        if (d.getProductOrService().getServices().getCurrency().getId().compareTo(business2.getCurrency().getId()) != 0) {
+            BigDecimalField bigDecimalField = new BigDecimalField();
+            bigDecimalField.setLabel("Exchange Rate ");
+            bigDecimalField.setHelperText(d.getProductOrService().getServices().getCurrency().getCode()+" - "+business2.getCurrency().getCode());
+            bigDecimalField.setValue(d.getExchange());
+            layout.add(bigDecimalField);
+
+            bigDecimalField.addValueChangeListener(f -> {
+                if (f.getValue() == null) {
+                    bigDecimalField.setValue(BigDecimal.ONE);
+                    return;
+                }
+                d.setExchange(f.getValue());
+                getDataProvider().refreshAll();
+                execute.build(itemList);
+            });
+        }
         if (d.getProductOrService().hasDetailedInventory()) {
             ComboBox<ProductsInventoryDetail> detailCmb = new ComboBox<>();
             layout.add(detailCmb);
@@ -255,7 +271,7 @@ public class ItemGrid extends Grid<Item> {
     }
 
     public List<PosHeaderDetailVO> itemListVo() {
-        List<PosHeaderDetailVO> collectItems = itemList.stream().map(f -> {
+        return itemList.stream().map(f -> {
             PosHeaderDetailVO posHeaderDetailVO = new PosHeaderDetailVO();
             posHeaderDetailVO.setId(f.getPosHeaderDetail() == null ? null : f.getPosHeaderDetail().getId());
             posHeaderDetailVO.setNew(posHeaderDetailVO.getId() == null);
@@ -265,6 +281,10 @@ public class ItemGrid extends Grid<Item> {
             posHeaderDetailVO.setCount((long) f.getCount());
             posHeaderDetailVO.setPrice(f.getPrice());
             posHeaderDetailVO.setInventoryDetail(f.getInventoryDetail() == null ? null : f.getInventoryDetail().getId());
+            posHeaderDetailVO.setCurrencyFrom(f.getCurrencyTo().getId());
+            posHeaderDetailVO.setCurrencyTo(currencySelect.getValue().getId());
+            posHeaderDetailVO.setConvertedAmount(f.getResult());
+            posHeaderDetailVO.setExchangeRate(f.getExchange());
 //            posHeaderDetailVO.setProduct(f.getProductOrService() == null ? //
 //                    (f.getPosHeaderDetail() == null ? null : (f.getPosHeaderDetail().getProduct() == null ? null : f.getPosHeaderDetail().getProduct().getId())) //
 //                    : (f.getProductOrService().getProduct() == null ? null : f.getProductOrService().getProduct().getId()));//
@@ -273,7 +293,6 @@ public class ItemGrid extends Grid<Item> {
                     : (f.getProductOrService().getServices() == null ? null : f.getProductOrService().getServices().getId()));//
             return posHeaderDetailVO;
         }).toList();
-        return collectItems;
     }
 
     public List<Item> getItemList() {
@@ -399,6 +418,7 @@ public class ItemGrid extends Grid<Item> {
         return new InterExecutable<Object, List<Item>>() {
             @Override
             public Object build(List<Item> itemList) {
+                itemList.stream().forEach(f -> f.setCurrency(business2.getCurrency()));
                 total = itemList.stream().map(Item::getCalcPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
 //        total = total.add(feeList.stream().map(Fee::getCalcPrice).reduce(BigDecimal.ZERO, BigDecimal::add));
                 BigDecimal value = exchangeRateFld.getValue();
@@ -409,6 +429,7 @@ public class ItemGrid extends Grid<Item> {
                 obj = obj.subtract(discountFld.getValue());
                 String text = Constants.CURRENCY_FORMAT.format(obj.multiply(value));
                 totalLbl.setText(text);
+                recalculateColumnWidths();
                 return null;
             }
         };

@@ -120,7 +120,7 @@ public class LoanView extends LitTemplate implements AfterNavigationObserver, Ha
     @Override
     public void afterNavigation(AfterNavigationEvent event) {
         LoanService loanService = ContextProvider.getBean(LoanService.class);
-        grid.setItems(loanService.list(AuthenticatedUser.token(), Long.valueOf(business)));
+        grid.setItems(loanService.list(AuthenticatedUser.token(), Long.valueOf(business)).getResult());
 
     }
 

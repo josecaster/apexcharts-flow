@@ -1,12 +1,14 @@
 package sr.we.data.controller;
 
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.RestTemplate;
 import sr.we.shekelflowcore.entity.Loan;
+import sr.we.shekelflowcore.entity.helper.PagingResult;
 import sr.we.shekelflowcore.entity.helper.vo.LoanVO;
 import sr.we.shekelflowcore.settings.Routes;
 
@@ -26,15 +28,15 @@ public class LoanService extends MyController {
         });
     }
 
-    public List<Loan> list(String accessToken, Long businessId) {
+    public PagingResult<Loan> list(String accessToken, Long businessId) {
         RestTemplate restTemplate = new RestTemplate();
         String fooResourceUrl
                 = configProperties.getRest() + Routes.LOAN_LIST + "?businessId=" + businessId;
         HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
 
         return encapsulate(() -> {
-            ResponseEntity<Loan[]> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, Loan[].class);
-            return Arrays.asList(exchange.getBody());
+            ResponseEntity<String> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, String.class);
+            return transform(exchange,new TypeToken<PagingResult<Loan>>(){}.getType());
         });
     }
 

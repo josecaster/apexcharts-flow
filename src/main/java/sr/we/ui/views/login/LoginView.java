@@ -40,7 +40,7 @@ public class LoginView extends LoginOverlay implements BeforeLeaveObserver, Afte
         header2.add(seaqns_icon);
         setTitle(header2);
 
-        i18n.getHeader().setDescription("Built with ♥ by José Caster");
+//        i18n.getHeader().setDescription("Built with ♥ by José Caster");
         i18n.setAdditionalInformation("Please, contact administrator if you're experiencing issues logging into your account");
         i18n.getForm().setForgotPassword("Return Home! | Forgot Password?");
         setI18n(i18n);

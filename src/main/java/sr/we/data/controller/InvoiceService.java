@@ -1,19 +1,27 @@
 package sr.we.data.controller;
 
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.RestTemplate;
 import sr.we.shekelflowcore.entity.ApplicationScheduledTask;
+import sr.we.shekelflowcore.entity.Business;
 import sr.we.shekelflowcore.entity.Invoice;
 import sr.we.shekelflowcore.entity.InvoiceSetting;
+import sr.we.shekelflowcore.entity.helper.PagingResult;
+import sr.we.shekelflowcore.entity.helper.adapter.ByteArrayAdapter;
 import sr.we.shekelflowcore.entity.helper.adapter.LocalDateAdapter;
+import sr.we.shekelflowcore.entity.helper.adapter.LocalDateTimeAdapter;
+import sr.we.shekelflowcore.entity.helper.vo.InvoiceSettingVO;
 import sr.we.shekelflowcore.entity.helper.vo.InvoiceVO;
 import sr.we.shekelflowcore.settings.Routes;
 
+import java.lang.reflect.Type;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -21,7 +29,7 @@ import java.util.Objects;
 @Controller
 public class InvoiceService extends MyController {
 
-    public List<Invoice> list(String accessToken, InvoiceVO vo) {
+    public PagingResult<Invoice> list(String accessToken, InvoiceVO vo) {
         String body = new GsonBuilder().create().toJson(vo);
         RestTemplate restTemplate = new RestTemplate();
         String fooResourceUrl = configProperties.getRest() + Routes.INVOICE_LIST;
@@ -29,9 +37,12 @@ public class InvoiceService extends MyController {
 
         return encapsulate(() -> {
             HttpEntity<String> httpEntity = getAuthHttpEntity(body, accessToken);
-            ResponseEntity<Invoice[]> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.POST, httpEntity, Invoice[].class);
-//            ResponseEntity<Invoice[]> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, Invoice[].class);
-            return Arrays.asList(Objects.requireNonNull(exchange.getBody()));
+            ResponseEntity<String> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.POST, httpEntity, String.class);
+            String content = exchange.getBody();
+            Type collectionType = new TypeToken<PagingResult<Invoice>>(){}.getType();
+            PagingResult<Invoice> myJson = new GsonBuilder().registerTypeAdapter(LocalDate.class, new LocalDateAdapter()).registerTypeAdapter(byte[].class, new ByteArrayAdapter())
+                    .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter()).create().fromJson(content, collectionType);
+            return myJson;
         });
     }
 
@@ -54,6 +65,15 @@ public class InvoiceService extends MyController {
 
         return encapsulate(() -> {
             ResponseEntity<Invoice> exchange = restTemplate.exchange(configProperties.getRest() + Routes.INVOICE_GET + "?id=" + id, HttpMethod.GET, getAuthHttpEntity(accessToken), Invoice.class);
+            return exchange.getBody();
+        });
+    }
+
+    public Invoice getByPosHeader(Long id, String accessToken) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        return encapsulate(() -> {
+            ResponseEntity<Invoice> exchange = restTemplate.exchange(configProperties.getRest() + Routes.INVOICE_GET_BY + "?id=" + id, HttpMethod.GET, getAuthHttpEntity(accessToken), Invoice.class);
             return exchange.getBody();
         });
     }
@@ -118,6 +138,18 @@ public class InvoiceService extends MyController {
                     = configProperties.getRest() + Routes.INVOICE_CHANGE_STATUS;
             HttpEntity<String> httpEntity = getAuthHttpEntity(body, accessToken);
             ResponseEntity<Invoice> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.POST, httpEntity, Invoice.class);
+            return exchange.getBody();
+        });
+    }
+
+    public InvoiceSetting setSettings(InvoiceSettingVO vo, String accessToken) {
+        return encapsulate(() -> {
+            String body = new GsonBuilder().create().toJson(vo);
+            RestTemplate restTemplate = new RestTemplate();
+            String fooResourceUrl
+                    = configProperties.getRest() + Routes.INVOICE_SET_SETTING;
+            HttpEntity<String> httpEntity = getAuthHttpEntity(body, accessToken);
+            ResponseEntity<InvoiceSetting> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.POST, httpEntity, InvoiceSetting.class);
             return exchange.getBody();
         });
     }

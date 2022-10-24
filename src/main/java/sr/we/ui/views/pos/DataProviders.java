@@ -26,12 +26,12 @@ public class DataProviders extends Div {
 
             List<ProductOrService> list = new ArrayList<>();
             ItemsService productService = ContextProvider.getBean(ItemsService.class);
-            List<Items> list1 = productService.list(AuthenticatedUser.token(), Long.valueOf(business));
+            List<Items> list1 = productService.list(AuthenticatedUser.token(), Long.valueOf(business)).getResult();
             list = list1.stream().map(ProductOrService::new).collect(Collectors.toList());
             return list.stream();
         }, query -> {
             ItemsService productService = ContextProvider.getBean(ItemsService.class);
-            List<Items> list1 = productService.list(AuthenticatedUser.token(), Long.valueOf(business));
+            List<Items> list1 = productService.list(AuthenticatedUser.token(), Long.valueOf(business)).getResult();
             return list1.size();
         });
         return dataProvider;
@@ -84,14 +84,14 @@ public class DataProviders extends Div {
 
             List<ProductOrService> list = new ArrayList<>();
             ItemsService productService = ContextProvider.getBean(ItemsService.class);
-            List<Items> list1 = productService.list(AuthenticatedUser.token(), Long.valueOf(business));
+            List<Items> list1 = productService.list(AuthenticatedUser.token(), Long.valueOf(business)).getResult();
             list = list1.stream().map(ProductOrService::new).collect(Collectors.toList());
 
             List<ProductOrServiceGrid> list2 = toGrid(list);
             return list2.stream();
         }, query -> {
             ItemsService productService = ContextProvider.getBean(ItemsService.class);
-            List<Items> list1 = productService.list(AuthenticatedUser.token(), Long.valueOf(business));
+            List<Items> list1 = productService.list(AuthenticatedUser.token(), Long.valueOf(business)).getResult();
             return rowSize(list1);
         });
         return dataProvider;

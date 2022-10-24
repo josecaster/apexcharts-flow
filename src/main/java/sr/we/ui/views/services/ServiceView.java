@@ -20,6 +20,7 @@ import sr.we.shekelflowcore.entity.Items;
 import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.ServicesPrivilege;
+import sr.we.ui.components.BreadCrumb;
 import sr.we.ui.views.MainLayout;
 
 import javax.annotation.security.RolesAllowed;
@@ -33,6 +34,7 @@ import java.util.*;
  */
 @Tag("service-view")
 @JsModule("./src/views/services/service-view.ts")
+@BreadCrumb(titleKey = "sr.we.products.services")
 @Route(value = "services", layout = MainLayout.class)
 @RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
 public class ServiceView extends LitTemplate implements BeforeEnterObserver {
@@ -104,7 +106,7 @@ public class ServiceView extends LitTemplate implements BeforeEnterObserver {
         business1.ifPresent(s -> business = s);
 
         ItemsService itemsService = ContextProvider.getBean(ItemsService.class);
-        List<Items> list = itemsService.list(AuthenticatedUser.token(), Long.valueOf(business));
+        List<Items> list = itemsService.list(AuthenticatedUser.token(), Long.valueOf(business)).getResult();
         grid.setItems(list);
     }
 

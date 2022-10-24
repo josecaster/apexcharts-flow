@@ -2,19 +2,17 @@ package sr.we.ui.views.finance.loans;
 
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.template.Id;
-import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import sr.we.shekelflowcore.entity.Loan;
 import sr.we.shekelflowcore.entity.helper.vo.LoanVO;
 import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.ui.components.finance.FactorField;
 import sr.we.ui.components.finance.FrequencyRangeField;
-import sr.we.ui.components.general.CurrencySelect;
+import sr.we.ui.components.general.BusinessCurrencySelect;
 
 import java.math.BigDecimal;
 
@@ -34,7 +32,7 @@ public class LoanForm extends LitTemplate {
     @Id("loan-name-fld")
     private TextField loanNameFld;
     @Id("currency-cmb")
-    private CurrencySelect currencyCmb;
+    private BusinessCurrencySelect currencyCmb;
     @Id("factor-type-fld")
     private FactorField factorTypeFld;
     @Id("fixed-loan-chk")

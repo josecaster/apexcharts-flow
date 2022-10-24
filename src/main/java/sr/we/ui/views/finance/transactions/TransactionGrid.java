@@ -128,7 +128,7 @@ public class TransactionGrid extends VerticalLayout  {
 
     public void afterNavigation() {
         PaymentTransactionService loanService = ContextProvider.getBean(PaymentTransactionService.class);
-        grid.setItems(loanService.list(AuthenticatedUser.token(), Long.valueOf(business)));
+        grid.setItems(loanService.list(AuthenticatedUser.token(), Long.valueOf(business)).getResult());
 
     }
 

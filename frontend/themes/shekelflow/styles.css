@@ -1,4 +1,5 @@
 @import url('./main-layout.css');
+@import url('./loading.css');
 @import url('./views/dashboard-view.css');
 @import url('./views/overview-view.css');
 @import url('./views/loans-view.css');
@@ -137,8 +138,3 @@ margin: 0px;
   background-color: var(--lumo-primary-color-10pct);
   cursor: pointer;
 }
-/*
-
-html, :host {
-  font-weight: bold;
-}*/

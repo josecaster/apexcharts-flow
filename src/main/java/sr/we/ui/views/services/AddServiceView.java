@@ -12,11 +12,13 @@ import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.ProductsPrivilege;
 import sr.we.shekelflowcore.security.privileges.ServicesPrivilege;
+import sr.we.ui.components.BreadCrumb;
 import sr.we.ui.views.MainLayout;
 import sr.we.ui.views.products.AddProducts;
 
 import javax.annotation.security.RolesAllowed;
 
+@BreadCrumb(titleKey = "sr.we.products.services.create",parentNavigationTarget = ServiceView.class)
 @Route(value = "add-service", layout = MainLayout.class)
 @RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
 public class AddServiceView extends AddService implements BeforeEnterObserver {

@@ -1,17 +1,25 @@
 package sr.we.data.controller;
 
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.RestTemplate;
+import sr.we.shekelflowcore.entity.Business;
+import sr.we.shekelflowcore.entity.LoanRequestAssets;
 import sr.we.shekelflowcore.entity.LoanRequestAssetsFiles;
+import sr.we.shekelflowcore.entity.helper.PagingResult;
+import sr.we.shekelflowcore.entity.helper.adapter.ByteArrayAdapter;
 import sr.we.shekelflowcore.entity.helper.adapter.LocalDateAdapter;
+import sr.we.shekelflowcore.entity.helper.adapter.LocalDateTimeAdapter;
 import sr.we.shekelflowcore.entity.helper.vo.LoanRequestAssetsFilesVO;
 import sr.we.shekelflowcore.settings.Routes;
 
+import java.lang.reflect.Type;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,7 +36,7 @@ public class LoanRequestAssetsFilesService extends MyController {
         });
     }
 
-    public List<LoanRequestAssetsFiles> list(String accessToken, Long loanRequestAssetsId, Long loanRequestId) {
+    public PagingResult<LoanRequestAssetsFiles> list(String accessToken, Long loanRequestAssetsId, Long loanRequestId) {
 
 
         return encapsulate(() -> {
@@ -39,8 +47,12 @@ public class LoanRequestAssetsFilesService extends MyController {
             }
 
             HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
-            ResponseEntity<LoanRequestAssetsFiles[]> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, LoanRequestAssetsFiles[].class);
-            return Arrays.asList(exchange.getBody());
+            ResponseEntity<String> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, String.class);
+            String content = exchange.getBody();
+            Type collectionType = new TypeToken<PagingResult<LoanRequestAssetsFiles>>(){}.getType();
+            PagingResult<LoanRequestAssetsFiles> myJson = new GsonBuilder().registerTypeAdapter(LocalDate.class, new LocalDateAdapter()).registerTypeAdapter(byte[].class, new ByteArrayAdapter())
+                    .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter()).create().fromJson(content, collectionType);
+            return myJson;
         });
     }
 

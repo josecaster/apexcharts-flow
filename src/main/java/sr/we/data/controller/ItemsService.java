@@ -1,15 +1,25 @@
 package sr.we.data.controller;
 
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.RestTemplate;
+import sr.we.shekelflowcore.entity.Business;
 import sr.we.shekelflowcore.entity.Items;
+import sr.we.shekelflowcore.entity.helper.PagingResult;
+import sr.we.shekelflowcore.entity.helper.adapter.ByteArrayAdapter;
+import sr.we.shekelflowcore.entity.helper.adapter.LocalDateAdapter;
+import sr.we.shekelflowcore.entity.helper.adapter.LocalDateTimeAdapter;
 import sr.we.shekelflowcore.entity.helper.vo.ServicesVO;
 import sr.we.shekelflowcore.settings.Routes;
+import sr.we.ui.views.pos.Item;
 
+import java.lang.reflect.Type;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,14 +36,18 @@ public class ItemsService extends MyController {
         });
     }
 
-    public List<Items> list(String accessToken, Long businessId) {
+    public PagingResult<Items> list(String accessToken, Long businessId) {
         RestTemplate restTemplate = new RestTemplate();
         String fooResourceUrl = configProperties.getRest() + Routes.ITEMS_LIST + "?businessId=" + businessId;
         HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
 
         return encapsulate(() -> {
-            ResponseEntity<Items[]> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, Items[].class);
-            return Arrays.asList(exchange.getBody());
+            ResponseEntity<String> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, String.class);
+            String content = exchange.getBody();
+            Type collectionType = new TypeToken<PagingResult<Items>>(){}.getType();
+            PagingResult<Items> myJson = new GsonBuilder().registerTypeAdapter(LocalDate.class, new LocalDateAdapter()).registerTypeAdapter(byte[].class, new ByteArrayAdapter())
+                    .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter()).create().fromJson(content, collectionType);
+            return myJson;
         });
     }
 

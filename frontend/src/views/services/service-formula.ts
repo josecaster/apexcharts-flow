@@ -20,7 +20,7 @@ export class ServiceFormula extends LitElement {
 
   render() {
     return html`
-<vaadin-vertical-layout theme="spacing" style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin: var(--lumo-space-s); margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m); width: 100%;">
+<vaadin-vertical-layout theme="spacing" style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin: var(--lumo-space-s); margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m); width: 100%;" class="shadow-s">
  <label>e.g. ([product_price]/50)+[service_price]</label>
  <div id="formula-layout" style="align-self: stretch;"></div>
  <vaadin-horizontal-layout theme="spacing" style="width: 100%;">

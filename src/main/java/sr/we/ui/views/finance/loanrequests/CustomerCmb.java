@@ -21,7 +21,7 @@ public class CustomerCmb extends ComboBox<Customer> {
 
     public void load(Long businessId){
         CustomerService customerService = ContextProvider.getBean(CustomerService.class);
-        List<Customer> list = customerService.list(businessId, AuthenticatedUser.token());
+        List<Customer> list = customerService.list(businessId, AuthenticatedUser.token()).getResult();
         setItems(list);
     }
 }

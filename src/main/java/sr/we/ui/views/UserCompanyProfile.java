@@ -189,7 +189,7 @@ public class UserCompanyProfile extends Button {
     private void setValues(ListBox<Long> listBox) {
         String token = AuthenticatedUser.token();
         BusinessService businessService = ContextProvider.getBean(BusinessService.class);
-        businesses = businessService.listFromUserRoles(token);
+        businesses = businessService.listFromUserRoles(token).getResult();
         if (businesses == null) {
             businesses = new ArrayList<>();
         }

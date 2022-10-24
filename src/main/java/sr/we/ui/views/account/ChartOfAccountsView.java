@@ -24,6 +24,7 @@ import sr.we.shekelflowcore.enums.ChartOfAccounts;
 import sr.we.shekelflowcore.security.PrivilegeModeAbstract;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.AccountsPrivilege;
+import sr.we.ui.components.BreadCrumb;
 import sr.we.ui.views.MainLayout;
 
 import javax.annotation.security.RolesAllowed;
@@ -36,6 +37,7 @@ import java.util.Optional;
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
+@BreadCrumb(titleKey = "sr.we.chart.of.accounts")
 @Tag("chart-of-accounts-view")
 @JsModule("./src/views/accounts/chart-of-accounts-view.ts")
 @Route(value = "chart-of-accounts", layout = MainLayout.class)

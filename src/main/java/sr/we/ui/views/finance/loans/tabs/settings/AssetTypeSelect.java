@@ -15,7 +15,7 @@ public class AssetTypeSelect extends Select<AssetType> {
         PojoService pojoService = ContextProvider.getBean(PojoService.class);
         String token = AuthenticatedUser.token();
 
-        List<AssetType> currencies = pojoService.listAssetTypes(token);
+        List<AssetType> currencies = pojoService.listAssetTypes(token).getResult();
         setItems(currencies);
 
         setItemLabelGenerator((f) -> f.getName());

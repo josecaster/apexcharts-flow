@@ -1,22 +1,24 @@
 package sr.we.data.controller;
 
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.RestTemplate;
+import sr.we.shekelflowcore.entity.Business;
 import sr.we.shekelflowcore.entity.LoanRequest;
 import sr.we.shekelflowcore.entity.LoanRequestPlan;
-import sr.we.shekelflowcore.entity.helper.adapter.LoanRequestBody;
-import sr.we.shekelflowcore.entity.helper.adapter.LoanRequestSchedulePlan;
-import sr.we.shekelflowcore.entity.helper.adapter.LoanRequestPlanningGenBody;
-import sr.we.shekelflowcore.entity.helper.adapter.LocalDateAdapter;
+import sr.we.shekelflowcore.entity.helper.PagingResult;
+import sr.we.shekelflowcore.entity.helper.adapter.*;
 import sr.we.shekelflowcore.entity.helper.vo.LoanRequestVO;
 import sr.we.shekelflowcore.settings.Routes;
 
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
@@ -34,7 +36,7 @@ public class LoanRequestService extends MyController {
         });
     }
 
-    public List<LoanRequest> list(String accessToken, Long businessId, Long loanId) {
+    public PagingResult<LoanRequest> list(String accessToken, Long businessId, Long loanId) {
 
 
         return encapsulate(() -> {
@@ -45,10 +47,13 @@ public class LoanRequestService extends MyController {
                 fooResourceUrl += "&loanId=" + loanId;
             }
             HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
-            ResponseEntity<LoanRequest[]> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, LoanRequest[].class);
-            return Arrays.asList(exchange.getBody());
+            ResponseEntity<String> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, String.class);
+            PagingResult<LoanRequest> myJson = transform(exchange,new TypeToken<PagingResult<LoanRequest>>(){}.getType());
+            return myJson;
         });
     }
+
+
 
     public LoanRequest create(String accessToken, LoanRequestBody vo) {
 
@@ -120,7 +125,7 @@ public class LoanRequestService extends MyController {
         });
     }
 
-    public List<LoanRequestPlan> listPlan(String accessToken, Long loanRequestId) {
+    public PagingResult<LoanRequestPlan> listPlan(String accessToken, Long loanRequestId) {
 
 
         return encapsulate(() -> {
@@ -128,8 +133,8 @@ public class LoanRequestService extends MyController {
             String fooResourceUrl
                     = configProperties.getRest() + Routes.LOAN_REQUEST_PLAN_LIST + "?loanRequestId=" + loanRequestId;
             HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
-            ResponseEntity<LoanRequestPlan[]> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, LoanRequestPlan[].class);
-            return Arrays.asList(exchange.getBody());
+            ResponseEntity<String> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, String.class);
+            return transform(exchange,new TypeToken<PagingResult<LoanRequestPlan>>(){}.getType());
         });
     }
 

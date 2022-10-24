@@ -1,12 +1,14 @@
 package sr.we.data.controller;
 
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.RestTemplate;
 import sr.we.shekelflowcore.entity.PaymentTransaction;
+import sr.we.shekelflowcore.entity.helper.PagingResult;
 import sr.we.shekelflowcore.entity.helper.adapter.LocalDateAdapter;
 import sr.we.shekelflowcore.entity.helper.vo.PaymentTransactionVO;
 import sr.we.shekelflowcore.settings.Routes;
@@ -18,14 +20,14 @@ import java.util.List;
 @Controller
 public class PaymentTransactionService extends MyController {
 
-    public List<PaymentTransaction> list(String accessToken, Long businessId) {
+    public PagingResult<PaymentTransaction> list(String accessToken, Long businessId) {
         RestTemplate restTemplate = new RestTemplate();
         String fooResourceUrl = configProperties.getRest() + Routes.PAYMENT_TRANSACTION_LIST + "?businessId=" + businessId;
         HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
 
         return encapsulate(() -> {
-            ResponseEntity<PaymentTransaction[]> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, PaymentTransaction[].class);
-            return Arrays.asList(exchange.getBody());
+            ResponseEntity<String> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, String.class);
+            return transform(exchange,new TypeToken<PagingResult<PaymentTransaction>>(){}.getType());
         });
     }
 

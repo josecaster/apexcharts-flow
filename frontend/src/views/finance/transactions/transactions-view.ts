@@ -23,18 +23,17 @@ export class TransactionsView extends LitElement {
     return html`
 <vaadin-vertical-layout style="width: 100%; height: 100%; padding: var(--lumo-space-s);">
  <vaadin-horizontal-layout theme="spacing" style="align-self: stretch;">
-  <h2 style="flex-grow: 1;margin:0px;">Transactions</h2>
-  <vaadin-button id="export-btn" style="align-self: center;border: solid 1px;" tabindex="0" theme="tertiary">
-   Add income
+  <vaadin-button id="export-btn" style="margin-left:auto;align-self: center;border: solid 1px;" tabindex="0" theme="tertiary">
+    Add income 
   </vaadin-button>
   <vaadin-button style="align-self: center;border: solid 1px;" id="import-btn" tabindex="0" theme="tertiary">
-   Add expense
+    Add expense 
   </vaadin-button>
   <vaadin-button style="align-self: center;border: solid 1px;" id="add-request-btn" tabindex="0" theme="tertiary">
-   More
+    More 
   </vaadin-button>
  </vaadin-horizontal-layout>
- <vaadin-vertical-layout theme="spacing" style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin: var(--lumo-space-s); margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m); align-self: stretch;">
+ <vaadin-vertical-layout theme="spacing" style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin: var(--lumo-space-s); margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m); align-self: stretch;" class="shadow-s">
   <vaadin-tabs style="align-self: stretch;" orientation="horizontal" selected="0">
    <vaadin-tab selected>
      All 

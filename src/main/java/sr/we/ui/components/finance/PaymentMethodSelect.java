@@ -16,7 +16,7 @@ public class PaymentMethodSelect extends RadioButtonGroup<PaymentMethod> {
         PojoService pojoService = ContextProvider.getBean(PojoService.class);
         String token = AuthenticatedUser.token();
         addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
-        List<PaymentMethod> paymentMethods = pojoService.listPaymentMethod(token);
+        List<PaymentMethod> paymentMethods = pojoService.listPaymentMethod(token).getResult();
         setItems(paymentMethods);
 
         setItemLabelGenerator((f) -> f.getDescription());

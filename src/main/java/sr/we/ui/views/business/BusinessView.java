@@ -96,7 +96,7 @@ public class BusinessView extends TableLayout implements AfterNavigationObserver
             @Override
             public void run() {
                 BusinessService businessService = ContextProvider.getBean(BusinessService.class);
-                List<Business> business = businessService.list(token);
+                List<Business> business = businessService.list(token).getResult();
                 current.access(() -> {
                     grid.setItems(business);
                     grid.getDataProvider().refreshAll();

@@ -1,10 +1,10 @@
 import { LitElement, html, css, customElement } from 'lit-element';
-import '@vaadin/button/src/vaadin-button.js';
 import '@vaadin/vaadin-ordered-layout/src/vaadin-vertical-layout.js';
 import '@vaadin/form-layout/src/vaadin-form-layout.js';
 import '@vaadin/vertical-layout/src/vaadin-vertical-layout.js';
 import '@vaadin/text-area/src/vaadin-text-area.js';
 import '@vaadin/horizontal-layout/src/vaadin-horizontal-layout.js';
+import '@vaadin/button/src/vaadin-button.js';
 
 @customElement('create-invoice-view')
 export class CreateInvoiceView extends LitElement {
@@ -21,11 +21,7 @@ export class CreateInvoiceView extends LitElement {
     return html`
 <vaadin-vertical-layout style="background: #f6f6f7; width: 100%; flex-direction: column; padding-right: var(--lumo-space-m); padding-left: var(--lumo-space-m);">
  <vaadin-horizontal-layout theme="spacing" style="align-self: stretch;">
-  <vaadin-button style="align-self: center;" tabindex="0" id="back-button">
-    . 
-  </vaadin-button>
-  <h2 id="add-product-title" style="flex-grow: 1; flex-shrink: 0; align-self: center;margin:0px;">New invoice</h2>
-  <vaadin-button id="save-btn" style="align-self: center;border: solid 1px;" tabindex="0" theme="tertiary">
+  <vaadin-button id="save-btn" style="align-self: center;border: solid 1px; margin-left:auto;" tabindex="0" theme="tertiary">
     Preview 
   </vaadin-button>
   <vaadin-button id="invoice-save-continue-btn" style="align-self: center;" tabindex="0" theme="primary">

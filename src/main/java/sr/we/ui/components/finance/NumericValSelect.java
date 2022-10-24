@@ -24,7 +24,7 @@ public class NumericValSelect extends CustomField<NumericVal> implements HasPref
         PojoService pojoService = ContextProvider.getBean(PojoService.class);
         String token = AuthenticatedUser.token();
 
-        List<NumericVal> businessTypes = pojoService.listNumericVal(token, null);
+        List<NumericVal> businessTypes = pojoService.listNumericVal(token, null).getResult();
         box1.setItems(businessTypes);
 
         box1.setItemLabelGenerator((f) -> f.getCode());

@@ -13,7 +13,7 @@ import sr.we.shekelflowcore.entity.Currency;
 import sr.we.shekelflowcore.entity.LoanRequest;
 import sr.we.shekelflowcore.entity.helper.Executable;
 import sr.we.shekelflowcore.enums.Reference;
-import sr.we.ui.components.general.CurrencySelect;
+import sr.we.ui.components.general.BusinessCurrencySelect;
 import sr.we.ui.views.finance.transactions.TransactionDialog;
 
 import java.math.BigDecimal;
@@ -34,7 +34,7 @@ public class ProvideLayout extends LitTemplate {
     @Id("label")
     private Label label;
     @Id("currencySelect")
-    private CurrencySelect vaadinSelect;
+    private BusinessCurrencySelect vaadinSelect;
     @Id("vaadinFormLayout")
     private FormLayout vaadinFormLayout;
     @Id("amountFld")

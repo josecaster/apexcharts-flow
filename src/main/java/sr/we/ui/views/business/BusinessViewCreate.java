@@ -14,7 +14,7 @@ import sr.we.shekelflowcore.entity.helper.vo.BusinessVO;
 import sr.we.ui.components.business.BusinessOrganisationTypeSelect;
 import sr.we.ui.components.business.BusinessTypeSelect;
 import sr.we.ui.components.general.CountrySelect;
-import sr.we.ui.components.general.CurrencySelect;
+import sr.we.ui.components.general.BusinessCurrencySelect;
 import sr.we.ui.views.StateListenerLayout;
 import sr.we.ui.views.settings.SettingsLayout;
 
@@ -27,7 +27,7 @@ public class BusinessViewCreate extends StateListenerLayout implements HasDynami
     private final TextField companyName;
     private final BusinessTypeSelect typeOfBusiness;
     private final CountrySelect country;
-    private final CurrencySelect businessCurrency;
+    private final BusinessCurrencySelect businessCurrency;
     private final BusinessOrganisationTypeSelect typeOfOrganization;
 
     public BusinessViewCreate() {
@@ -41,7 +41,7 @@ public class BusinessViewCreate extends StateListenerLayout implements HasDynami
         country = new CountrySelect();
         country.setRequiredIndicatorVisible(true);
 
-        businessCurrency = new CurrencySelect();
+        businessCurrency = new BusinessCurrencySelect();
         businessCurrency.setRequiredIndicatorVisible(true);
 
         typeOfOrganization = new BusinessOrganisationTypeSelect();

@@ -24,7 +24,7 @@ public class BankSelect extends Select<Bank> {
             BankService pojoService = ContextProvider.getBean(BankService.class);
             String token = AuthenticatedUser.token();
 
-            List<Bank> currencies = pojoService.list(token, businessId);
+            List<Bank> currencies = pojoService.list(token, businessId).getResult();
             setItems(currencies);
         }
     }

@@ -86,7 +86,7 @@ public class LTabCustomers extends VerticalLayout implements AfterNavigationObse
     public void afterNavigation(AfterNavigationEvent event) {
         CustomerService CustomerService = ContextProvider.getBean(CustomerService.class);
         String token = AuthenticatedUser.token();
-        List<Customer> customer = CustomerService.list(Long.valueOf(business), token);
+        List<Customer> customer = CustomerService.list(Long.valueOf(business), token).getResult();
         grid.setItems(customer);
     }
 

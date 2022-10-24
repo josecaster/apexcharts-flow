@@ -22,7 +22,7 @@ public class LoanCmb extends ComboBox<Loan> {
 
     public void load(Long businessId) {
         LoanService loanService = ContextProvider.getBean(LoanService.class);
-        List<Loan> list = loanService.list(AuthenticatedUser.token(), businessId);
+        List<Loan> list = loanService.list(AuthenticatedUser.token(), businessId).getResult();
         setItems(list);
     }
 }

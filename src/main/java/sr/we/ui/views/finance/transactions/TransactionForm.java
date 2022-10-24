@@ -6,9 +6,11 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import sr.we.ContextProvider;
 import sr.we.data.controller.ExchangeRateService;
 import sr.we.data.controller.PaymentTransactionService;
@@ -22,12 +24,12 @@ import sr.we.shekelflowcore.enums.PlusMin;
 import sr.we.shekelflowcore.enums.Reference;
 import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.shekelflowcore.security.Privileges;
-import sr.we.shekelflowcore.security.privileges.CurrencyPrivilege;
+import sr.we.shekelflowcore.security.privileges.CurrencyExchangePrivilege;
 import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.ui.components.TempDatePicker;
 import sr.we.ui.components.finance.AccountSelect;
 import sr.we.ui.components.finance.PaymentMethodSelect;
-import sr.we.ui.components.general.CurrencySelect;
+import sr.we.ui.components.general.BusinessCurrencySelect;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -36,20 +38,21 @@ import java.time.LocalDate;
 
 public class TransactionForm extends FormLayout {
 
-    private final CurrencySelect currencySelect;
+    private final BusinessCurrencySelect currencySelect;
     private final BigDecimalField exchangeRate;
-    private final H4 convertedAmountLbl;
-    private final BigDecimalField amountFld, currencyAmountFld;
+    private final H4 convertedAmountLbl,changeLbl;
+    private final BigDecimalField amountFld, currencyAmountFld, receivedFld;
     private final PaymentMethodSelect paymentMethodSelect;
     private final AccountSelect accountSelect;
     private final TextArea memoFld;
     private final DatePicker dateFld;
 
     private final Reference reference;
-    private final CurrencySelect currencyFrom;
+    private final BusinessCurrencySelect currencyFrom;
     private final PlusMin plusMin;
     private final Long businessId;
-    private FormItem exchanged_amount;
+    private final FormItem exchanged_amount;
+    private BigDecimal change = BigDecimal.ZERO;
     private Long referenceId;
     private Long nextReferenceId;
 
@@ -66,22 +69,33 @@ public class TransactionForm extends FormLayout {
         // init
         amountFld = new BigDecimalField();
         currencyAmountFld = new BigDecimalField();
+        receivedFld = new BigDecimalField();
+        receivedFld.setPlaceholder("Received");
         exchangeRate = new BigDecimalField();
         dateFld = new TempDatePicker();
         convertedAmountLbl = new H4(rest == null ? null : Constants.CURRENCY_FORMAT.format(rest));
+        convertedAmountLbl.setClassName(LumoUtility.Margin.NONE);
         Element element = convertedAmountLbl.getElement();
         element.setAttribute("theme", "badge primary");
         element.getStyle().set("font-size", "var(--lumo-font-size-xl)");
+
+        changeLbl = new H4("0.00");
+        changeLbl.setClassName(LumoUtility.Margin.NONE);
+        Element element1 = changeLbl.getElement();
+        element1.setAttribute("theme", "badge");
+        element1.getStyle().set("font-size", "var(--lumo-font-size-xl)");
         paymentMethodSelect = new PaymentMethodSelect();
         accountSelect = new AccountSelect(businessId, reference);
         memoFld = new TextArea();
-        currencySelect = new CurrencySelect();
+        currencySelect = new BusinessCurrencySelect();
         currencySelect.setLabel("To");
         currencySelect.setHelperText(null);
         currencySelect.setWidthFull();
-        HorizontalLayout convertedAmountLayout = new HorizontalLayout(convertedAmountLbl);
+//        HorizontalLayout convertedAmountLayout = new HorizontalLayout(convertedAmountLbl);
+//        HorizontalLayout convertedAmountLayout1 = new HorizontalLayout(receivedFld);
+//        HorizontalLayout convertedAmountLayout2 = new HorizontalLayout(changeLbl);
 
-        currencyFrom = new CurrencySelect();
+        currencyFrom = new BusinessCurrencySelect();
         currencyFrom.setLabel("From");
         currencyFrom.setHelperText(null);
         currencyFrom.setReadOnly(true);
@@ -97,30 +111,34 @@ public class TransactionForm extends FormLayout {
         accountSelect.setWidthFull();
         memoFld.setWidthFull();
         convertedAmountLbl.setWidth("-1px");
-        convertedAmountLayout.setWidthFull();
-        convertedAmountLayout.setAlignItems(FlexComponent.Alignment.END);
-        convertedAmountLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+//        convertedAmountLayout.setWidthFull();
+//        convertedAmountLayout.setAlignItems(FlexComponent.Alignment.END);
+//        convertedAmountLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+//
+//        convertedAmountLayout1.setWidthFull();
+//        convertedAmountLayout1.setAlignItems(FlexComponent.Alignment.END);
+//        convertedAmountLayout1.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+//
+//        convertedAmountLayout2.setWidthFull();
+//        convertedAmountLayout2.setAlignItems(FlexComponent.Alignment.END);
+//        convertedAmountLayout2.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 
 
         UserAccessService userAccesService = ContextProvider.getBean(UserAccessService.class);
-        boolean hasAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new CurrencyPrivilege(), Privileges.UPDATE);
+        boolean hasAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new CurrencyExchangePrivilege(), Privileges.UPDATE);
         exchangeRate.setEnabled(hasAccess);
 
         // listeners
         exchangeRate.addValueChangeListener(h -> {
             BigDecimal val = amountFld.getValue().multiply(h.getValue());
             currencyAmountFld.setValue(val);
-            convertedAmountLbl.setText(Constants.CURRENCY_FORMAT.format(val));
-            if(exchangeRate.getValue().compareTo(BigDecimal.ONE) != 0){
-                currencyAmountFld.setReadOnly(false);
-            } else {
-                currencyAmountFld.setReadOnly(true);
-            }
+            convertedAmountLbl.setText(selectedCurrency.getCode() + " " + Constants.CURRENCY_FORMAT.format(val));
+            currencyAmountFld.setReadOnly(exchangeRate.getValue().compareTo(BigDecimal.ONE) == 0);
         });
 
         currencySelect.addValueChangeListener(g -> {
             if (currencyFrom.getValue() == null) {
-                exchangeRate.setValue(BigDecimal.ZERO);
+                exchangeRate.setValue(rest);
                 return;
             }
             ExchangeRateService exchangeRateService = ContextProvider.getBean(ExchangeRateService.class);
@@ -134,6 +152,7 @@ public class TransactionForm extends FormLayout {
 
         // add default values
         amountFld.setValue(rest == null ? BigDecimal.ZERO : rest);
+        receivedFld.setValue(amountFld.getValue());
         exchangeRate.setValue(BigDecimal.ONE);
         dateFld.setValue(initDate);
         currencyFrom.setValue(fromCurrency);
@@ -147,14 +166,21 @@ public class TransactionForm extends FormLayout {
             }
             if (rest != null && g.getValue().compareTo(rest) > 0) {
                 amountFld.setValue(rest);
-            } else {
                 if (exchangeRate.getValue() != null) {
                     BigDecimal val = amountFld.getValue().multiply(exchangeRate.getValue());
-                    convertedAmountLbl.setText(Constants.CURRENCY_FORMAT.format(val));
+                    convertedAmountLbl.setText(selectedCurrency.getCode() + " " + Constants.CURRENCY_FORMAT.format(val));
                     currencyAmountFld.setValue(val);
                 }
+            } else {
+                if(!fromToCurrency) {
+                    if (exchangeRate.getValue() != null) {
+                        BigDecimal val = amountFld.getValue().multiply(exchangeRate.getValue());
+                        convertedAmountLbl.setText(selectedCurrency.getCode() + " " + Constants.CURRENCY_FORMAT.format(val));
+                        currencyAmountFld.setValue(val);
+                    }
+                }
             }
-
+            fromToCurrency = false;
 
         });
         currencyAmountFld.addValueChangeListener(f -> {
@@ -163,28 +189,52 @@ public class TransactionForm extends FormLayout {
                 if (exchangeRate.getValue() != null && exchangeRate.getValue().compareTo(BigDecimal.ONE) == 0) {
                     currencyAmountFld.setValue(amountFld.getValue());
                 } else if (exchangeRate.getValue() != null) {
-                    BigDecimal val = amountFld.getValue().divide(exchangeRate.getValue(), 2, RoundingMode.HALF_UP);
+                    BigDecimal val = f.getValue().multiply((BigDecimal.ONE.divide(exchangeRate.getValue(), 2, RoundingMode.HALF_UP)));
+                    fromToCurrency = true;
                     amountFld.setValue(val);
-                    convertedAmountLbl.setText(Constants.CURRENCY_FORMAT.format(currencyAmountFld.getValue()));
+                    convertedAmountLbl.setText(selectedCurrency.getCode() + " " + Constants.CURRENCY_FORMAT.format(currencyAmountFld.getValue()));
                 }
+            }
+            receivedFld.setValue(f.getValue());
+        });
+
+        receivedFld.addValueChangeListener(f -> {
+
+            if(receivedFld.getValue() != null && currencyAmountFld.getValue() != null) {
+                change = receivedFld.getValue().subtract(currencyAmountFld.getValue());
+                if(change.compareTo(BigDecimal.ZERO) < 0){
+                    receivedFld.setValue(currencyAmountFld.getValue());
+                }
+                changeLbl.setText(Constants.CURRENCY_FORMAT.format(change));
+            } else {
+                changeLbl.setText("0.00");
             }
         });
 
         // build
+        FormItem payment_date = addFormItem(dateFld, "Payment date");
+        setColspan(payment_date, 2);
         addFormItem(currencyFrom, "Currency");
-        addFormItem(currencySelect, "");
-        addFormItem(dateFld, "Payment date");
+        addFormItem(currencySelect, "Currency to");
         addFormItem(amountFld, "Amount");
         exchanged_amount = addFormItem(currencyAmountFld, "Exchanged amount");
-        addFormItem(exchangeRate, "Exchange rate");
+        FormItem exchange_rate = addFormItem(exchangeRate, "Exchange rate");
+        setColspan(exchange_rate, 2);
         addFormItem(paymentMethodSelect, "Payment method");
-        addFormItem(accountSelect, "Account");
-        add(convertedAmountLayout);
-        addFormItem(memoFld, "Memo");
-        setResponsiveSteps(new ResponsiveStep("0", 1));
-        setMaxWidth("500px");
+        VerticalLayout field = new VerticalLayout(accountSelect, convertedAmountLbl, receivedFld, changeLbl);
+        field.setSpacing(false);
+        field.setMargin(false);
+        field.setPadding(false);
+        addFormItem(field, "Account");
+        convertedAmountLbl.setWidthFull();
+        receivedFld.setWidthFull();
+        changeLbl.setWidthFull();
+        FormItem memo = addFormItem(memoFld, "Memo");
+        setColspan(memo, 2);
+        setResponsiveSteps(new ResponsiveStep("0", 1), new ResponsiveStep("500", 2));
+        setMaxWidth("750px");
     }
-
+private boolean fromToCurrency = false;
 
     public PaymentTransaction save() {
         PaymentTransactionVO paymentTransactionVO = new PaymentTransactionVO();
@@ -203,7 +253,8 @@ public class TransactionForm extends FormLayout {
         paymentTransactionVO.setBusiness(businessId);
         paymentTransactionVO.setCurrencyFrom(currencyFrom.getValue().getId());
         paymentTransactionVO.setCurrencyTo(currencySelect.getValue().getId());
-
+        paymentTransactionVO.setReceived(receivedFld.getValue());
+        paymentTransactionVO.setChange(change);
         if (paymentTransactionVO.getAccount() != null && paymentTransactionVO.getPaymentDate() != null && paymentTransactionVO.getPaymentMethod() != null && paymentTransactionVO.getExchangeRate() != null) {
             PaymentTransactionService paymentTransactionService = ContextProvider.getBean(PaymentTransactionService.class);
             PaymentTransaction paymentTransaction = paymentTransactionService.create(AuthenticatedUser.token(), paymentTransactionVO);

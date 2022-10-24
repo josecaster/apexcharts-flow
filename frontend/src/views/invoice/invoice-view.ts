@@ -24,12 +24,11 @@ export class InvoiceView extends LitElement {
     return html`
 <vaadin-vertical-layout style="width: 100%; height: 100%; padding: var(--lumo-space-s);">
  <vaadin-horizontal-layout theme="spacing" style="align-self: stretch;">
-  <h2 style="flex-grow: 1;margin:0px;">Invoices</h2>
-  <vaadin-button style="align-self: center;" id="add-invoice-btn" tabindex="0" theme="primary">
+  <vaadin-button style="align-self: center;margin-left:auto;" id="add-invoice-btn" tabindex="0" theme="primary">
     Create an invoice 
   </vaadin-button>
  </vaadin-horizontal-layout>
- <vaadin-vertical-layout theme="spacing" style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin: var(--lumo-space-s); margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m); align-self: stretch;">
+ <vaadin-vertical-layout theme="spacing" style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin: var(--lumo-space-s); margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m); align-self: stretch;" class="shadow-s">
   <vaadin-text-field placeholder="Filter requests" id="filter-field" style="align-self: stretch;" type="text">
    <iron-icon icon="lumo:search" slot="prefix"></iron-icon>
   </vaadin-text-field>
@@ -38,7 +37,7 @@ export class InvoiceView extends LitElement {
      Unpaid 
    </vaadin-tab>
    <vaadin-tab>
-    Paid
+     Paid 
    </vaadin-tab>
    <vaadin-tab>
      All invoices 

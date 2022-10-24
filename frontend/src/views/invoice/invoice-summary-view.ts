@@ -1,11 +1,11 @@
 import { LitElement, html, css, customElement } from 'lit-element';
 import '@vaadin/form-layout/src/vaadin-form-layout.js';
-import '@vaadin/horizontal-layout/src/vaadin-horizontal-layout.js';
 import '@vaadin/vertical-layout/src/vaadin-vertical-layout.js';
 import '@vaadin/checkbox/src/vaadin-checkbox.js';
 import '@vaadin/button/src/vaadin-button.js';
 import '@vaadin/vaadin-ordered-layout/src/vaadin-vertical-layout.js';
 import '@vaadin/radio-group/src/vaadin-radio-group.js';
+import '@vaadin/horizontal-layout/src/vaadin-horizontal-layout.js';
 
 @customElement('invoice-summary-view')
 export class InvoiceSummaryView extends LitElement {
@@ -21,20 +21,21 @@ export class InvoiceSummaryView extends LitElement {
   render() {
     return html`
 <vaadin-vertical-layout style="width: 100%; height: 100%; font-weight:bold !important;" id="invoice-view-main-layout">
- <vaadin-horizontal-layout theme="spacing" style="align-items: center; justify-content: center;">
+ <vaadin-horizontal-layout theme="spacing" style="align-items: center; justify-content: center; align-self: stretch;">
   <h2 id="invoice-view-title-h2">Invoice #</h2>
   <vaadin-button id="invoice-status-btn" style="align-self: center;border: solid 1px;border-radius:100px;" tabindex="0" theme="tertiary error">
-   Cancel invoice
+    Cancel invoice 
   </vaadin-button>
+  <vaadin-button id="settings-btn" style="margin-left: auto;" tabindex="0"></vaadin-button>
  </vaadin-horizontal-layout>
  <hr style="align-self: stretch; width: 100%;">
  <vaadin-form-layout id="invoice-summary-dashboard" style="align-self: center; width: 100%;">
   <vaadin-form-layout>
-   <vaadin-vertical-layout theme="spacing">
+   <vaadin-vertical-layout theme="spacing" style="width: 100%; height: 100%;">
     <label>Status</label>
     <span id="invoice-view-status-span">Span</span>
    </vaadin-vertical-layout>
-   <vaadin-vertical-layout theme="spacing">
+   <vaadin-vertical-layout theme="spacing" style="width: 100%; height: 100%;">
     <label>Customer</label>
     <span id="invoice-view-customer-span">Span</span>
    </vaadin-vertical-layout>
@@ -50,7 +51,7 @@ export class InvoiceSummaryView extends LitElement {
    </vaadin-vertical-layout>
   </vaadin-form-layout>
  </vaadin-form-layout>
- <vaadin-vertical-layout theme="spacing" class="my-cart-white" style="padding: var(--lumo-space-m); align-self: center; width: 100%;" id="invoice-view-create-layout">
+ <vaadin-vertical-layout theme="spacing" class="my-cart-white shadow-s" style="padding: var(--lumo-space-m); align-self: center; width: 100%;" id="invoice-view-create-layout">
   <vaadin-horizontal-layout theme="spacing" style="align-self: stretch;">
    <span id="invoice-view-create-icon-span" style="align-self: center;"></span>
    <label style="align-self: center;">Create</label>
@@ -62,7 +63,7 @@ export class InvoiceSummaryView extends LitElement {
   </vaadin-horizontal-layout>
   <vaadin-vertical-layout theme="spacing" style="align-self: stretch;" id="invoice-view-create-content"></vaadin-vertical-layout>
  </vaadin-vertical-layout>
- <vaadin-vertical-layout theme="spacing" id="invoice-view-schedule-layout" style="align-self: center; width: 100%; padding: var(--lumo-space-m);max-width:1000px;" class="my-cart-white">
+ <vaadin-vertical-layout theme="spacing" id="invoice-view-schedule-layout" style="align-self: center; width: 100%; padding: var(--lumo-space-m);max-width:1000px;" class="my-cart-white shadow-s">
   <vaadin-horizontal-layout theme="spacing" style="align-self: stretch;">
    <span style="align-self: center;" id="invoice-view-schedule-icon-span"></span>
    <label style="align-self: center;">Schedule</label>
@@ -92,7 +93,7 @@ export class InvoiceSummaryView extends LitElement {
    </vaadin-form-item>
   </vaadin-form-layout>
  </vaadin-vertical-layout>
- <vaadin-vertical-layout theme="spacing" class="my-cart-white" style="align-self: center; padding: var(--lumo-space-m); width: 100%;" id="invoice-view-send-layout">
+ <vaadin-vertical-layout theme="spacing" class="my-cart-white shadow-s" style="align-self: center; padding: var(--lumo-space-m); width: 100%;" id="invoice-view-send-layout">
   <vaadin-horizontal-layout theme="spacing" style="align-self: stretch;">
    <span id="invoice-view-send-icon-span" style="align-self: center;"></span>
    <label style="align-self: center;">Send</label>
@@ -108,11 +109,12 @@ export class InvoiceSummaryView extends LitElement {
   </vaadin-horizontal-layout>
   <vaadin-vertical-layout theme="spacing" style="align-self: stretch;" id="invoice-view-send-content"></vaadin-vertical-layout>
  </vaadin-vertical-layout>
- <vaadin-vertical-layout theme="spacing" class="my-cart-white" style="align-self: center; padding: var(--lumo-space-m); width: 100%;" id="invoice-view-get-paid-layout">
+ <vaadin-vertical-layout theme="spacing" class="my-cart-white shadow-s" style="align-self: center; padding: var(--lumo-space-m); width: 100%;" id="invoice-view-get-paid-layout">
   <vaadin-horizontal-layout theme="spacing" style="align-self: stretch;">
    <span id="invoice-view-get-paid-icon-span" style="align-self: center;"></span>
    <label style="align-self: center; flex-grow: 1; flex-shrink: 0;">Get paid</label>
    <vaadin-horizontal-layout theme="spacing" id="invoice-view-create-action-layout" style="flex-grow: 0; flex-shrink: 1; width: 100%; justify-content: flex-end; align-self: center;">
+    <vaadin-horizontal-layout theme="spacing" id="is-transactions-layout"></vaadin-horizontal-layout>
     <vaadin-button style="align-self: center;border: solid 1px;border-radius:100px;" theme="primary" tabindex="0" id="invoice-summary-payment-btn">
       Record a payment 
     </vaadin-button>

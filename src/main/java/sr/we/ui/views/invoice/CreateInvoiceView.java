@@ -10,8 +10,6 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.details.DetailsVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H5;
 import com.vaadin.flow.component.html.Label;
@@ -22,39 +20,28 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.textfield.*;
 import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.apache.commons.lang3.StringUtils;
 import sr.we.ContextProvider;
-import sr.we.data.controller.ExchangeRateService;
 import sr.we.data.controller.InvoiceService;
 import sr.we.data.controller.PosHeaderService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.*;
-import sr.we.shekelflowcore.entity.helper.Executable;
-import sr.we.shekelflowcore.entity.helper.InterExecutable;
 import sr.we.shekelflowcore.entity.helper.vo.InvoiceVO;
-import sr.we.shekelflowcore.entity.helper.vo.PosHeaderDetailVO;
 import sr.we.shekelflowcore.entity.helper.vo.PosHeaderVO;
 import sr.we.shekelflowcore.exception.ValidationException;
-import sr.we.shekelflowcore.settings.util.Constants;
+import sr.we.ui.components.BreadCrumb;
 import sr.we.ui.components.TempDatePicker;
-import sr.we.ui.components.general.CurrencySelect;
 import sr.we.ui.views.LineAwesomeIcon;
 import sr.we.ui.views.ReRouteLayout;
 import sr.we.ui.views.finance.loanrequests.CustomerCmb;
-import sr.we.ui.views.pos.Fee;
-import sr.we.ui.views.pos.IFee;
-import sr.we.ui.views.pos.Item;
 import sr.we.ui.views.pos.ProductOrService;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static sr.we.ContextProvider.getBean;
 
@@ -64,6 +51,7 @@ import static sr.we.ContextProvider.getBean;
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
+@BreadCrumb(titleKey = "sr.we.invoices.create",parentNavigationTarget = InvoiceView.class)
 @Tag("create-invoice-view")
 @JsModule("./src/views/invoice/create-invoice-view.ts")
 public class CreateInvoiceView extends LitTemplate {
@@ -180,6 +168,7 @@ public class CreateInvoiceView extends LitTemplate {
         createInvoiceHeaderDetails.addThemeVariants(DetailsVariant.REVERSE);
         createInvoiceHeaderDetails.addClassNames(medium);
         createInvoiceHeaderDetails.getElement().getStyle().set("background", "var(--lumo-primary-contrast-color)");
+        createInvoiceHeaderDetails.setVisible(false);
 
         H5 footerSummary = new H5("Footer");
         footerSummary.getElement().getStyle().set("margin", "5px");
@@ -524,7 +513,7 @@ public class CreateInvoiceView extends LitTemplate {
     protected void setByPosHeaderId(BeforeEnterEvent event, Long posHeaderId) {
         String token = AuthenticatedUser.token();
         InvoiceService loanRequestService = getBean(InvoiceService.class);
-        invoice = loanRequestService.get(posHeaderId, token);
+        invoice = loanRequestService.getByPosHeader(posHeaderId, token);
         if (invoice == null) {
             if (event != null) {
                 event.forwardTo(ReRouteLayout.class);

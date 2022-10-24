@@ -42,6 +42,7 @@ import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.InvoicesPrivilege;
 import sr.we.shekelflowcore.security.privileges.POSPrivilege;
 import sr.we.shekelflowcore.settings.util.Constants;
+import sr.we.ui.components.BreadCrumb;
 import sr.we.ui.components.TempDatePicker;
 import sr.we.ui.views.LineAwesomeIcon;
 import sr.we.ui.views.MainLayout;
@@ -59,6 +60,7 @@ import java.util.stream.Collectors;
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
+@BreadCrumb(titleKey = "")
 @Route(value = "invoice-new", layout = MainLayout.class)
 @RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
 public class AddInvoiceView extends CreateInvoiceView implements BeforeEnterObserver {

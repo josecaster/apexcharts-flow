@@ -179,7 +179,7 @@ public class LTabRequests extends TableLayout implements AfterNavigationObserver
     @Override
     public void afterNavigation(AfterNavigationEvent event) {
         LoanRequestService loanService = ContextProvider.getBean(LoanRequestService.class);
-        grid.setItems(loanService.list(AuthenticatedUser.token(), Long.valueOf(business), Long.valueOf(loanId)));
+        grid.setItems(loanService.list(AuthenticatedUser.token(), Long.valueOf(business), Long.valueOf(loanId)).getResult());
 
     }
 

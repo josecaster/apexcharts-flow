@@ -17,7 +17,7 @@ import sr.we.shekelflowcore.entity.helper.vo.CustomerShippingVO;
 import sr.we.shekelflowcore.entity.helper.vo.CustomerVO;
 import sr.we.ui.views.MainLayout;
 import sr.we.ui.views.StateListenerLayout;
-import sr.we.ui.components.general.CurrencySelect;
+import sr.we.ui.components.general.BusinessCurrencySelect;
 
 import javax.annotation.security.RolesAllowed;
 import java.util.Optional;
@@ -32,7 +32,7 @@ public class CustomerViewCreate extends StateListenerLayout implements HasDynami
     private ContactView contactView;
     private AddressView shippingAddress;
     private AddressView billingAddress;
-    private CurrencySelect currencySelect;
+    private BusinessCurrencySelect currencySelect;
 
     public CustomerViewCreate() {
 
@@ -85,7 +85,7 @@ public class CustomerViewCreate extends StateListenerLayout implements HasDynami
         billingFormLayout.setResponsiveSteps(
                 new FormLayout.ResponsiveStep("0", 1)
         );
-        currencySelect = new CurrencySelect();
+        currencySelect = new BusinessCurrencySelect();
         currencySelect.setLabel(null);
         currencySelect.setHelperText(null);
         currencySelect.setWidthFull();

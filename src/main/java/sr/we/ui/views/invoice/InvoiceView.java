@@ -31,6 +31,7 @@ import sr.we.shekelflowcore.security.privileges.InvoicesPrivilege;
 import sr.we.shekelflowcore.security.privileges.LoanRequestPrivilege;
 import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.ui.components.ArrowDownButton;
+import sr.we.ui.components.BreadCrumb;
 import sr.we.ui.views.LineAwesomeIcon;
 import sr.we.ui.views.MainLayout;
 import sr.we.ui.views.finance.loanrequests.AddRequestsView;
@@ -48,6 +49,7 @@ import java.util.*;
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
+@BreadCrumb(titleKey = "sr.we.invoices")
 @Tag("invoice-view")
 @JsModule("./src/views/invoice/invoice-view.ts")
 @Route(value = "invoices", layout = MainLayout.class)
@@ -162,7 +164,7 @@ public class InvoiceView extends LitTemplate  implements BeforeEnterObserver, Af
         InvoiceService loanService = ContextProvider.getBean(InvoiceService.class);
         InvoiceVO invoiceVO = new InvoiceVO();
         invoiceVO.setBusiness(Long.valueOf(business));
-        List<Invoice> list = loanService.list(AuthenticatedUser.token(), invoiceVO);
+        List<Invoice> list = loanService.list(AuthenticatedUser.token(), invoiceVO).getResult();
         grid.setItems(list);
 
     }

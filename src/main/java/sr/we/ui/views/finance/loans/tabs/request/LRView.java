@@ -303,7 +303,7 @@ public class LRView extends VerticalLayout implements BeforeEnterObserver {
     }
 
     private void payments(LoanRequestService loanRequestService, HasComponents layout) {
-        List<LoanRequestPlan> loanRequestPlans = loanRequestService.listPlan(AuthenticatedUser.token(), loanRequest.getId());
+        List<LoanRequestPlan> loanRequestPlans = loanRequestService.listPlan(AuthenticatedUser.token(), loanRequest.getId()).getResult();
         layout.removeAll();
         Board board = new Board();
         layout.add(board);

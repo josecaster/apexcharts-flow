@@ -16,7 +16,7 @@ public class BusinessTypeSelect extends Select<BusinessType> {
         PojoService pojoService = ContextProvider.getBean(PojoService.class);
         String token = AuthenticatedUser.token();
 
-        List<BusinessType> businessTypes = pojoService.listBusinessType(token);
+        List<BusinessType> businessTypes = pojoService.listBusinessType(token).getResult();
         setItems(businessTypes);
 
         setItemLabelGenerator((f) -> f.getName());

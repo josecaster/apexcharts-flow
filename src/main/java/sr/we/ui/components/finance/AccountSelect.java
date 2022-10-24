@@ -31,7 +31,7 @@ public class AccountSelect extends Select<Account> {
                 AccountVO accountVO = new AccountVO();
                 accountVO.setBusiness(businessId);
                 accountVO.setAccountCodes(reference.getAccountCodes());
-                List<Account> accounts = pojoService.list(token, accountVO);
+                List<Account> accounts = pojoService.list(token, accountVO).getResult();
 //                getDataProvider().fetch(new Query<>()).collect(Collectors.toList()).addAll(accounts1);
 //                getDataProvider().refreshAll();
 //                if(accounts != null && !accounts.isEmpty()){

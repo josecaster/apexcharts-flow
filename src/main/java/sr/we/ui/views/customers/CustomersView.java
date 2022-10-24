@@ -15,6 +15,7 @@ import sr.we.data.controller.CustomerService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Customer;
 import sr.we.shekelflowcore.entity.Role;
+import sr.we.ui.components.BreadCrumb;
 import sr.we.ui.views.MainLayout;
 import sr.we.ui.views.TableLayout;
 
@@ -24,6 +25,7 @@ import java.util.Optional;
 import java.util.Random;
 
 //@PageTitle("Customers")
+@BreadCrumb(titleKey = "sr.we.customers")
 @Route(value = "customers", layout = MainLayout.class)
 @RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
 public class CustomersView extends TableLayout implements AfterNavigationObserver, BeforeEnterObserver, HasDynamicTitle, BeforeLeaveObserver {
@@ -133,7 +135,7 @@ public class CustomersView extends TableLayout implements AfterNavigationObserve
                 public void run() {
                     CustomerService CustomerService = ContextProvider.getBean(CustomerService.class);
 
-                    List<Customer> Customer = CustomerService.list(Long.valueOf(businessString), token);
+                    List<Customer> Customer = CustomerService.list(Long.valueOf(businessString), token).getResult();
                     current.access(() -> {
                         grid.setItems(Customer);
                         grid.getDataProvider().refreshAll();

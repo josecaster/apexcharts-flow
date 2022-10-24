@@ -17,7 +17,7 @@ public class LoanAssetsSelect extends Select<LoanAssets> {
 
     public void load(Long loanId) {
         LoanAssetsService loanService = ContextProvider.getBean(LoanAssetsService.class);
-        setItems(loanService.list(AuthenticatedUser.token(), Long.valueOf(loanId)));
+        setItems(loanService.list(AuthenticatedUser.token(), Long.valueOf(loanId)).getResult());
         setItemLabelGenerator((f) -> f.getName());
     }
 

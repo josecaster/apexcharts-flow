@@ -17,7 +17,7 @@ import sr.we.shekelflowcore.entity.helper.adapter.LoanRequestBody;
 import sr.we.ui.components.EmailAddress;
 import sr.we.ui.components.TempDatePicker;
 import sr.we.ui.components.finance.FrequencyField;
-import sr.we.ui.components.general.CurrencySelect;
+import sr.we.ui.components.general.BusinessCurrencySelect;
 import sr.we.ui.views.StateListenerLayout;
 import sr.we.ui.views.finance.loans.tabs.LTabRequests;
 
@@ -27,7 +27,7 @@ public class LRCreateLayout extends StateListenerLayout {
     private final TextField nameFld, firstNameFld;
     private final TextField mobileFld;
     private final EmailAddress emailAddress;
-    private final CurrencySelect currencyFld;
+    private final BusinessCurrencySelect currencyFld;
     private final FrequencyField frequencyFld;
     private final BigDecimalField requestedAmountFld;
     private final DatePicker datePicker;
@@ -49,7 +49,7 @@ public class LRCreateLayout extends StateListenerLayout {
         firstNameFld = new TextField();
         mobileFld = new TextField();
         emailAddress = new EmailAddress();
-        currencyFld = new CurrencySelect();
+        currencyFld = new BusinessCurrencySelect();
         frequencyFld = new FrequencyField();
         requestedAmountFld = new BigDecimalField();
         datePicker = new TempDatePicker();
@@ -199,7 +199,7 @@ public class LRCreateLayout extends StateListenerLayout {
         actionLayout.setVisible(false);
     }
 
-    private void setReadOnly(TextField nameFld,TextField firstNameFld, TextField mobileFld, EmailAddress emailAddress, CurrencySelect currencyFld, FrequencyField frequencyFld, BigDecimalField requestedAmountFld, DatePicker datePicker) {
+    private void setReadOnly(TextField nameFld, TextField firstNameFld, TextField mobileFld, EmailAddress emailAddress, BusinessCurrencySelect currencyFld, FrequencyField frequencyFld, BigDecimalField requestedAmountFld, DatePicker datePicker) {
         firstNameFld.setReadOnly(true);
         nameFld.setReadOnly(true);
         mobileFld.setReadOnly(true);

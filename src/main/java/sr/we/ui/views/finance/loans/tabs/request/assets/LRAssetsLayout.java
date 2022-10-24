@@ -18,7 +18,7 @@ import sr.we.shekelflowcore.entity.helper.vo.LoanRequestAssetsVO;
 import sr.we.ui.components.EmailAddress;
 import sr.we.ui.components.finance.FrequencyField;
 import sr.we.ui.components.finance.LoanAssetsSelect;
-import sr.we.ui.components.general.CurrencySelect;
+import sr.we.ui.components.general.BusinessCurrencySelect;
 import sr.we.ui.views.StateListenerLayout;
 import sr.we.util.FileBuffer;
 
@@ -152,7 +152,7 @@ public class LRAssetsLayout extends StateListenerLayout {
         actionLayout.setVisible(false);
     }
 
-    private void setReadOnly(TextField nameFld, TextField mobileFld, EmailAddress emailAddress, CurrencySelect currencyFld, FrequencyField frequencyFld, BigDecimalField requestedAmountFld, DatePicker datePicker) {
+    private void setReadOnly(TextField nameFld, TextField mobileFld, EmailAddress emailAddress, BusinessCurrencySelect currencyFld, FrequencyField frequencyFld, BigDecimalField requestedAmountFld, DatePicker datePicker) {
         nameFld.setReadOnly(true);
         mobileFld.setReadOnly(true);
         emailAddress.setReadOnly(true);

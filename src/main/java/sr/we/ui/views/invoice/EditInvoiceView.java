@@ -17,6 +17,7 @@ import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.POSPrivilege;
+import sr.we.ui.components.BreadCrumb;
 import sr.we.ui.views.MainLayout;
 import sr.we.ui.views.ReRouteLayout;
 import sr.we.ui.views.pos.DataProviders;
@@ -34,6 +35,7 @@ import static sr.we.ContextProvider.getBean;
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
+@BreadCrumb(titleKey = "sr.we.invoices.edit",parentNavigationTarget = InvoicePreView.class)
 @Route(value = "invoice-edit", layout = MainLayout.class)
 @RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
 public class EditInvoiceView extends CreateInvoiceView implements BeforeEnterObserver {

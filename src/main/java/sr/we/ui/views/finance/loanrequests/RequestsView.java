@@ -153,6 +153,6 @@ public class RequestsView extends LitTemplate implements BeforeEnterObserver , A
     @Override
     public void afterNavigation(AfterNavigationEvent afterNavigationEvent) {
         LoanRequestService loanService = ContextProvider.getBean(LoanRequestService.class);
-        grid.setItems(loanService.list(AuthenticatedUser.token(), Long.valueOf(business), null));
+        grid.setItems(loanService.list(AuthenticatedUser.token(), Long.valueOf(business), null).getResult());
     }
 }
