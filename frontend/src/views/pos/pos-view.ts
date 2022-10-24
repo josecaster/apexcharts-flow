@@ -1,5 +1,4 @@
 import { LitElement, html, css, customElement } from 'lit-element';
-import '@vaadin/vertical-layout/src/vaadin-vertical-layout.js';
 import '@vaadin/vaadin-ordered-layout/src/vaadin-vertical-layout.js';
 import '@vaadin/form-layout/src/vaadin-form-layout.js';
 import '@vaadin/text-field/src/vaadin-text-field.js';
@@ -7,6 +6,7 @@ import '@vaadin/combo-box/src/vaadin-combo-box.js';
 import '@vaadin/button/src/vaadin-button.js';
 import '@polymer/iron-icon/iron-icon.js';
 import '@vaadin/horizontal-layout/src/vaadin-horizontal-layout.js';
+import '@vaadin/vertical-layout/src/vaadin-vertical-layout.js';
 
 @customElement('pos-view')
 export class PosView extends LitElement {
@@ -35,7 +35,9 @@ export class PosView extends LitElement {
   </vaadin-horizontal-layout>
   <vaadin-form-layout colspan="1">
    <vaadin-vertical-layout style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin: var(--lumo-space-s); margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m); width: 100%; height: 514px;" colspan="2" class="shadow-s">
-    <div id="radio-layout" style="align-self: center;"></div>
+    <div id="radio-layout" style="align-self: flex-start;">
+     <h2>Items</h2>
+    </div>
     <vaadin-combo-box placeholder="Filter products" id="filter-cmb" style="align-self: stretch;" type="text">
      <iron-icon icon="lumo:search" slot="prefix"></iron-icon>
     </vaadin-combo-box>
@@ -46,7 +48,7 @@ export class PosView extends LitElement {
    <vaadin-horizontal-layout theme="spacing" style="align-self: stretch;">
     <h2 id="product-title" style="flex-grow: 1;">Ticket</h2>
     <vaadin-button id="customer-btn" style="align-self: center;" tabindex="0" theme="tertiary">
-     + Add Customer
+      + Add Customer 
     </vaadin-button>
     <vaadin-button theme="primary success" aria-label="Add new" id="variable-btn" style="align-self: center;" tabindex="0">
       Save 
@@ -55,12 +57,7 @@ export class PosView extends LitElement {
    <div id="items-layout" style="align-self: stretch;"></div>
    <div id="fee-layout" style="width: 100%;"></div>
   </vaadin-vertical-layout>
-  <vaadin-vertical-layout style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin: var(--lumo-space-s); margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m); width: 100%; height: 514px;" id="checkout-layout" colspan="3" class="shadow-s">
-   <vaadin-horizontal-layout theme="spacing" style="align-self: stretch;">
-    <h2>Open tickets</h2>
-   </vaadin-horizontal-layout>
-   <div style="align-self: stretch;" id="tickets-layout"></div>
-  </vaadin-vertical-layout>
+  <div style="align-self: stretch;" id="tickets-layout" colspan="3"></div>
  </vaadin-form-layout>
 </vaadin-vertical-layout>
 `;

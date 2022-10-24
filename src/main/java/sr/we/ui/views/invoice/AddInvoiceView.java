@@ -60,7 +60,7 @@ import java.util.stream.Collectors;
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
-@BreadCrumb(titleKey = "")
+@BreadCrumb(titleKey = "sr.we.invoices.create",parentNavigationTarget = InvoiceView.class)
 @Route(value = "invoice-new", layout = MainLayout.class)
 @RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
 public class AddInvoiceView extends CreateInvoiceView implements BeforeEnterObserver {

@@ -21,7 +21,7 @@ export class CreateInvoiceView extends LitElement {
     return html`
 <vaadin-vertical-layout style="background: #f6f6f7; width: 100%; flex-direction: column; padding-right: var(--lumo-space-m); padding-left: var(--lumo-space-m);">
  <vaadin-horizontal-layout theme="spacing" style="align-self: stretch;">
-  <vaadin-button id="save-btn" style="align-self: center;border: solid 1px; margin-left:auto;" tabindex="0" theme="tertiary">
+  <vaadin-button id="preview-btn" style="align-self: center;border: solid 1px; margin-left:auto;" tabindex="0" theme="tertiary">
     Preview 
   </vaadin-button>
   <vaadin-button id="invoice-save-continue-btn" style="align-self: center;" tabindex="0" theme="primary">

@@ -17,6 +17,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Item {
+
+    private  Boolean valid;
     private final ProductOrService productOrService;
     private Map<String, Object> map;
     private Map<String, Object> feeMap;
@@ -227,5 +229,13 @@ public class Item {
     public void setExchange(BigDecimal value) {
         exchange = value;
         recalcRate = false;
+    }
+
+    public Boolean isValid() {
+        return valid;
+    }
+
+    public void setValid(boolean valid) {
+        this.valid = valid;
     }
 }

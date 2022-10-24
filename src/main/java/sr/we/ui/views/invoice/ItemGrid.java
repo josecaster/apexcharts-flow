@@ -22,6 +22,7 @@ import sr.we.shekelflowcore.entity.*;
 import sr.we.shekelflowcore.entity.helper.InterExecutable;
 import sr.we.shekelflowcore.entity.helper.vo.PosHeaderDetailVO;
 import sr.we.shekelflowcore.entity.helper.vo.PosHeaderVO;
+import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.ui.components.general.BusinessCurrencySelect;
 import sr.we.ui.views.LineAwesomeIcon;
@@ -108,8 +109,39 @@ public class ItemGrid extends Grid<Item> {
             });
             return lineAwesomeIcon;
         }).setFlexGrow(0);
+        addComponentColumn(d -> {
+            LineAwesomeIcon lineAwesomeIcon = new LineAwesomeIcon("la la-exclamation-triangle");
+            boolean visible = false;
+            boolean containsExchangeOnly = false;
+            if (d.getProductOrService().getServices().getCurrency().getId().compareTo(business2.getCurrency().getId()) != 0) {
+                visible = true;
+                containsExchangeOnly = true;
+            }
+            if (d.getProductOrService().hasDetailedInventory()) {
+                visible = true;
+                containsExchangeOnly = false;
+            }
+            if (d.getDescMap() != null && !d.getDescMap().entrySet().isEmpty() && d.getPosHeaderDetail() == null) {
+                visible = true;
+                containsExchangeOnly = false;
+            }
+            if(visible) {
+                if ((d.isValid() != null && d.isValid()) || (d.isValid() == null && containsExchangeOnly)) {
+                    d.setValid(true);
+                    lineAwesomeIcon.removeClassName(LumoUtility.TextColor.ERROR);
+                    lineAwesomeIcon.addClassName(LumoUtility.TextColor.SUCCESS);
+                } else {
+                    d.setValid(false);
+                    lineAwesomeIcon.addClassName(LumoUtility.TextColor.ERROR);
+                    lineAwesomeIcon.removeClassName(LumoUtility.TextColor.SUCCESS);
+                }
+            }
+            lineAwesomeIcon.setVisible(visible);
+            lineAwesomeIcon.addClickListener(f -> setDetailsVisible(d, !isDetailsVisible(d)));
+            return lineAwesomeIcon;
+        }).setFlexGrow(0);
         setItemDetailsRenderer(new ComponentRenderer<>(this::getVariableLayout));
-        setDetailsVisibleOnClick(true);
+        setDetailsVisibleOnClick(false);
         itemList = new ArrayList<>();
         setItems(itemList);
 
@@ -209,15 +241,17 @@ public class ItemGrid extends Grid<Item> {
         if (d.getProductOrService().getServices().getCurrency().getId().compareTo(business2.getCurrency().getId()) != 0) {
             BigDecimalField bigDecimalField = new BigDecimalField();
             bigDecimalField.setLabel("Exchange Rate ");
-            bigDecimalField.setHelperText(d.getProductOrService().getServices().getCurrency().getCode()+" - "+business2.getCurrency().getCode());
+            bigDecimalField.setHelperText(d.getProductOrService().getServices().getCurrency().getCode() + " - " + business2.getCurrency().getCode());
             bigDecimalField.setValue(d.getExchange());
             layout.add(bigDecimalField);
 
             bigDecimalField.addValueChangeListener(f -> {
+                d.setValid(f.getValue() != null);
                 if (f.getValue() == null) {
                     bigDecimalField.setValue(BigDecimal.ONE);
                     return;
                 }
+
                 d.setExchange(f.getValue());
                 getDataProvider().refreshAll();
                 execute.build(itemList);
@@ -242,6 +276,7 @@ public class ItemGrid extends Grid<Item> {
 //            d.setInventoryDetail(detailCmb.getValue());
 
             detailCmb.addValueChangeListener(f -> {
+                d.setValid(f.getValue() != null);
                 d.setInventoryDetail(f.getValue());
                 getDataProvider().refreshAll();
 //                variableBtn.click();
@@ -257,6 +292,7 @@ public class ItemGrid extends Grid<Item> {
                 bigDecimalField.setValue(StringUtils.isBlank((String) d.getMap().get(key)) ? null : BigDecimal.valueOf(Double.parseDouble((String) d.getMap().get(key))));
                 layout.add(bigDecimalField);
                 bigDecimalField.addValueChangeListener(f -> {
+                    d.setValid(f.getValue() != null);
                     d.getMap().put(key, (f.getValue() == null ? null : f.getValue().toString()));
                     d.getFeeMap().put(key, (f.getValue() == null ? null : f.getValue().toString()));
                     getDataProvider().refreshAll();
@@ -272,6 +308,9 @@ public class ItemGrid extends Grid<Item> {
 
     public List<PosHeaderDetailVO> itemListVo() {
         return itemList.stream().map(f -> {
+            if (f.isValid() != null && !f.isValid()) {
+                throw new ValidationException("Please fix invalid items before saving");
+            }
             PosHeaderDetailVO posHeaderDetailVO = new PosHeaderDetailVO();
             posHeaderDetailVO.setId(f.getPosHeaderDetail() == null ? null : f.getPosHeaderDetail().getId());
             posHeaderDetailVO.setNew(posHeaderDetailVO.getId() == null);
@@ -357,8 +396,7 @@ public class ItemGrid extends Grid<Item> {
         BigDecimal reduce = itemList.stream().map(Item::getResult).reduce(BigDecimal.ZERO, BigDecimal::add);
 //        reduce = reduce.add(feeList.stream().map(Fee::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add));
 
-        BigDecimal obj =
-                total = convertedAmount;
+        BigDecimal obj = total = convertedAmount;
         currencySelect.setValue(currencyTo);
         exchangeRateFld.setValue(exchangeRate);
         discountFld.setValue(this.posHeader.getDiscount());
@@ -392,6 +430,9 @@ public class ItemGrid extends Grid<Item> {
 //        }).toList();
 
         vos.addAll(itemListVo());
+        if (vos.isEmpty()) {
+            throw new ValidationException("Please add at least one (1) item");
+        }
 //        vos.addAll(collectFees);
 
         BigDecimal reduce = getItemList().stream().map(Item::getResult).reduce(BigDecimal.ZERO, BigDecimal::add);

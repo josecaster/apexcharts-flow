@@ -10,6 +10,7 @@ import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.template.Id;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.*;
 import sr.we.ContextProvider;
@@ -32,6 +33,7 @@ import sr.we.shekelflowcore.security.privileges.LoanRequestPrivilege;
 import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.ui.components.ArrowDownButton;
 import sr.we.ui.components.BreadCrumb;
+import sr.we.ui.components.NotYetChange;
 import sr.we.ui.views.LineAwesomeIcon;
 import sr.we.ui.views.MainLayout;
 import sr.we.ui.views.finance.loanrequests.AddRequestsView;
@@ -62,6 +64,8 @@ public class InvoiceView extends LitTemplate  implements BeforeEnterObserver, Af
     @Id("add-invoice-btn")
     private Button addInvoiceBtn;
     private Grid<Invoice> grid = new Grid<>();
+    @Id("filter-field")
+    private TextField filterField;
 
     /**
      * Creates a new InvoiceView.
@@ -69,6 +73,7 @@ public class InvoiceView extends LitTemplate  implements BeforeEnterObserver, Af
     public InvoiceView() {
         // You can initialise any data required for the connected UI components here.
         addInvoiceBtn.addClickListener(f -> UI.getCurrent().navigate(AddInvoiceView.class, new RouteParameters(new RouteParam("business", business))));
+        filterField.addValueChangeListener(new NotYetChange<>());
 
         grid.addComponentColumn(new ValueProvider<Invoice, LineAwesomeIcon>() {
             @Override

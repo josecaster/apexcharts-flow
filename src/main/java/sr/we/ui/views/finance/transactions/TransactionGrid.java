@@ -70,7 +70,7 @@ public class TransactionGrid extends VerticalLayout  {
         }).setHeader("Transaction");
         grid.setSelectionMode(Grid.SelectionMode.SINGLE);
         grid.addSelectionListener(get -> {
-            Optional<PaymentTransaction> firstSelectedItem = get.getFirstSelectedItem();
+            /*Optional<PaymentTransaction> firstSelectedItem = get.getFirstSelectedItem();
             if (firstSelectedItem.isPresent()) {
                 PaymentTransaction loan = firstSelectedItem.get();
 //                QueryParameters queryParameters = QueryParameters.fromString("id=" + loan.getId());
@@ -79,7 +79,7 @@ public class TransactionGrid extends VerticalLayout  {
                         new RouteParameters(//
                                 new RouteParam("business", business),//
                                 new RouteParam("loan", loan.getId().toString())));
-            }
+            }*/
         });
         add(grid);
     }

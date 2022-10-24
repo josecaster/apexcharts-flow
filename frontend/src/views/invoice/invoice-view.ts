@@ -4,10 +4,10 @@ import '@vaadin/horizontal-layout/src/vaadin-horizontal-layout.js';
 import '@vaadin/vertical-layout/src/vaadin-vertical-layout.js';
 import '@vaadin/tabs/src/vaadin-tabs.js';
 import '@vaadin/button/src/vaadin-button.js';
-import '@vaadin/tabs/src/vaadin-tab.js';
 import '@vaadin/text-field/src/vaadin-text-field.js';
 import '@polymer/iron-icon/iron-icon.js';
 import '@vaadin/vaadin-lumo-styles/utility';
+import '@vaadin/tabs/src/vaadin-tab.js';
 
 @customElement('invoice-view')
 export class InvoiceView extends LitElement {
@@ -33,14 +33,14 @@ export class InvoiceView extends LitElement {
    <iron-icon icon="lumo:search" slot="prefix"></iron-icon>
   </vaadin-text-field>
   <vaadin-tabs style="align-self: center;" orientation="horizontal" selected="0">
-   <vaadin-tab selected>
-     Unpaid 
-   </vaadin-tab>
-   <vaadin-tab>
-     Paid 
-   </vaadin-tab>
    <vaadin-tab>
      All invoices 
+   </vaadin-tab>
+   <vaadin-tab selected disabled>
+     Unpaid 
+   </vaadin-tab>
+   <vaadin-tab disabled>
+     Paid 
    </vaadin-tab>
   </vaadin-tabs>
   <div id="invoice-grid-layout" style="align-self: stretch;"></div>

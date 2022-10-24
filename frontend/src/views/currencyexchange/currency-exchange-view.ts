@@ -25,27 +25,27 @@ export class CurrencyExchangeView extends LitElement {
  <vaadin-vertical-layout theme="spacing" style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin: var(--lumo-space-s); margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m); max-width:1000px; align-self: center;" class="shadow-s">
   <vaadin-form-layout style="width: 100%;" id="vaadinFormLayout">
    <vaadin-form-item>
-    <vaadin-select id="currency-from-select" style="width: 100%;"></vaadin-select>
-    <label slot="label">From</label>
+    <vaadin-select id="currency-from-select" style="width: 100%;" required></vaadin-select>
+    <label slot="label">One (1)</label>
    </vaadin-form-item>
    <vaadin-form-item>
-    <vaadin-select id="currency-to-select" style="width: 100%;"></vaadin-select>
-    <label slot="label">To</label>
+    <vaadin-select id="currency-to-select" style="width: 100%;" required></vaadin-select>
+    <label slot="label">Equals</label>
    </vaadin-form-item>
    <vaadin-form-item>
-    <label slot="label">xf</label>
+    <label slot="label">fx-rate</label>
     <vaadin-big-decimal-field id="from-amount-fld" style="width: 100%;"></vaadin-big-decimal-field>
    </vaadin-form-item>
    <vaadin-form-item>
-    <label slot="label">From</label>
+    <label slot="label">One (1)</label>
     <vaadin-select value="Item one" id="currency-to--replica-select" style="width: 100%;" readonly></vaadin-select>
    </vaadin-form-item>
    <vaadin-form-item>
-    <label slot="label">To</label>
+    <label slot="label">Equals</label>
     <vaadin-select value="Item one" id="currency-from--replica-select" style="width: 100%;" readonly></vaadin-select>
    </vaadin-form-item>
    <vaadin-form-item>
-    <label slot="label">xf</label>
+    <label slot="label">fx-rate</label>
     <vaadin-big-decimal-field id="to-amount-fld" style="width: 100%;"></vaadin-big-decimal-field>
    </vaadin-form-item>
   </vaadin-form-layout>

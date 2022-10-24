@@ -27,22 +27,28 @@ public class CustomErrorHandler implements ErrorHandler {
                 Notification notification = new Notification();
                 notification.setPosition(Notification.Position.TOP_STRETCH);
                 notification.setDuration(5000);
-                notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+
 
                 if(errorEvent.getThrowable() instanceof AuthenticationException exception){
+                    notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
                     notification.setText("Could not Authenticate");
                 } else if(errorEvent.getThrowable() instanceof FrameworkException exception){
+                    notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
                     notification.setText("Framework Issue Detected, Try Again after Maintenance");
                 }else if(errorEvent.getThrowable() instanceof SecurityException exception){
+                    notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
                     notification.setText("Please login again for security reasons");
                     UI.getCurrent().navigate(LoginView.class);
                 }else if(errorEvent.getThrowable() instanceof ValidationException exception){
                     notification.addThemeVariants(NotificationVariant.LUMO_CONTRAST);
                     notification.setText(exception.getError().getMessage());
+                    notification.setDuration(5000);
+                    notification.setPosition(Notification.Position.MIDDLE);
                 } else if(errorEvent.getThrowable() instanceof HttpStatusCodeException exception){
                     notification.addThemeVariants(NotificationVariant.LUMO_CONTRAST);
                     notification.setText("Service Issue Detected, Try Again after Maintenance");
                 } else {
+                    notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
                     notification.setText("Something wrong happened, Try Again after Maintenance");
                 }
 

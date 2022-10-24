@@ -8,12 +8,12 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.littemplate.LitTemplate;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.textfield.BigDecimalField;
-import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
@@ -36,6 +36,8 @@ import sr.we.ui.components.general.CurrencySelect;
 import sr.we.ui.views.MainLayout;
 
 import javax.annotation.security.RolesAllowed;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Optional;
 
 /**
@@ -75,9 +77,9 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
     private CurrencySelect currencyFromReplicaSelect;
     @Id("vaadinTabs")
     private Tabs vaadinTabs;
-    private Tab vaadinTab;
+    private final Tab vaadinTab;
     private Tab vaadinTab1;
-    private Tab vaadinTab2;
+    private final Tab vaadinTab2;
 
     /**
      * Creates a new CurrencyExchangeView.
@@ -105,20 +107,30 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
 
         rateGridLayout.add(grid);
 
+        fromAmountFld.setRequiredIndicatorVisible(true);
+        toAmountFld.setRequiredIndicatorVisible(true);
+
+        fromAmountFld.addValueChangeListener(f -> {
+            if (f.getValue() != null && f.getValue().compareTo(BigDecimal.ZERO) != 0) {
+                toAmountFld.setValue(BigDecimal.ONE.divide(f.getValue(), 4, RoundingMode.HALF_UP));
+            }
+        });
+
         addRateBtn.addClickListener(f -> {
             ExchangeRateService productService = ContextProvider.getBean(ExchangeRateService.class);
             String token = AuthenticatedUser.token();
 
             CurrencyExchangeVO currencyExchangeVO = new CurrencyExchangeVO();
             currencyExchangeVO.setNew(true);
-            currencyExchangeVO.setCurrencyToId(currencyToSelect.getValue().getId());
-            currencyExchangeVO.setCurrencyFromId(currencyFromSelect.getValue().getId());
+            currencyExchangeVO.setCurrencyToId(currencyToSelect.getValue() == null ? null : currencyToSelect.getValue().getId());
+            currencyExchangeVO.setCurrencyFromId(currencyFromSelect.getValue() == null ? null : currencyFromSelect.getValue().getId());
 
 
             currencyExchangeVO.setAmountFrom(fromAmountFld.getValue());
             currencyExchangeVO.setAmountTo(toAmountFld.getValue());
             currencyExchangeVO.setBusinessId(businessId);
 
+            validate(currencyExchangeVO);
 
             if (currencyExchangeVO.getCurrencyToId() == null || currencyExchangeVO.getCurrencyFromId() == null || currencyExchangeVO.getAmountTo() == null || currencyExchangeVO.getAmountFrom() == null) {
                 throw new ValidationException("Please fill in all the fields");
@@ -129,8 +141,14 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
             }
             productService.create(token, currencyExchangeVO);
 
-
+            vaadinTabs.setSelectedTab(vaadinTab1);
             refresh(token);
+            Notification notification = new Notification();
+            notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            notification.setText(getTranslation("sr.we.success"));
+            notification.setDuration(5000);
+            notification.setPosition(Notification.Position.MIDDLE);
+            notification.open();
         });
 
         currencyFromSelect.addValueChangeListener(f -> {
@@ -139,21 +157,33 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
         currencyToSelect.addValueChangeListener(f -> {
             currencyToReplicaSelect.setValue(f.getValue());
         });
-        vaadinTab= new Tab("All");
+        vaadinTab = new Tab("All");
         vaadinTab1 = new Tab("Active");
         vaadinTab2 = new Tab("Archived");
-        vaadinTabs.add(vaadinTab,vaadinTab1,vaadinTab2);
+        vaadinTabs.add(vaadinTab, vaadinTab1, vaadinTab2);
         vaadinTabs.addSelectedChangeListener(f -> {
             Tab selectedTab = f.getSelectedTab();
-            if(selectedTab.equals(vaadinTab)){
+            if (selectedTab.equals(vaadinTab)) {
                 filter.setActive(null);
-            } else if (selectedTab.equals(vaadinTab1)){
-                filter.setActive(true);
-            } else {
-                filter.setActive(false);
-            }
+            } else filter.setActive(selectedTab.equals(vaadinTab1));
             refresh(AuthenticatedUser.token());
         });
+    }
+
+    private void validate(CurrencyExchangeVO currencyExchangeVO) {
+        boolean valid = currencyExchangeVO.getCurrencyToId() != null;
+        if (currencyExchangeVO.getCurrencyFromId() == null) {
+            valid = false;
+        }
+        if (currencyExchangeVO.getAmountFrom() == null) {
+            valid = false;
+        }
+        if (currencyExchangeVO.getAmountTo() == null) {
+            valid = false;
+        }
+        if (!valid) {
+            throw new ValidationException("Please fill in all required fields");
+        }
     }
 
     private String getTo(CurrencyExchange f) {

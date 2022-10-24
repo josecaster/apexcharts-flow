@@ -23,13 +23,13 @@ export class TransactionsView extends LitElement {
     return html`
 <vaadin-vertical-layout style="width: 100%; height: 100%; padding: var(--lumo-space-s);">
  <vaadin-horizontal-layout theme="spacing" style="align-self: stretch;">
-  <vaadin-button id="export-btn" style="margin-left:auto;align-self: center;border: solid 1px;" tabindex="0" theme="tertiary">
+  <vaadin-button id="add-income-btn" style="margin-left:auto;align-self: center;border: solid 1px;" tabindex="0" theme="tertiary">
     Add income 
   </vaadin-button>
-  <vaadin-button style="align-self: center;border: solid 1px;" id="import-btn" tabindex="0" theme="tertiary">
+  <vaadin-button style="align-self: center;border: solid 1px;" id="add-expense-btn" tabindex="0" theme="tertiary">
     Add expense 
   </vaadin-button>
-  <vaadin-button style="align-self: center;border: solid 1px;" id="add-request-btn" tabindex="0" theme="tertiary">
+  <vaadin-button style="align-self: center;border: solid 1px;" id="more-btn" tabindex="0" theme="tertiary">
     More 
   </vaadin-button>
  </vaadin-horizontal-layout>
@@ -38,13 +38,13 @@ export class TransactionsView extends LitElement {
    <vaadin-tab selected>
      All 
    </vaadin-tab>
-   <vaadin-tab>
+   <vaadin-tab disabled>
      Active 
    </vaadin-tab>
-   <vaadin-tab>
+   <vaadin-tab disabled>
      Draft 
    </vaadin-tab>
-   <vaadin-tab>
+   <vaadin-tab disabled>
      Archived 
    </vaadin-tab>
   </vaadin-tabs>

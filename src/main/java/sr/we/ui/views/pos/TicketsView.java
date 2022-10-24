@@ -10,8 +10,10 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.template.Id;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
 import sr.we.shekelflowcore.entity.Business;
 import sr.we.shekelflowcore.entity.PosHeader;
@@ -19,6 +21,8 @@ import sr.we.shekelflowcore.entity.helper.Executable;
 import sr.we.shekelflowcore.enums.Reference;
 import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.shekelflowcore.settings.util.DateUtil;
+import sr.we.ui.components.NotYetChange;
+import sr.we.ui.components.NotYetClick;
 import sr.we.ui.views.LineAwesomeIcon;
 import sr.we.ui.views.finance.transactions.TransactionDialog;
 import sr.we.ui.views.finance.transactions.TransactionsCmb;
@@ -42,12 +46,20 @@ public class TicketsView extends LitTemplate {
     @Id("tickets-grid-layout")
     private Div ticketsGridLayout;
     private Business business;
+    @Id("tv-main")
+    private VerticalLayout tvMain;
+    @Id("tv-sub")
+    private VerticalLayout tvSub;
+    @Id("filter-field")
+    private TextField filterField;
 
     /**
      * Creates a new TicketsView.
      */
     public TicketsView() {
         // You can initialise any data required for the connected UI components here.
+
+        filterField.addValueChangeListener(new NotYetChange<>());
 
         grid = new Grid<>();
         ticketsGridLayout.add(grid);
@@ -101,6 +113,7 @@ public class TicketsView extends LitTemplate {
 
         Button aVoid = new Button("Void");
         aVoid.addThemeVariants(ButtonVariant.LUMO_ERROR);
+        aVoid.addClickListener(new NotYetClick<>());
         layout.add(aVoid);
         return layout;
     }
@@ -113,4 +126,10 @@ public class TicketsView extends LitTemplate {
         grid.getDataProvider().refreshAll();
     }
 
+    public void marginpadding(String s) {
+        tvMain.getElement().getStyle().set("margin", s);
+        tvMain.getElement().getStyle().set("padding", s);
+        tvSub.getElement().getStyle().set("margin", s);
+        tvSub.getElement().getStyle().set("padding", s);
+    }
 }

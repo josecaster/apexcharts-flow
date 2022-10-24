@@ -33,6 +33,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import sr.we.ContextProvider;
 import sr.we.data.controller.*;
 import sr.we.demo.about.AboutView;
@@ -191,6 +192,8 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
 
 //        ticketsLayout.removeAll();
         ticketsGrid = new TicketsView();
+        ticketsGrid.marginpadding("0px");
+        ticketsGrid.addClassName(LumoUtility.Margin.NONE);
         ticketsLayout.add(ticketsGrid);
         ticketsList = new ArrayList<>();
 //        ticketsGrid.setItems(ticketsList);
@@ -360,21 +363,21 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
     private void init() {
         // You can initialise any data required for the connected UI components here.
 //        RadioButtonGroup<Radio> productservicesRadio = new RadioButtonGroup<Radio>();
-        radioLayout.setVisible(false);
+//        radioLayout.setVisible(false);
 //        radioLayout.add(productservicesRadio);
 //        productservicesRadio.setItems(EnumSet.allOf(Radio.class));
 
         grid = new Grid();
 //        map = new HashMap<>();
 //        feeMap = new HashMap<>();
-        grid.addClassName("dashboard-view");
+        grid.addClassName("resonate");
         grid.addThemeVariants(GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_NO_BORDER);
         grid.setSelectionMode(Grid.SelectionMode.NONE);
         boardLayout.addClassName("dashboard-view");
         boardLayout.removeAll();
         boardLayout.add(grid);
-        grid.addComponentColumn(f -> rowBoard(f)).setFrozen(true);
-
+        grid.addComponentColumn(f -> rowBoard(f)).setFrozen(true).setHeader("Select an item");
+        filterCmb.setVisible(false);
         filterCmb.setItemLabelGenerator(l -> {
 //            if (l.getProduct() != null) {
 //                return l.getProduct().getTitle();
@@ -640,6 +643,7 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
 
     public Component itemCard(ProductOrService productOrService) {
         VerticalLayout layout = new VerticalLayout();
+        layout.setClassName("my-cart-base");
         UI current = UI.getCurrent();
         layout.addClickListener(f -> {
             itemsGrid.addItem(productOrService);
@@ -656,8 +660,8 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
                 (items.getPrice() == null ? 0D : items.getPrice().doubleValue());
 
 
-        H2 h2 = new H2(title);
-        h2.addClassNames("font-normal", "m-0", "text-secondary", "text-xs");
+        H5 h2 = new H5(title);
+        h2.addClassNames(LumoUtility.Margin.NONE);
 
         Span valueSpan = new Span();
         valueSpan.addClassNames("font-semibold", "text-3xl");

@@ -33,6 +33,7 @@ import sr.we.shekelflowcore.entity.helper.vo.InvoiceVO;
 import sr.we.shekelflowcore.entity.helper.vo.PosHeaderVO;
 import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.ui.components.BreadCrumb;
+import sr.we.ui.components.NotYetClick;
 import sr.we.ui.components.TempDatePicker;
 import sr.we.ui.views.LineAwesomeIcon;
 import sr.we.ui.views.ReRouteLayout;
@@ -104,6 +105,8 @@ public class CreateInvoiceView extends LitTemplate {
     private CustomerCmb existingCustomersCmb;
 
     private boolean activateListener = true;
+    @Id("preview-btn")
+    private Button previewBtn;
 
     /**
      * Creates a new CreateInvoiceView.
@@ -111,6 +114,8 @@ public class CreateInvoiceView extends LitTemplate {
     public CreateInvoiceView() {
         // You can initialise any data required for the connected UI components here.
         div.setMaxWidth("1000px");
+
+        previewBtn.addClickListener(new NotYetClick<>());
 
         addCustomerLabelLayout = new Button();
         addCustomerLabelLayout.setIcon(new LineAwesomeIcon("la la-plus"));
