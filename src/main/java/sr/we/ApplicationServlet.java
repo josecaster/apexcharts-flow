@@ -1,19 +1,20 @@
 package sr.we;
 
 import com.vaadin.flow.server.InitParameters;
-import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinServlet;
-import com.vaadin.flow.server.VaadinSession;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebInitParam;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.Cookie;
-import java.util.Arrays;
-import java.util.Optional;
 
-@WebServlet(urlPatterns = "/*", name = "slot", asyncSupported = true, initParams = {@WebInitParam(name = InitParameters.I18N_PROVIDER, value = "sr.we.TranslationProvider")})
+/*@WebServlet(urlPatterns = "/*", name = "app", asyncSupported = true, loadOnStartup = 1,
+        initParams = {
+                 })*/
+@WebServlet(urlPatterns = "/*", name = "slot", asyncSupported = true,loadOnStartup = 1, initParams = {//
+        @WebInitParam(name = InitParameters.I18N_PROVIDER, value = "sr.we.TranslationProvider"),//
+        @WebInitParam(name = InitParameters.SERVLET_PARAMETER_HEARTBEAT_INTERVAL, value = "10"),//
+        @WebInitParam(name = InitParameters.SERVLET_PARAMETER_CLOSE_IDLE_SESSIONS, value = "true")})
 public class ApplicationServlet extends VaadinServlet {
 
     @Override
