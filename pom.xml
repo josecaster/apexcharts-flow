@@ -377,9 +377,9 @@
                                     </classPath>
                                     <jre>
                                         <minVersion>17</minVersion>
-                                        <opts>
+                                        <!--<opts>
                                             <opt>-Djava.endorsed.dirs=./endorsed</opt>
-                                        </opts>
+                                        </opts>-->
                                         <path>${java.home}</path>
                                         <bundledJre64Bit>true</bundledJre64Bit>
                                         <runtimeBits>64</runtimeBits>
