@@ -25,7 +25,7 @@ public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
     static boolean isFrameworkInternalRequest(HttpServletRequest request) {
         StringBuffer requestURL = request.getRequestURL();
         String s = requestURL.toString();
-        if (s.endsWith("sw-runtime-resources-precache.js")) {
+        if (s.endsWith("sw-runtime-resources-precache.js") || s.endsWith("@fontsource/poppins")) {
             return true;
         }
         final String parameterValue = request.getParameter(ApplicationConstants.REQUEST_TYPE_PARAMETER);

@@ -1,16 +1,14 @@
 package sr.we;
 
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.page.*;
+import com.vaadin.flow.component.page.AppShellConfigurator;
+import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.server.AppShellSettings;
 import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinServiceInitListener;
-import com.vaadin.flow.spring.annotation.EnableVaadin;
 import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.theme.lumo.Lumo;
-import com.vaadin.flow.theme.material.Material;
-import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
@@ -18,15 +16,15 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.system.ApplicationHome;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.context.annotation.ComponentScan;
 
 /**
  * The entry point of the Spring Boot application.
- *
+ * <p>
  * Use the @PWA annotation make the application installable on phones, tablets
  * and some desktop browsers.
- *
  */
-@SpringBootApplication(exclude = { ErrorMvcAutoConfiguration.class, SecurityAutoConfiguration.class })
+@SpringBootApplication(exclude = {ErrorMvcAutoConfiguration.class, SecurityAutoConfiguration.class})
 //@NpmPackage(value = "@fontsource/poppins", version = "4.5.0")
 @NpmPackage(value = "@fontsource/rubik", version = "4.5.11")
 @Theme(value = "shekelflow")
@@ -39,9 +37,12 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 //        target = TargetElement.BODY,
 //        value = "splash-screen.html")
 //@EnableVaadin("sr.we.ui")
+@EnableAutoConfiguration
+@ComponentScan
 public class Application extends SpringBootServletInitializer implements AppShellConfigurator, VaadinServiceInitListener {
 
     public static final String CUSTOM_BUNDLE_PREFIX = "custom_messages";
+
     public static void main(String[] args) {
 
 //        SpringApplication.run(Application.class, args);
@@ -81,8 +82,8 @@ public class Application extends SpringBootServletInitializer implements AppShel
             conf.setApplyDefaultTheme(false);
 
             *//*
-             * Delay for showing the indicator and setting the 'first' class name.
-             *//*
+         * Delay for showing the indicator and setting the 'first' class name.
+         *//*
             conf.setFirstDelay(300); // 300ms is the default
 
             *//* Delay for setting the 'second' class name *//*
