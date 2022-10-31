@@ -18,17 +18,19 @@ import java.util.stream.Collectors;
 public class AccountSelect extends Select<Account> {
 
 
+    private AccountVO accountVO;
+
     public AccountSelect(Long businessId, Reference reference) {
         AccountService pojoService = ContextProvider.getBean(AccountService.class);
         String token = AuthenticatedUser.token();
 
         setItemLabelGenerator((f) -> f.getName());
 
-
+        accountVO = new AccountVO();
 
         addOpenedChangeListener(f -> {
             if(f.isOpened()){
-                AccountVO accountVO = new AccountVO();
+
                 accountVO.setBusiness(businessId);
                 accountVO.setAccountCodes(reference.getAccountCodes());
                 List<Account> accounts = pojoService.list(token, accountVO).getResult();
@@ -50,6 +52,10 @@ public class AccountSelect extends Select<Account> {
         });
 //        setLabel(getTranslation("sr.we.payment.method"));
 //        setHelperText(getTranslation("sr.we.type.of.business.info"));
+    }
+
+    public void setCurrency(Long currency) {
+        accountVO.setCurrency(currency);
     }
 
 }

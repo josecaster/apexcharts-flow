@@ -10,7 +10,6 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.*;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.page.History;
@@ -21,9 +20,9 @@ import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.spring.SpringVaadinSession;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.core.env.PropertyResolver;
 import sr.we.ContextProvider;
 import sr.we.CustomErrorHandler;
+import sr.we.data.controller.BusinessService;
 import sr.we.data.controller.UserAccessService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Role;
@@ -49,7 +48,6 @@ import sr.we.ui.views.person.PersonView;
 import sr.we.ui.views.personform.PersonFormView;
 import sr.we.ui.views.pos.PosView;
 import sr.we.ui.views.pos.TicketsGridView;
-import sr.we.ui.views.products.ProductView;
 import sr.we.ui.views.services.ServiceView;
 
 import javax.annotation.security.RolesAllowed;
@@ -77,14 +75,16 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
     private final H1 viewTitle;
     private final AuthenticatedUser authenticatedUser;
     private final AccessAnnotationChecker accessChecker;
-    boolean constructed = false;
     private final UserCompanyProfile userCompanyProfile;
+    boolean constructed = false;
     private Select<Role> roleSelect;
     private ThisUser thisUser;
     private String businessId;
     private Nav nav;
     private String token;
     private UI current;
+    private HorizontalLayout breadCrumbLayout;
+
 
     public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker) {
         this.authenticatedUser = authenticatedUser;
@@ -98,6 +98,9 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
         userCompanyProfile = new UserCompanyProfile(dialog);
     }
 
+    public static String getLocation(String business) {
+        return "n/a/" + business;
+    }
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
@@ -159,7 +162,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
         }
 
 
-        if(genMenu) {
+        if (genMenu) {
             nav.removeAll();
             // Wrap the links in a list; improves accessibility
             current = UI.getCurrent();
@@ -184,28 +187,22 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
                     return f.getBusinessId() != null && f.getBusinessId().toString().equalsIgnoreCase(businessId);
                 }
             }).map(f -> f.getRole()).collect(Collectors.toList());
-            roleSelect.setItems(collect);
-            Optional<UsersRoles> max = thisUser.getUsersRoles().stream().//
-                    filter(f -> collect.stream().anyMatch(g -> g.getId().compareTo(f.getRole().getId()) == 0)).//
-                    max(Comparator.comparingLong(f -> f.getCounter() == null ? 0L : f.getCounter()));
-            if (max.isPresent()) {
-                UsersRoles usersRoles = max.get();
-                roleSelect.setValue(usersRoles.getRole());
+            if (collect.isEmpty()) {
+                BusinessService businessService = ContextProvider.getBean(BusinessService.class);
+                businessService.unselectAll(token);
+                event.forwardTo(ReRouteLayout.class);
+            } else {
+                roleSelect.setItems(collect);
+                Optional<UsersRoles> max = thisUser.getUsersRoles().stream().//
+                        filter(f -> collect.stream().anyMatch(g -> g.getId().compareTo(f.getRole().getId()) == 0)).//
+                        max(Comparator.comparingLong(f -> f.getCounter() == null ? 0L : f.getCounter()));
+                if (max.isPresent()) {
+                    UsersRoles usersRoles = max.get();
+                    roleSelect.setValue(usersRoles.getRole());
+                }
             }
         }
 
-    }
-
-    @Override
-    public void setContent(Component content) {
-        super.setContent(content);
-    }
-
-    public void construct() throws RuntimeException {
-        setPrimarySection(Section.DRAWER);
-        addToNavbar(true, createHeaderContent());
-        addToDrawer(createDrawerContent());
-        constructed = true;
     }
 
 //    private Component createHeaderContent() {
@@ -238,6 +235,18 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
 //
 //        return header;
 //    }
+
+    @Override
+    public void setContent(Component content) {
+        super.setContent(content);
+    }
+
+    public void construct() throws RuntimeException {
+        setPrimarySection(Section.DRAWER);
+        addToNavbar(true, createHeaderContent());
+        addToDrawer(createDrawerContent());
+        constructed = true;
+    }
 
     private Component createHeaderContent() {
         DrawerToggle toggle = new DrawerToggle();
@@ -275,8 +284,6 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
         header.addClassName(LumoUtility.Padding.Right.MEDIUM);
         return header;
     }
-
-    private HorizontalLayout breadCrumbLayout;
 
     private Component createDrawerContent() {
         String token = AuthenticatedUser.token();
@@ -337,14 +344,14 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
 
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(LoanReportPrivilege.class), Privileges.READ)) {
             //current.access(() -> {
-                MenuItemInfo dashboard = new MenuItemInfo(getTranslation("sr.we.dashboard"), "icons/menus/icons8_dashboard_48px.png", DashboardView.class);
-                list.add(dashboard);
+            MenuItemInfo dashboard = new MenuItemInfo(getTranslation("sr.we.dashboard"), "icons/menus/icons8_dashboard_48px.png", DashboardView.class);
+            list.add(dashboard);
 //            });
         }
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(LoanPrivilege.class), Privileges.READ)) {
             //current.access(() -> {
-                MenuItemInfo loans = new MenuItemInfo(getTranslation("sr.we.loans"), "icons/menus/icons8_debt_48px.png", LoanView.class);
-                list.add(loans);
+            MenuItemInfo loans = new MenuItemInfo(getTranslation("sr.we.loans"), "icons/menus/icons8_debt_48px.png", LoanView.class);
+            list.add(loans);
 //            });
         }
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(LoanRequestPrivilege.class), Privileges.READ)) {
@@ -361,20 +368,20 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
         }
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(CustomerPrivilege.class), Privileges.READ)) {
             //current.access(() -> {
-                MenuItemInfo customers = new MenuItemInfo(getTranslation("sr.we.customers"), "icons/menus/icons8_customer_48px.png", CustomersView.class);
-                list.add(customers);
+            MenuItemInfo customers = new MenuItemInfo(getTranslation("sr.we.customers"), "icons/menus/icons8_customer_48px.png", CustomersView.class);
+            list.add(customers);
 //            });
         }
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(PaymentsPrivilege.class), Privileges.INSERT)) {
             //current.access(() -> {
-                MenuItemInfo transactions = new MenuItemInfo("Payments", "icons/menus/icons8_payment_history_48px.png", PaymentsView.class);
-                list.add(transactions);
+            MenuItemInfo transactions = new MenuItemInfo("Payments", "icons/menus/icons8_payment_history_48px.png", PaymentsView.class);
+            list.add(transactions);
 //            });
         }
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(TransactionsPrivilege.class), Privileges.READ)) {
             //current.access(() -> {
-                MenuItemInfo transactions = new MenuItemInfo("Transactions", "icons/menus/icons8_transaction_48px.png", TransactionsView.class);
-                list.add(transactions);
+            MenuItemInfo transactions = new MenuItemInfo("Transactions", "icons/menus/icons8_transaction_48px.png", TransactionsView.class);
+            list.add(transactions);
 //            });
         }
 
@@ -408,8 +415,8 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
 
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(ServicesPrivilege.class), Privileges.READ)) {
             //current.access(() -> {
-                MenuItemInfo products = new MenuItemInfo("Products & Services", "icons/menus/icons8_product_48px.png", ServiceView.class);
-                list.add(products);
+            MenuItemInfo products = new MenuItemInfo("Products & Services", "icons/menus/icons8_product_48px.png", ServiceView.class);
+            list.add(products);
 //            });
         }
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(AccountsPrivilege.class), Privileges.READ)) {
@@ -420,6 +427,15 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
         }
         return list.toArray(new MenuItemInfo[]{});
     }
+
+//    @Override
+//    protected void afterNavigation() {
+//        super.afterNavigation();
+//        viewTitle.setText(getCurrentPageTitle());
+//        if (dialog != null && dialog.isOpened()) {
+//            dialog.close();
+//        }
+//    }
 
     private Footer createFooter() {
         Footer layout = new Footer();
@@ -449,15 +465,6 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
         return layout;
     }
 
-//    @Override
-//    protected void afterNavigation() {
-//        super.afterNavigation();
-//        viewTitle.setText(getCurrentPageTitle());
-//        if (dialog != null && dialog.isOpened()) {
-//            dialog.close();
-//        }
-//    }
-
     @Override
     public void afterNavigation(AfterNavigationEvent event) {
         breadCrumbLayout.removeAll();
@@ -485,7 +492,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
             }
 
             String titleKey = breadCrumb.titleKey();
-            Span viewTitle = new Span(getTranslation(titleKey ));
+            Span viewTitle = new Span(getTranslation(titleKey));
             viewTitle.addClassNames(LumoUtility.FontWeight.BOLD, LumoUtility.FontSize.LARGE);
             breadCrumbLayout.add(viewTitle);
 
@@ -528,8 +535,8 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
             Image img = new Image(iconClass, "icon by Icons8");
             img.setWidth("18px");
             img.setHeight("18px");
-            img.getElement().getStyle().set("margin-inline-end","var(--lumo-space-s)");
-            img.getElement().getStyle().set("margin-top","calc(var(--lumo-space-xs) * 0.5)");
+            img.getElement().getStyle().set("margin-inline-end", "var(--lumo-space-s)");
+            img.getElement().getStyle().set("margin-top", "calc(var(--lumo-space-xs) * 0.5)");
             link.add(iconClass.startsWith("icons/menus/") ? img : new LineAwesomeIcon(iconClass), text);
             add(link);
         }
@@ -543,9 +550,5 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
         }
 
 
-    }
-
-    public static String getLocation(String business) {
-        return "n/a/" + business;
     }
 }

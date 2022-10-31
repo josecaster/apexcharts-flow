@@ -24,6 +24,7 @@ import sr.we.shekelflowcore.entity.helper.vo.PosHeaderDetailVO;
 import sr.we.shekelflowcore.entity.helper.vo.PosHeaderVO;
 import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.shekelflowcore.settings.util.Constants;
+import sr.we.shekelflowcore.settings.util.NumberUtil;
 import sr.we.ui.components.general.BusinessCurrencySelect;
 import sr.we.ui.views.LineAwesomeIcon;
 import sr.we.ui.views.pos.Item;
@@ -37,16 +38,16 @@ import java.util.stream.Collectors;
 public class ItemGrid extends Grid<Item> {
 
     private final BigDecimalField discountFld;
-    private final BusinessCurrencySelect currencySelect;
     private final BigDecimalField exchangeRateFld;
     private final Label totalLbl;
     private final Map<String, Object> map;
+    private BusinessCurrencySelect currencySelect = null;
     private List<Item> itemList = null;
     //    private List<Fee> feeList = null;
     private List<Long> removeList = null;
     private BigDecimal total;
 
-    private boolean activateListener = false;
+    private boolean activateListener = true;
     private PosHeader posHeader;
     private InterExecutable<Object, List<Item>> execute;
     private Business business2;
@@ -113,7 +114,7 @@ public class ItemGrid extends Grid<Item> {
             LineAwesomeIcon lineAwesomeIcon = new LineAwesomeIcon("la la-exclamation-triangle");
             boolean visible = false;
             boolean containsExchangeOnly = false;
-            if (d.getProductOrService().getServices().getCurrency().getId().compareTo(business2.getCurrency().getId()) != 0) {
+            if (d.getProductOrService().getServices().getCurrency().getId().compareTo(currencySelect.getValue().getId()) != 0) {
                 visible = true;
                 containsExchangeOnly = true;
             }
@@ -125,7 +126,7 @@ public class ItemGrid extends Grid<Item> {
                 visible = true;
                 containsExchangeOnly = false;
             }
-            if(visible) {
+            if (visible) {
                 if ((d.isValid() != null && d.isValid()) || (d.isValid() == null && containsExchangeOnly)) {
                     d.setValid(true);
                     lineAwesomeIcon.removeClassName(LumoUtility.TextColor.ERROR);
@@ -191,6 +192,7 @@ public class ItemGrid extends Grid<Item> {
         Label totalNameLbl = new Label("Total");
         currencySelect = new BusinessCurrencySelect();
         exchangeRateFld = new BigDecimalField();
+        exchangeRateFld.setVisible(false);
         totalLbl = new Label("0.00");
 
         totalNameLbl.getElement().getStyle().set("margin-left", "auto");
@@ -238,10 +240,10 @@ public class ItemGrid extends Grid<Item> {
         layout.setClassName("my-cart-base");
         layout.setMargin(true);
         layout.setPadding(true);
-        if (d.getProductOrService().getServices().getCurrency().getId().compareTo(business2.getCurrency().getId()) != 0) {
+        if (d.getProductOrService().getServices().getCurrency().getId().compareTo(currencySelect.getValue().getId()) != 0) {
             BigDecimalField bigDecimalField = new BigDecimalField();
             bigDecimalField.setLabel("Exchange Rate ");
-            bigDecimalField.setHelperText(d.getProductOrService().getServices().getCurrency().getCode() + " - " + business2.getCurrency().getCode());
+            bigDecimalField.setHelperText(d.getProductOrService().getServices().getCurrency().getCode() + " - " + currencySelect.getValue().getCode());
             bigDecimalField.setValue(d.getExchange());
             layout.add(bigDecimalField);
 
@@ -284,11 +286,22 @@ public class ItemGrid extends Grid<Item> {
             });
         }
         if (d.getDescMap() != null && !d.getDescMap().entrySet().isEmpty() && d.getPosHeaderDetail() == null) {
-            d.getDescMap().forEach((key, calculationComponent) -> {
+            d.getDescMap().entrySet().stream().filter(f -> {//
+                return f.getValue() != null && f.getValue().getType() != null && (//
+                        f.getValue().getType().compareTo(CalculationComponent.Type.VALUE) == 0//
+                                ||//
+                                f.getValue().getType().compareTo(CalculationComponent.Type.VALUE_FORMULA) == 0//
+                );
+            }).forEach(g -> {
+                String key = g.getKey();
+                CalculationComponent calculationComponent = g.getValue();
                 BigDecimalField bigDecimalField = new BigDecimalField();
                 bigDecimalField.setLabel(calculationComponent.getName());
                 bigDecimalField.setPlaceholder(calculationComponent.getCode());
                 bigDecimalField.setWidthFull();
+                if(StringUtils.isNotBlank(calculationComponent.getFormula()) && NumberUtil.isNumeric(calculationComponent.getFormula())) {
+                    d.getMap().put(key, BigDecimal.valueOf(Double.parseDouble(calculationComponent.getFormula())));
+                }
                 bigDecimalField.setValue(StringUtils.isBlank((String) d.getMap().get(key)) ? null : BigDecimal.valueOf(Double.parseDouble((String) d.getMap().get(key))));
                 layout.add(bigDecimalField);
                 bigDecimalField.addValueChangeListener(f -> {
@@ -400,7 +413,7 @@ public class ItemGrid extends Grid<Item> {
         currencySelect.setValue(currencyTo);
         exchangeRateFld.setValue(exchangeRate);
         discountFld.setValue(this.posHeader.getDiscount());
-        obj = obj.subtract(posHeader.getDiscount() == null ? BigDecimal.ZERO : (posHeader.getDiscount().multiply(posHeader.getExchangeRate())));
+        obj = obj.subtract(posHeader.getDiscount() == null ? BigDecimal.ZERO : posHeader.getDiscount());
         String text = Constants.CURRENCY_FORMAT.format(obj);
         totalLbl.setText(text);
         activateListener = true;
@@ -439,9 +452,9 @@ public class ItemGrid extends Grid<Item> {
 //        reduce = reduce.add(feeList.stream().map(Fee::getCalcPrice).reduce(BigDecimal.ZERO, BigDecimal::add));
         posHeaderVO.setPrice(reduce);
         posHeaderVO.setRemoveList(getRemoveList());
-        posHeaderVO.setExchangeRate(exchangeRateFld.getValue());
+        posHeaderVO.setExchangeRate(/*exchangeRateFld.getValue()*/BigDecimal.ONE);
         posHeaderVO.setConvertedAmount(posHeaderVO.getPrice().multiply(posHeaderVO.getExchangeRate()));
-        posHeaderVO.setCurrencyFrom(business2.getCurrency().getId());
+        posHeaderVO.setCurrencyFrom(currencySelect.getValue().getId());
         posHeaderVO.setCurrencyTo(currencySelect.getValue().getId());
         posHeaderVO.setDiscount(discountFld.getValue());
         return posHeaderVO;
@@ -459,10 +472,10 @@ public class ItemGrid extends Grid<Item> {
         return new InterExecutable<Object, List<Item>>() {
             @Override
             public Object build(List<Item> itemList) {
-                itemList.stream().forEach(f -> f.setCurrency(business2.getCurrency()));
+                itemList.stream().forEach(f -> f.setCurrency(currencySelect.getValue()));
                 total = itemList.stream().map(Item::getCalcPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
 //        total = total.add(feeList.stream().map(Fee::getCalcPrice).reduce(BigDecimal.ZERO, BigDecimal::add));
-                BigDecimal value = exchangeRateFld.getValue();
+                BigDecimal value = null;//exchangeRateFld.getValue();
                 if (value == null) {
                     value = BigDecimal.ONE;
                 }

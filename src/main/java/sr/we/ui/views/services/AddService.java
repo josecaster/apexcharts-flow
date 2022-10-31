@@ -186,6 +186,8 @@ public class AddService extends LitTemplate {
                 calculationComponentVO.setFormula(calculationComponent.getFormula());
                 calculationComponentVO.setVisibleCustomer(calculationComponent.getVisibleCustomer());
                 calculationComponentVO.setActive(calculationComponent.getActive());
+                calculationComponentVO.setCategory(calculationComponent.getCategory());
+                calculationComponentVO.setType(calculationComponent.getType());
                 items.add(calculationComponentVO);
             }
 

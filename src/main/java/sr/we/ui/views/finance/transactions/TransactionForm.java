@@ -137,6 +137,7 @@ public class TransactionForm extends FormLayout {
         });
 
         currencySelect.addValueChangeListener(g -> {
+            accountSelect.setCurrency(g.getValue() == null ? null : g.getValue().getId());
             if (currencyFrom.getValue() == null) {
                 exchangeRate.setValue(rest);
                 return;

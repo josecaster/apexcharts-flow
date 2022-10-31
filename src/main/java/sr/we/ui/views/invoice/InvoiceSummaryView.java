@@ -20,9 +20,7 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.textfield.IntegerField;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.QueryParameters;
@@ -53,7 +51,7 @@ import sr.we.shekelflowcore.security.privileges.POSPrivilege;
 import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.shekelflowcore.settings.util.DateUtil;
 import sr.we.ui.components.BreadCrumb;
-import sr.we.ui.components.ConfirmationDialog;
+import sr.we.ui.components.MailDialog;
 import sr.we.ui.components.MyDialog;
 import sr.we.ui.views.LineAwesomeIcon;
 import sr.we.ui.views.MainLayout;
@@ -213,22 +211,16 @@ public class InvoiceSummaryView extends LitTemplate implements BeforeEnterObserv
         invoiceSummaryDownloadBtn.getElement().getStyle().set("border-radius", "100px");
 
         invoiceSummaryResendInvoiceBtn.addClickListener(f -> {
-            TextField contentComponent = new TextField();
-            contentComponent.setWidthFull();
-            contentComponent.setValue(invoice.getCustomer() == null ? "" : //
-                    (invoice.getCustomer().getPrimaryCustomerContacts() == null ? "" : //
-                            (StringUtils.isBlank(invoice.getCustomer().getPrimaryCustomerContacts().getEmail()) ? "" : //
-                                    invoice.getCustomer().getPrimaryCustomerContacts().getEmail())));
-            ConfirmationDialog confirmationDialog = new ConfirmationDialog("Send email", "Confirm e-mailadres", contentComponent);
-            confirmationDialog.open();
-            confirmationDialog.getContinueBtn().addClickListener(c -> {
+
+            MailDialog mailDialog = new MailDialog("Mail invoice", (vo) -> {
                 String token = AuthenticatedUser.token();
                 InvoiceService invoiceService = ContextProvider.getBean(InvoiceService.class);
                 UI current = UI.getCurrent();
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        boolean emailSend = invoiceService.sendEmail(invoice.getId(), contentComponent.getValue(), token);
+                        vo.setReferenceId(invoice.getId());
+                        boolean emailSend = invoiceService.sendEmail(vo, token);
 
                         current.access(() -> {
                             if (emailSend) {
@@ -242,7 +234,48 @@ public class InvoiceSummaryView extends LitTemplate implements BeforeEnterObserv
                         });
                     }
                 }).start();
+                return null;
             });
+            String subj = "Invoice #" + invoice.getInvoiceNumber() + " From " + invoice.getBusiness().getName();
+            String message = subj + " <br> " + invoice.getCurrencyTo().getCode() + " " + Constants.CURRENCY_FORMAT.format(invoice.getConvertedAmount());
+            String emailTo = invoice.getCustomer() == null ? "" : //
+                    (invoice.getCustomer().getPrimaryCustomerContacts() == null ? "" : //
+                            (StringUtils.isBlank(invoice.getCustomer().getPrimaryCustomerContacts().getEmail()) ? "" : //
+                                    invoice.getCustomer().getPrimaryCustomerContacts().getEmail()));
+            mailDialog.setValues(emailTo, subj, message);
+            mailDialog.open();
+
+
+//            TextField contentComponent = new TextField();
+//            contentComponent.setWidthFull();
+//            contentComponent.setValue(invoice.getCustomer() == null ? "" : //
+//                    (invoice.getCustomer().getPrimaryCustomerContacts() == null ? "" : //
+//                            (StringUtils.isBlank(invoice.getCustomer().getPrimaryCustomerContacts().getEmail()) ? "" : //
+//                                    invoice.getCustomer().getPrimaryCustomerContacts().getEmail())));
+//            ConfirmationDialog confirmationDialog = new ConfirmationDialog("Send email", "Confirm e-mailadres", contentComponent);
+//            confirmationDialog.open();
+//            confirmationDialog.getContinueBtn().addClickListener(c -> {
+//                String token = AuthenticatedUser.token();
+//                InvoiceService invoiceService = ContextProvider.getBean(InvoiceService.class);
+//                UI current = UI.getCurrent();
+//                new Thread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        boolean emailSend = invoiceService.sendEmail(invoice.getId(), contentComponent.getValue(), token);
+//
+//                        current.access(() -> {
+//                            if (emailSend) {
+//                                Notification notification = new Notification();
+//                                notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+//                                notification.setText(getTranslation("sr.we.success"));
+//                                notification.setDuration(5000);
+//                                notification.setPosition(Notification.Position.MIDDLE);
+//                                notification.open();
+//                            }
+//                        });
+//                    }
+//                }).start();
+//            });
         });
 
         invoiceSummaryShareLinkBtn.addClickListener(f -> {

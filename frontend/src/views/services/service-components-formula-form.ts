@@ -8,6 +8,7 @@ import '@vaadin/horizontal-layout/src/vaadin-horizontal-layout.js';
 import '@vaadin/button/src/vaadin-button.js';
 import '@vaadin/text-field/src/vaadin-text-field.js';
 import '@vaadin/checkbox/src/vaadin-checkbox.js';
+import '@vaadin/select/src/vaadin-select.js';
 
 @customElement('service-components-formula-form')
 export class ServiceComponentsFormulaForm extends LitElement {
@@ -40,13 +41,20 @@ export class ServiceComponentsFormulaForm extends LitElement {
    <label slot="label">Active</label>
    <vaadin-checkbox type="checkbox" value="on" id="formula-active-chk"></vaadin-checkbox>
   </vaadin-form-item>
+  <vaadin-form-item>
+   <label slot="label">Category</label>
+   <vaadin-select type="select" value="on" id="formula-category-cmb"></vaadin-select>
+  </vaadin-form-item>
+  <vaadin-form-item>
+   <label slot="label">Type</label>
+   <vaadin-select type="select" value="on" id="formula-type-cmb"></vaadin-select>
+  </vaadin-form-item>
  </vaadin-form-layout>
- <label>e.g. ([product_price]/50)+[service_price]</label>
  <div id="form-formula-layout" style="align-self: stretch;"></div>
  <vaadin-horizontal-layout theme="spacing" style="width: 100%;">
   <label style="align-self: center;">Use [ctrl+shift] to include predefined and user defined components</label>
   <vaadin-button id="formula-test-btn" style="align-self: center;margin-left:auto;" tabindex="0" theme="primary contrast">
-   Test
+    Test 
   </vaadin-button>
  </vaadin-horizontal-layout>
  <vaadin-horizontal-layout theme="spacing" style="width: 100%;">

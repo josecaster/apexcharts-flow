@@ -87,6 +87,6 @@ private ServicesVO servicesVO;
         this.servicesVO= servicesVO;
         serviceComponentsGrid.setItems(servicesVO.getCalculationComponentVO());
         serviceComponentsGrid.getDataProvider().refreshAll();
-        serviceComponentsFormulaForm.setComponets(servicesVO.getCalculationComponentVO());
+        serviceComponentsFormulaForm.setComponents(servicesVO.getCalculationComponentVO());
     }
 }

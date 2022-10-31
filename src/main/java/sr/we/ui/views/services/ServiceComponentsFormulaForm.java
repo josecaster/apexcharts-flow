@@ -7,12 +7,18 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.littemplate.LitTemplate;
-import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.template.Id;
+import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.TextField;
+import org.apache.commons.lang3.StringUtils;
+import sr.we.shekelflowcore.entity.CalculationComponent;
 import sr.we.shekelflowcore.entity.helper.Executable;
 import sr.we.shekelflowcore.entity.helper.vo.CalculationComponentVO;
+import sr.we.shekelflowcore.settings.util.NumberUtil;
+import sr.we.ui.components.NotYetClick;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -26,12 +32,12 @@ import java.util.List;
 public class ServiceComponentsFormulaForm extends LitTemplate {
 
     private final MyAceEditor myAceEditor;
+    private final BigDecimalField valueFld;
+    boolean edit = false;
     @Id("discard-formula-btn")
     private Button discardBtn;
     @Id("add-formula")
     private Button addBtn;
-
-    boolean edit = false;
     @Id("form-formula-layout")
     private Div formFormulaLayout;
     @Id("formula-code-fld")
@@ -47,12 +53,20 @@ public class ServiceComponentsFormulaForm extends LitTemplate {
     private CalculationComponentVO calculationComponentVO;
     @Id("formula-test-btn")
     private Button formulaTestBtn;
+    @Id("formula-category-cmb")
+    private Select<CalculationComponent.Category> formulaCategoryCmb;
+    @Id("formula-type-cmb")
+    private Select<CalculationComponent.Type> formulaTypeCmb;
 
     /**
      * Creates a new ServiceComponentsFormulaForm.
      */
     public ServiceComponentsFormulaForm() {
         // You can initialise any data required for the connected UI components here.
+
+
+        formulaCategoryCmb.setItems(List.of(CalculationComponent.Category.values()));
+        formulaTypeCmb.setItems(List.of(CalculationComponent.Type.values()));
 
         discardBtn.addClickListener(f -> {
             setVisible(false);
@@ -69,13 +83,31 @@ public class ServiceComponentsFormulaForm extends LitTemplate {
         });
 
         myAceEditor = new MyAceEditor();
-        formFormulaLayout.add(myAceEditor);
+        valueFld = new BigDecimalField();
 
-        formulaTestBtn.addClickListener(f -> {
-//            ServiceFormulaTest serviceFormulaTest = new ServiceFormulaTest();
-//            serviceFormulaTest.test();
-            Notification.show("Not yet implemented");
+        formFormulaLayout.add(myAceEditor, valueFld);
+
+        myAceEditor.setVisible(false);
+        valueFld.setVisible(false);
+
+
+        formulaTypeCmb.addValueChangeListener(f -> {
+            if (f.getValue() == null) {
+                formulaVisible(true);
+                return;
+            }
+            switch (f.getValue()) {
+                case FORMULA, VALUE_FORMULA -> formulaVisible(true);
+                case VALUE -> formulaVisible(false);
+            }
         });
+
+        formulaTestBtn.addClickListener(new NotYetClick<>());
+    }
+
+    private void formulaVisible(boolean b) {
+        myAceEditor.setVisible(b);
+        valueFld.setVisible(!b);
     }
 
     public CalculationComponentVO getVO() {
@@ -85,7 +117,9 @@ public class ServiceComponentsFormulaForm extends LitTemplate {
         }
         calculationComponentVO.setCode(formulaCodeFld.getValue());
         calculationComponentVO.setName(formulaNameFld.getValue());
-        calculationComponentVO.setFormula(myAceEditor.getValue());
+        calculationComponentVO.setType(formulaTypeCmb.getValue());
+        calculationComponentVO.setCategory(formulaCategoryCmb.getValue());
+        calculationComponentVO.setFormula(myAceEditor.isVisible() ? myAceEditor.getValue() : (valueFld.getValue() == null ? null : valueFld.getValue().toString()));
         calculationComponentVO.setVisibleCustomer(formulaVisibleCustomersChk.getValue());
         calculationComponentVO.setActive(formulaActiveChk.getValue());
         return calculationComponentVO;
@@ -93,13 +127,21 @@ public class ServiceComponentsFormulaForm extends LitTemplate {
 
     public void setVO(CalculationComponentVO vo) {
         this.calculationComponentVO = vo;
-        if(vo != null) {
+        if (vo != null) {
             edit = true;
             formulaCodeFld.setValue(vo.getCode());
             formulaNameFld.setValue(vo.getName());
-            myAceEditor.setValue(vo.getFormula());
+            if (vo.getType() == null || vo.getType().compareTo(CalculationComponent.Type.FORMULA) == 0 || vo.getType().compareTo(CalculationComponent.Type.VALUE_FORMULA) == 0) {
+                myAceEditor.setValue(vo.getFormula());
+            } else {
+                if (StringUtils.isNotBlank(vo.getFormula()) && NumberUtil.isNumeric(vo.getFormula())) {
+                    valueFld.setValue(BigDecimal.valueOf(Double.parseDouble(vo.getFormula())));
+                }
+            }
+            formulaCategoryCmb.setValue(vo.getCategory());
+            formulaTypeCmb.setValue(vo.getType());
             formulaVisibleCustomersChk.setValue(vo.getVisibleCustomer());
-            formulaActiveChk.setValue(vo.getActive() == null ? false : vo.getActive());
+            formulaActiveChk.setValue(vo.getActive() != null && vo.getActive());
         } else {
             edit = false;
             formulaCodeFld.clear();
@@ -107,6 +149,9 @@ public class ServiceComponentsFormulaForm extends LitTemplate {
             myAceEditor.clear();
             formulaVisibleCustomersChk.clear();
             formulaActiveChk.clear();
+            formulaCategoryCmb.clear();
+            formulaTypeCmb.clear();
+            valueFld.clear();
         }
     }
 
@@ -118,7 +163,7 @@ public class ServiceComponentsFormulaForm extends LitTemplate {
         return edit;
     }
 
-    public void setComponets(List<CalculationComponentVO> calculationComponentVO) {
+    public void setComponents(List<CalculationComponentVO> calculationComponentVO) {
         myAceEditor.setComponets(calculationComponentVO);
     }
 }

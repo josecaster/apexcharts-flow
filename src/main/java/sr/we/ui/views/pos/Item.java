@@ -14,12 +14,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class Item {
 
-    private  Boolean valid;
     private final ProductOrService productOrService;
+    private Boolean valid;
     private Map<String, Object> map;
     private Map<String, Object> feeMap;
     private Map<String, CalculationComponent> descMap;
@@ -75,7 +74,9 @@ public class Item {
             Boolean advancedPricing = items.getVariablePrice();
             if (!(advancedPricing == null || !advancedPricing)) {
                 Set<CalculationComponent> calculationComponents = items.getCalculationComponents();
-                List<CalculationComponent> variables = calculationComponents.stream().filter(f -> f.getType() == null || f.getType().compareTo(CalculationComponent.Type.VARIABLE) == 0).collect(Collectors.toList());
+                List<CalculationComponent> variables = calculationComponents.stream().filter(f -> f.getType() == null //
+                        || f.getType().compareTo(CalculationComponent.Type.VALUE_FORMULA) == 0 //
+                        || f.getType().compareTo(CalculationComponent.Type.VALUE) == 0).toList();//
 //                List<CalculationComponent> categories = calculationComponents.stream().filter(f -> f.getCategory().compareTo(CalculationComponent.Category.FEE) == 0).collect(Collectors.toList());
 
                 variables.forEach(f -> {
