@@ -13,8 +13,8 @@
             <outputDirectory>/</outputDirectory>
 			<includes>
 				<include>${project.build.directory}/SeaQns.jar</include>
-				<include>SeaQns.exe</include>
-				<include>SeaQns.xml</include>
+				<include>${project.build.directory}/SeaQns.exe</include>
+				<include>${project.build.directory}/SeaQns.xml</include>
 				<!--<include>application.properties</include>-->
 			</includes>
 		</fileSet>
