@@ -58,4 +58,6 @@ public class AccountSelect extends Select<Account> {
         accountVO.setCurrency(currency);
     }
 
+    public void setValue(Long account) {
+    }
 }
