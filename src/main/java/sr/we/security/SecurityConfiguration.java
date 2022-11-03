@@ -23,7 +23,7 @@ public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
     public static final String LOGOUT_URL = "/";
 
     static boolean isFrameworkInternalRequest(HttpServletRequest request) {
-        StringBuffer requestURL = request.getRequestURL();
+        StringBuilder requestURL = new StringBuilder(request.getRequestURL().toString());
         String s = requestURL.toString();
         if (s.endsWith("sw-runtime-resources-precache.js") || s.endsWith("@fontsource/poppins")) {
             return true;
@@ -100,7 +100,10 @@ public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
                 "/manifest.webmanifest",
                 "/sw.js",
                 "/offline.html",
+                "/offline-stub.html",
                 "/my-lumo.html",
+                "/@fontsource/poppins",
+                "/sw-runtime-resources-precache.js",
                 // icons and images
                 "/icons/**",
                 "/images/**",

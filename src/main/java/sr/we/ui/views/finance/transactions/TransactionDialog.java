@@ -25,6 +25,7 @@ import sr.we.shekelflowcore.entity.PaymentTransaction;
 import sr.we.shekelflowcore.entity.PosHeader;
 import sr.we.shekelflowcore.entity.helper.Executable;
 import sr.we.shekelflowcore.enums.Reference;
+import sr.we.shekelflowcore.enums.TransactionType;
 import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.TransactionsPrivilege;
@@ -48,6 +49,10 @@ public class TransactionDialog extends MyDialog {
     private PaymentTransaction save;
 
     public TransactionDialog(BigDecimal rest, LocalDate initDate, Long businessId, Currency fromCurrency, Currency selectedCurrency, Reference reference, Long referenceId) {
+        this(rest, initDate, businessId, fromCurrency, selectedCurrency, reference, referenceId, reference.getPlusMin());
+    }
+
+    public TransactionDialog(BigDecimal rest, LocalDate initDate, Long businessId, Currency fromCurrency, Currency selectedCurrency, Reference reference, Long referenceId, TransactionType transactionType) {
 
         setHeaderTitle("Record a payment");
         Button closeButton = new Button(new Icon("lumo", "cross"), (e) -> {
@@ -64,7 +69,7 @@ public class TransactionDialog extends MyDialog {
         cancelButton.getStyle().set("margin-right", "auto");
         getFooter().add(cancelButton);
 
-        transactionForm = new TransactionForm(rest, initDate, businessId, fromCurrency, selectedCurrency, reference, referenceId);
+        transactionForm = new TransactionForm(rest, initDate, businessId, fromCurrency, selectedCurrency, reference, referenceId, transactionType);
         add(transactionForm);
 
         saveButton = new Button("Save");
@@ -79,12 +84,21 @@ public class TransactionDialog extends MyDialog {
 
         saveButton.addClickListener(g -> {
             save = transactionForm.save();
-
+            Reference saveReference = save.getReference();
+            Long saveReferenceId = save.getReferenceId();
             if(save != null && onSave != null){
                 onSave.build();
             }
+            if(reference == null || referenceId == null){
+                /***
+                 * This case is for add income and expense where we do not need a receipt to download
+                 * For this reason we will exit the save click and do not show save dialog
+                 * */
+                close();
+                return;
+            }
             String token = AuthenticatedUser.token();
-            if(reference.compareTo(Reference.POS) == 0||reference.compareTo(Reference.INVOICE) == 0||reference.compareTo(Reference.BILL) == 0){
+            if(saveReference.compareTo(Reference.POS) == 0||saveReference.compareTo(Reference.INVOICE) == 0||saveReference.compareTo(Reference.BILL) == 0){
                 remove(transactionForm);
                 if(anchor != null){
                     remove(anchor);

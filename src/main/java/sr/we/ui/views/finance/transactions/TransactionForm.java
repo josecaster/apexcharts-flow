@@ -4,9 +4,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H4;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.dom.Element;
@@ -19,8 +16,9 @@ import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Currency;
 import sr.we.shekelflowcore.entity.PaymentTransaction;
 import sr.we.shekelflowcore.entity.helper.Executable;
+import sr.we.shekelflowcore.entity.helper.TransactionCategory;
 import sr.we.shekelflowcore.entity.helper.vo.PaymentTransactionVO;
-import sr.we.shekelflowcore.enums.PlusMin;
+import sr.we.shekelflowcore.enums.TransactionType;
 import sr.we.shekelflowcore.enums.Reference;
 import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.shekelflowcore.security.Privileges;
@@ -29,7 +27,7 @@ import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.ui.components.TempDatePicker;
 import sr.we.ui.components.finance.AccountSelect;
 import sr.we.ui.components.finance.PaymentMethodSelect;
-import sr.we.ui.components.general.BusinessCurrencySelect;
+import sr.we.ui.components.general.CurrencySelect;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -38,18 +36,19 @@ import java.time.LocalDate;
 
 public class TransactionForm extends FormLayout {
 
-    private final BusinessCurrencySelect currencySelect;
+    private final CurrencySelect currencySelect;
     private final BigDecimalField exchangeRate;
     private final H4 convertedAmountLbl,changeLbl;
     private final BigDecimalField amountFld, currencyAmountFld, receivedFld;
     private final PaymentMethodSelect paymentMethodSelect;
     private final AccountSelect accountSelect;
+    private final CategorySelect categorySelect;
     private final TextArea memoFld;
     private final DatePicker dateFld;
 
     private final Reference reference;
-    private final BusinessCurrencySelect currencyFrom;
-    private final PlusMin plusMin;
+    private final CurrencySelect currencyFrom;
+    private final TransactionType transactionType;
     private final Long businessId;
     private final FormItem exchanged_amount;
     private BigDecimal change = BigDecimal.ZERO;
@@ -57,14 +56,19 @@ public class TransactionForm extends FormLayout {
     private Long nextReferenceId;
 
     private Executable refresh;
-
+    private FormItem category;
 
     public TransactionForm(BigDecimal rest, LocalDate initDate, Long businessId, Currency fromCurrency, Currency selectedCurrency, Reference reference, Long referenceId) {
+        this(rest, initDate, businessId, fromCurrency, selectedCurrency, reference, referenceId, reference.getPlusMin());
+    }
+
+
+    public TransactionForm(BigDecimal rest, LocalDate initDate, Long businessId, Currency fromCurrency, Currency selectedCurrency, Reference reference, Long referenceId, TransactionType transactionType) {
 
         this.businessId = businessId;
         this.reference = reference;
         this.referenceId = referenceId;
-        this.plusMin = reference.getPlusMin();
+        this.transactionType = transactionType;
 
         // init
         amountFld = new BigDecimalField();
@@ -85,17 +89,23 @@ public class TransactionForm extends FormLayout {
         element1.setAttribute("theme", "badge");
         element1.getStyle().set("font-size", "var(--lumo-font-size-xl)");
         paymentMethodSelect = new PaymentMethodSelect();
-        accountSelect = new AccountSelect(businessId, reference);
+        if(reference == null){
+            accountSelect = new AccountSelect(businessId, transactionType);
+        } else {
+            accountSelect = new AccountSelect(businessId, reference);
+        }
+        categorySelect = new CategorySelect(transactionType,businessId);
         memoFld = new TextArea();
-        currencySelect = new BusinessCurrencySelect();
-        currencySelect.setLabel("To");
+        currencySelect = new CurrencySelect(true);
+        currencyAmountFld.setPrefixComponent(currencySelect);
+//        currencySelect.setLabel("To");
         currencySelect.setHelperText(null);
-        currencySelect.setWidthFull();
+        currencySelect.setWidth("100px");
 //        HorizontalLayout convertedAmountLayout = new HorizontalLayout(convertedAmountLbl);
 //        HorizontalLayout convertedAmountLayout1 = new HorizontalLayout(receivedFld);
 //        HorizontalLayout convertedAmountLayout2 = new HorizontalLayout(changeLbl);
 
-        currencyFrom = new BusinessCurrencySelect();
+        currencyFrom = new CurrencySelect();
         currencyFrom.setLabel("From");
         currencyFrom.setHelperText(null);
         currencyFrom.setReadOnly(true);
@@ -109,6 +119,7 @@ public class TransactionForm extends FormLayout {
         convertedAmountLbl.setWidthFull();
         paymentMethodSelect.setWidthFull();
         accountSelect.setWidthFull();
+        categorySelect.setWidthFull();
         memoFld.setWidthFull();
         convertedAmountLbl.setWidth("-1px");
 //        convertedAmountLayout.setWidthFull();
@@ -133,7 +144,14 @@ public class TransactionForm extends FormLayout {
             BigDecimal val = amountFld.getValue().multiply(h.getValue());
             currencyAmountFld.setValue(val);
             convertedAmountLbl.setText(selectedCurrency.getCode() + " " + Constants.CURRENCY_FORMAT.format(val));
-            currencyAmountFld.setReadOnly(exchangeRate.getValue().compareTo(BigDecimal.ONE) == 0);
+//            currencyAmountFld.setReadOnly(exchangeRate.getValue().compareTo(BigDecimal.ONE) == 0);
+            if(exchangeRate.getValue().compareTo(BigDecimal.ONE) == 0) {
+                currencyAmountFld.setHelperText(null);
+            } else {
+                currencyAmountFld.setHelperText( currencyFrom.getValue().getCode()+" "+Constants.CURRENCY_FORMAT.format(amountFld.getValue())+//
+                        " - "+//
+                        currencySelect.getValue().getCode()+" "+Constants.CURRENCY_FORMAT.format(val)+" | fx-rate: "+Constants.CURRENCY_FORMAT.format(h.getValue()));
+            }
         });
 
         currencySelect.addValueChangeListener(g -> {
@@ -188,12 +206,20 @@ public class TransactionForm extends FormLayout {
             if (f.isFromClient()) {
 
                 if (exchangeRate.getValue() != null && exchangeRate.getValue().compareTo(BigDecimal.ONE) == 0) {
-                    currencyAmountFld.setValue(amountFld.getValue());
+                    if(rest != null && (currencyAmountFld.getValue() == null || currencyAmountFld.getValue().compareTo(rest) >= 0)) {
+                        currencyAmountFld.setValue(amountFld.getValue());
+                        receivedFld.setValue(amountFld.getValue());
+                    }
+                    amountFld.setValue(f.getValue());
                 } else if (exchangeRate.getValue() != null) {
-                    BigDecimal val = f.getValue().multiply((BigDecimal.ONE.divide(exchangeRate.getValue(), 2, RoundingMode.HALF_UP)));
+                    BigDecimal val = f.getValue().divide(exchangeRate.getValue(), 4, RoundingMode.HALF_UP);
                     fromToCurrency = true;
                     amountFld.setValue(val);
                     convertedAmountLbl.setText(selectedCurrency.getCode() + " " + Constants.CURRENCY_FORMAT.format(currencyAmountFld.getValue()));
+
+                    currencyAmountFld.setHelperText( currencyFrom.getValue().getCode()+" "+Constants.CURRENCY_FORMAT.format(amountFld.getValue())+//
+                            " - "+//
+                            currencySelect.getValue().getCode()+" "+Constants.CURRENCY_FORMAT.format(currencyAmountFld.getValue())+" | fx-rate: "+Constants.CURRENCY_FORMAT.format(exchangeRate.getValue()));
                 }
             }
             receivedFld.setValue(f.getValue());
@@ -215,18 +241,20 @@ public class TransactionForm extends FormLayout {
         // build
         FormItem payment_date = addFormItem(dateFld, "Payment date");
         setColspan(payment_date, 2);
-        addFormItem(currencyFrom, "Currency");
-        addFormItem(currencySelect, "Currency to");
-        addFormItem(amountFld, "Amount");
-        exchanged_amount = addFormItem(currencyAmountFld, "Exchanged amount");
+//        addFormItem(currencyFrom, "Currency");
+//        addFormItem(currencySelect, "Currency to");
+//        addFormItem(amountFld, "Amount");
+        exchanged_amount = addFormItem(currencyAmountFld, "Amount");
         FormItem exchange_rate = addFormItem(exchangeRate, "Exchange rate");
-        setColspan(exchange_rate, 2);
         addFormItem(paymentMethodSelect, "Payment method");
 //        VerticalLayout field = new VerticalLayout(accountSelect, convertedAmountLbl, receivedFld, changeLbl);
 //        field.setSpacing(false);
 //        field.setMargin(false);
 //        field.setPadding(false);
         addFormItem(accountSelect, "Account");
+        if(reference == null || referenceId == null) {
+            category = addFormItem(categorySelect, "Category");
+        }
 //        addFormItem(convertedAmountLbl, "Exchnaged amount");
         addFormItem(receivedFld, "Paid");
         addFormItem(changeLbl, "Change");
@@ -250,9 +278,17 @@ private boolean fromToCurrency = false;
         paymentTransactionVO.setExchangeRate(exchangeRate.getValue());
         BigDecimal multiply = paymentTransactionVO.getAmount().multiply(paymentTransactionVO.getExchangeRate());
         paymentTransactionVO.setConvertedAmount(currencyAmountFld.getValue());
-        paymentTransactionVO.setPlusMin(plusMin);
-        paymentTransactionVO.setReference(reference);
-        paymentTransactionVO.setReferenceId(referenceId);
+        paymentTransactionVO.setTransactionType(transactionType);
+        if(reference != null && referenceId != null) {
+            paymentTransactionVO.setReference(reference);
+            paymentTransactionVO.setReferenceId(referenceId);
+        } else {
+            TransactionCategory value = categorySelect.getValue();
+            if(value != null){
+                paymentTransactionVO.setReference(value.getReference());
+                paymentTransactionVO.setReferenceId(value.getReferenceId());
+            }
+        }
         paymentTransactionVO.setNextReferenceId(nextReferenceId);
         paymentTransactionVO.setBusiness(businessId);
         paymentTransactionVO.setCurrencyFrom(currencyFrom.getValue().getId());

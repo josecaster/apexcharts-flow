@@ -12,8 +12,14 @@ import java.util.Optional;
 public class CurrencySelect extends Select<Currency> {
 
     private List<Currency> currencies;
+    private boolean codeOnly;
 
     public CurrencySelect() {
+        this(false);
+    }
+
+    public CurrencySelect(boolean codeOnly) {
+        this.codeOnly = codeOnly;
         load();
     }
 
@@ -24,7 +30,7 @@ public class CurrencySelect extends Select<Currency> {
         currencies = pojoService.listCurrency(token).getResult();
         setItems(currencies);
 
-        setItemLabelGenerator((f) -> f.getName());
+        setItemLabelGenerator((f) -> codeOnly ? f.getCode() : f.getName());
     }
 
     public String getTranslation() {

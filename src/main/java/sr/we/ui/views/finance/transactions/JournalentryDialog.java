@@ -8,6 +8,8 @@ import sr.we.ui.components.MyDialog;
 public class JournalentryDialog extends MyDialog {
 
     public JournalentryDialog(Long businessId) {
+//        setMaxWidth("1000px");
+//        setWidth("100%");
         setSizeFull();
         setHeaderTitle("Journal Entry");
         Button closeButton = new Button(new Icon("lumo", "cross"), (e) -> {

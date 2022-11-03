@@ -92,6 +92,7 @@ public class AccountView extends LitTemplate {
         vo = new AccountVO();
         vo.setBusiness(businessId);
         vo.setAccountCodes(List.of(accountCodes));
+        vo.setCurrency(0L);
 
         grid = new Grid<>();
         grid.addColumn(Account::getAccountId);

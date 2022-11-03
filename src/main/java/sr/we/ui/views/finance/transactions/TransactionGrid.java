@@ -1,28 +1,15 @@
 package sr.we.ui.views.finance.transactions;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.*;
 import sr.we.ContextProvider;
 import sr.we.data.controller.PaymentTransactionService;
-import sr.we.data.controller.UserAccessService;
-import sr.we.demo.about.AboutView;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.PaymentTransaction;
-import sr.we.shekelflowcore.entity.Role;
-import sr.we.shekelflowcore.security.Privileges;
-import sr.we.shekelflowcore.security.privileges.CurrencyPrivilege;
-import sr.we.shekelflowcore.security.privileges.TransactionsPrivilege;
 import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.ui.views.LineAwesomeIcon;
-import sr.we.ui.views.MainLayout;
-import sr.we.ui.views.finance.loans.tabs.LTabDashboard;
-
-import javax.annotation.security.RolesAllowed;
-import java.util.Optional;
 
 
 //@PreserveOnRefresh
@@ -43,11 +30,11 @@ public class TransactionGrid extends VerticalLayout  {
         grid.addColumn(f -> f.getReference().getCaption() + " #" + f.getReferenceId()).setHeader("Reference");
         grid.addColumn(f -> Constants.CURRENCY_FORMAT.format(f.getConvertedAmount())).setHeader("Amount");
         grid.setClassNameGenerator(f -> {
-            switch (f.getPlusMin()) {
-                case PLUS -> {
+            switch (f.getTransactionType()) {
+                case DEPOSIT -> {
                     return "success";
                 }
-                case MIN -> {
+                case WITHDRAWAL -> {
                     return "error";
                 }
             }
@@ -56,12 +43,12 @@ public class TransactionGrid extends VerticalLayout  {
         grid.addComponentColumn(f -> {
             Span lineAwesomeIcon = new Span();
 
-            switch (f.getPlusMin()) {
-                case PLUS -> {
+            switch (f.getTransactionType()) {
+                case DEPOSIT -> {
                     lineAwesomeIcon.add(new LineAwesomeIcon("la la-arrow-up"));
                     lineAwesomeIcon.getElement().getThemeList().add("badge success");
                 }
-                case MIN -> {
+                case WITHDRAWAL -> {
                     lineAwesomeIcon.add(new LineAwesomeIcon("la la-arrow-down"));
                     lineAwesomeIcon.getElement().getThemeList().add("badge error");
                 }
