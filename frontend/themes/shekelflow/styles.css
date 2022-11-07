@@ -128,6 +128,12 @@ background:white;
 border-radius:var(--lumo-border-radius);
 margin: 0px;
 }
+.my-cart{
+width: 100%;
+border-radius:var(--lumo-border-radius);
+border: solid 1px;
+margin: 0px;
+}
 .my-cart-base{
 width: 100%;
 background:var(--lumo-base-color);
@@ -137,4 +143,16 @@ margin: 0px;
 .clickable-layout:hover {
   background-color: var(--lumo-primary-color-10pct);
   cursor: pointer;
+}
+
+.drawer-section{
+background:white;
+background-image: none;
+}
+.view-header{
+background:white;
+background-image: none;
+}
+html{
+background-color:white;
 }

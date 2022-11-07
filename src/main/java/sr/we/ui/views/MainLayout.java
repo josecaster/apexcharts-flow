@@ -48,6 +48,7 @@ import sr.we.ui.views.person.PersonView;
 import sr.we.ui.views.personform.PersonFormView;
 import sr.we.ui.views.pos.PosView;
 import sr.we.ui.views.pos.TicketsGridView;
+import sr.we.ui.views.reports.ReportsView;
 import sr.we.ui.views.services.ServiceView;
 
 import javax.annotation.security.RolesAllowed;
@@ -422,6 +423,12 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(AccountsPrivilege.class), Privileges.READ)) {
             //current.access(() -> {
             MenuItemInfo products = new MenuItemInfo("Chart of accounts", "icons/menus/icons8_ledger_48px.png", ChartOfAccountsView.class);
+            list.add(products);
+//            });
+        }
+        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(AccountsPrivilege.class), Privileges.READ)) {
+            //current.access(() -> {
+            MenuItemInfo products = new MenuItemInfo("Reports", "icons/menus/icons8_chart_48px.png", ReportsView.class);
             list.add(products);
 //            });
         }

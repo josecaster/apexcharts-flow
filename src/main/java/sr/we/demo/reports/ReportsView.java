@@ -15,9 +15,9 @@ import javax.annotation.security.RolesAllowed;
 
 import sr.we.ui.views.MainLayout;
 
-@PageTitle("Reports")
-@Route(value = "reports", layout = MainLayout.class)
-@RolesAllowed("ADMIN")
+//@PageTitle("Reports")
+//@Route(value = "reports", layout = MainLayout.class)
+//@RolesAllowed("ADMIN")
 public class ReportsView extends Main implements HasComponents, HasStyle {
 
     private OrderedList imageContainer;
