@@ -18,7 +18,9 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.template.Id;
-import com.vaadin.flow.component.textfield.*;
+import com.vaadin.flow.component.textfield.EmailField;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.QueryParameters;
@@ -42,7 +44,10 @@ import sr.we.ui.views.pos.ProductOrService;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static sr.we.ContextProvider.getBean;
 
@@ -52,11 +57,10 @@ import static sr.we.ContextProvider.getBean;
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
-@BreadCrumb(titleKey = "sr.we.invoices.create",parentNavigationTarget = InvoiceView.class)
+@BreadCrumb(titleKey = "sr.we.invoices.create", parentNavigationTarget = InvoiceView.class)
 @Tag("create-invoice-view")
 @JsModule("./src/views/invoice/create-invoice-view.ts")
 public class CreateInvoiceView extends LitTemplate {
-
 
 
     private final TextArea footerMessageFld;
@@ -230,10 +234,14 @@ public class CreateInvoiceView extends LitTemplate {
         init();
 
 
-
         invoiceSaveContinueBtn.addClickListener(f -> save());
 
-
+        paymentDateFld.addValueChangeListener(f -> {
+            if (f.isFromClient()) {
+                itemsGrid.setLocalDate(paymentDateFld.getValue());
+                itemsGrid.refresh();
+            }
+        });
     }
 
     private void setCustomer(Customer value) {
@@ -394,7 +402,6 @@ public class CreateInvoiceView extends LitTemplate {
 //    }
 
 
-
 //    private InterExecutable<Object, List<Item>> total() {
 //        return new InterExecutable<Object, List<Item>>() {
 //            @Override
@@ -483,7 +490,6 @@ public class CreateInvoiceView extends LitTemplate {
     }
 
 
-
     private Long getCustomerId() {
         return existingCustomersCmb == null ? //
                 (invoice == null ? null : //
@@ -509,10 +515,9 @@ public class CreateInvoiceView extends LitTemplate {
         invoiceSummaryFld.setValue(StringUtils.isBlank(invoice.getHeaderMessage()) ? "" : invoice.getHeaderMessage());
         companyNameLbl.setText(this.invoice.getBusiness().getName());
         setCustomer(invoice.getCustomer());
-        itemsGrid.setTicket(posHeader, (invoice.getConvertedAmount() == null ? BigDecimal.ZERO : invoice.getConvertedAmount()), invoice.getExchangeRate(), invoice.getCurrencyTo());
+        itemsGrid.setTicket(posHeader, (invoice.getConvertedAmount() == null ? BigDecimal.ZERO : invoice.getConvertedAmount()), invoice.getExchangeRate(), invoice.getCurrencyTo(), invoice.getInvoiceDate());
 
     }
-
 
 
     protected void setByPosHeaderId(BeforeEnterEvent event, Long posHeaderId) {
@@ -526,6 +531,7 @@ public class CreateInvoiceView extends LitTemplate {
             throw new ValidationException("Invalid Link");
         }
         setInvoice(invoice);
+
     }
 
     public void setBusiness2(Business business2) {
@@ -537,11 +543,11 @@ public class CreateInvoiceView extends LitTemplate {
         InvoiceService loanRequestService = getBean(InvoiceService.class);
         String token = AuthenticatedUser.token();
         InvoiceSetting settings = loanRequestService.getSettings(business2.getId(), token);
-        if(settings != null) {
+        if (settings != null) {
             invoiceNoteTermsFld.setValue(settings.getThankMessage());
             footerMessageFld.setValue(settings.getFooterMessage());
             invoiceSummaryFld.setValue(settings.getHeaderMessage());
-            invoiceNumberFld.setValue(String.valueOf(settings.getCurrentInvoiceNumber() == null ? 0 : settings.getCurrentInvoiceNumber()+1));
+            invoiceNumberFld.setValue(String.valueOf(settings.getCurrentInvoiceNumber() == null ? 0 : settings.getCurrentInvoiceNumber() + 1));
             paymentDateFld.setValue(LocalDate.now());
             paymentDueFld.setValue(LocalDate.now().plusDays(14));
         }

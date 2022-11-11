@@ -10,6 +10,7 @@ import sr.we.shekelflowcore.entity.helper.adapter.CalculationResult;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,7 @@ public class Item {
     private BigDecimal exchange;
     private Currency currencyTo;
     private boolean recalcRate = true;
+    private LocalDate localDate;
 
     public Item(PosHeaderDetail posHeaderDetail, Map<String, Object> map, Map<String, Object> feeMap) {
         addCount();
@@ -140,7 +142,7 @@ public class Item {
                 try {
                     if (recalcRate || exchange == null) {
                         ExchangeRateService exchangeRateService = ContextProvider.getBean(ExchangeRateService.class);
-                        exchange = exchangeRateService.exchange(productOrService.getServices().getCurrency().getCode(), currencyTo.getCode(), productOrService.getServices().getBusiness().getId(), AuthenticatedUser.token());
+                        exchange = exchangeRateService.exchange(currencyTo.getCode(), productOrService.getServices().getCurrency().getCode(), productOrService.getServices().getBusiness().getId(), localDate, AuthenticatedUser.token());
                     }
                     if (exchange == null) {
                         exchange = BigDecimal.ONE;
@@ -238,5 +240,9 @@ public class Item {
 
     public void setValid(boolean valid) {
         this.valid = valid;
+    }
+
+    public void setLocalDate(LocalDate localDate) {
+        this.localDate = localDate;
     }
 }

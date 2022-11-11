@@ -3,13 +3,16 @@ package sr.we.ui.views.currencyexchange;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.template.Id;
@@ -22,22 +25,29 @@ import sr.we.data.controller.ExchangeRateService;
 import sr.we.data.controller.UserAccessService;
 import sr.we.demo.about.AboutView;
 import sr.we.security.AuthenticatedUser;
+import sr.we.shekelflowcore.entity.Account;
 import sr.we.shekelflowcore.entity.Currency;
 import sr.we.shekelflowcore.entity.CurrencyExchange;
 import sr.we.shekelflowcore.entity.Role;
+import sr.we.shekelflowcore.entity.helper.adapter.CurrencyExchangeBody;
 import sr.we.shekelflowcore.entity.helper.vo.CurrencyExchangeVO;
+import sr.we.shekelflowcore.enums.Reference;
 import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.CurrencyExchangePrivilege;
 import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.shekelflowcore.settings.util.DateUtil;
 import sr.we.ui.components.BreadCrumb;
+import sr.we.ui.components.finance.AccountSelect;
+import sr.we.ui.components.finance.PaymentMethodSelect;
 import sr.we.ui.components.general.CurrencySelect;
 import sr.we.ui.views.MainLayout;
 
 import javax.annotation.security.RolesAllowed;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.Optional;
 
 /**
@@ -55,6 +65,8 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
 
     private final Grid<CurrencyExchange> grid;
     private final CurrencyExchangeVO filter;
+    private final Tab vaadinTab;
+    private final Tab vaadinTab2;
     @Id("rate-grid-layout")
     private Div rateGridLayout;
     @Id("add-rate-btn")
@@ -77,25 +89,125 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
     private CurrencySelect currencyFromReplicaSelect;
     @Id("vaadinTabs")
     private Tabs vaadinTabs;
-    private final Tab vaadinTab;
     private Tab vaadinTab1;
-    private final Tab vaadinTab2;
+    @Id("my-form-layout")
+    private FormLayout myFormLayout;
+    @Id("from-cur-fld")
+    private CurrencySelect fromCurFld;
+    @Id("to-cur-fld")
+    private CurrencySelect toCurFld;
+    private final RadioButtonGroup<String> buySellGrp;
+    @Id("fx-fld")
+    private BigDecimalField fxFld;
+    @Id("to-account-fld")
+    private AccountSelect toAccountFld;
+    @Id("from-account-fld")
+    private AccountSelect fromAccountFld;
+    @Id("radio-div")
+    private Div radioDiv;
+    @Id("amount-fld")
+    private BigDecimalField amountFld;
+    @Id("converted-amount-fld")
+    private BigDecimalField convertedAmountFld;
+    @Id("exchange-btn")
+    private Button exchangeBtn;
+    private CurrencyExchangeBody exchange;
+    @Id("date-fld")
+    private DatePicker dateFld;
+    @Id("payment-method-from")
+    private PaymentMethodSelect paymentMethodFrom;
+    @Id("payment-method-to")
+    private PaymentMethodSelect paymentMethodTo;
+    @Id("flip-btn")
+    private Button flipBtn;
 
     /**
      * Creates a new CurrencyExchangeView.
      */
     public CurrencyExchangeView() {
         // You can initialise any data required for the connected UI components here.
+        dateFld.setValue(LocalDate.now());
+        dateFld.addValueChangeListener(f -> {
+           exchange();
+        });
+
+
+        flipBtn.setText("Flip");
+        flipBtn.addClickListener(f -> {
+            fromAccountFld.setValue((Account) null);
+            toAccountFld.setValue((Account) null);
+            Currency value = fromCurFld.getValue();
+            BigDecimal value1 = amountFld.getValue();
+            Currency value2 = toCurFld.getValue();
+            BigDecimal value3 = convertedAmountFld.getValue();
+            toCurFld.setValue(value);
+            convertedAmountFld.setValue(value1);
+            fromCurFld.setValue(value2);
+            amountFld.setValue(value3);
+            exchange();
+        });
+
+        amountFld.addValueChangeListener(f -> {
+            if (f.getValue() == null) {
+                return;
+            }
+            if (f.isFromClient() && fxFld.getValue() != null) {
+                convertedAmountFld.setValue(f.getValue().divide(fxFld.getValue(),6, RoundingMode.HALF_UP));
+            }
+        });
+        convertedAmountFld.addValueChangeListener(f -> {
+            if (f.getValue() == null) {
+                return;
+            }
+            if (f.isFromClient() && fxFld.getValue() != null) {
+                amountFld.setValue(f.getValue().multiply(fxFld.getValue()));
+            }
+        });
+
+        buySellGrp = new RadioButtonGroup<>();
+        radioDiv.add(buySellGrp);
+        buySellGrp.setItems("Buy", "Sell");
+        buySellGrp.setValue("Buy");
+        fromCurFld.addValueChangeListener(f -> {
+            if (f.getValue() == null) {
+                return;
+            }
+            fromAccountFld.setCurrency(f.getValue().getId());
+            amountFld.setPrefixComponent(new Span(f.getValue().getCode()));
+            exchange();
+        });
+        toCurFld.addValueChangeListener(f -> {
+            if (f.getValue() == null) {
+                return;
+            }
+            toAccountFld.setCurrency(f.getValue().getId());
+            convertedAmountFld.setPrefixComponent(new Span(f.getValue().getCode()));
+            exchange();
+        });
+        buySellGrp.addValueChangeListener(f -> {
+            exchange();
+        });
+        fxFld.addValueChangeListener(f -> {
+            if (f.getValue() == null) {
+                fxFld.setValue(BigDecimal.ONE);
+                return;
+            }
+            if (amountFld.getValue() != null && fxFld.getValue() != null) {
+                convertedAmountFld.setValue(amountFld.getValue().divide(fxFld.getValue(), 6, RoundingMode.HALF_UP));
+            }
+        });
+
+        myFormLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0px", 1), new FormLayout.ResponsiveStep("500px", 4));
 
         vaadinFormLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0px", 1, FormLayout.ResponsiveStep.LabelsPosition.TOP), new FormLayout.ResponsiveStep("500px", 3, FormLayout.ResponsiveStep.LabelsPosition.TOP));
 
         grid = new Grid<>();
         grid.addColumn(f -> {
-            return getFrom(f) + "-" + getTo(f) + " xf  " + Constants.CURRENCY_FORMAT.format(f.getAmountFrom());
-        }).setHeader("Exchange rate (1)");
+            return getFrom(f) + "-" + getTo(f) + " fx " + Constants.CURRENCY_FORMAT.format(f.getAmountFrom());
+        }).setHeader("Buy");
         grid.addColumn(f -> {
-            return getTo(f) + "-" + getFrom(f) + " xf  " + Constants.CURRENCY_FORMAT.format(f.getAmountTo());
-        }).setHeader("Exchange rate (2)");
+            return getFrom(f) + "-" + getTo(f) + " fx  " + Constants.CURRENCY_FORMAT.format(f.getAmountTo());
+        }).setHeader("Sell");
         grid.addColumn(f -> {
             return Constants.SIMPLE_DATE_TIME_FORMAT_24H.format(DateUtil.convertToDateViaInstant(f.getStartDateTime()));
         }).setHeader("Started");
@@ -112,7 +224,8 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
 
         fromAmountFld.addValueChangeListener(f -> {
             if (f.getValue() != null && f.getValue().compareTo(BigDecimal.ZERO) != 0) {
-                toAmountFld.setValue(BigDecimal.ONE.divide(f.getValue(), 4, RoundingMode.HALF_UP));
+//                toAmountFld.setValue(BigDecimal.ONE.divide(f.getValue(), 4, RoundingMode.HALF_UP));
+                toAmountFld.setValue(f.getValue());
             }
         });
 
@@ -151,11 +264,52 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
             notification.open();
         });
 
+        exchangeBtn.addClickListener(f -> {
+            if (toCurFld.getValue() == null || fromCurFld.getValue() == null || amountFld.getValue() == null || convertedAmountFld.getValue() == null//
+                    || paymentMethodFrom.getValue() == null || paymentMethodTo.getValue() == null || dateFld.getValue() == null || fxFld.getValue() == null) {//
+                throw new ValidationException("Not all required fields are filled in");
+            }
+
+
+            ExchangeRateService productService = ContextProvider.getBean(ExchangeRateService.class);
+            CurrencyExchangeVO vo = new CurrencyExchangeVO();
+            vo.setCurrencyToId(toCurFld.getValue().getId());
+            vo.setCurrencyFromId(fromCurFld.getValue().getId());
+            vo.setAmountFrom(amountFld.getValue());
+            vo.setAmountTo(convertedAmountFld.getValue());
+            vo.setAccountTo(toAccountFld.getValue().getId());
+            vo.setAccountFrom(fromAccountFld.getValue().getId());
+            vo.setBuySell(buySellGrp.getValue().equalsIgnoreCase("Buy") ? "b" : "s");
+            vo.setRate(fxFld.getValue());
+            vo.setFxId(exchange.getId());
+            vo.setBusinessId(businessId);
+            vo.setLogDate(dateFld.getValue());
+            vo.setPaymentMethodFrom(paymentMethodFrom.getValue().getId());
+            vo.setPaymentMethodTo(paymentMethodTo.getValue().getId());
+            productService.buySell(AuthenticatedUser.token(), vo);
+
+            toCurFld.clear();
+            fromCurFld.clear();
+            amountFld.clear();
+            convertedAmountFld.clear();
+            toAccountFld.clear();
+            fromAccountFld.clear();
+            fxFld.clear();
+
+
+            Notification notification = new Notification();
+            notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            notification.setText(getTranslation("sr.we.success"));
+            notification.setDuration(5000);
+            notification.setPosition(Notification.Position.MIDDLE);
+            notification.open();
+        });
+
         currencyFromSelect.addValueChangeListener(f -> {
-            currencyFromReplicaSelect.setValue(f.getValue());
+            currencyToReplicaSelect.setValue(f.getValue());
         });
         currencyToSelect.addValueChangeListener(f -> {
-            currencyToReplicaSelect.setValue(f.getValue());
+            currencyFromReplicaSelect.setValue(f.getValue());
         });
         vaadinTab = new Tab("All");
         vaadinTab1 = new Tab("Active");
@@ -168,6 +322,18 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
             } else filter.setActive(selectedTab.equals(vaadinTab1));
             refresh(AuthenticatedUser.token());
         });
+    }
+
+    private void exchange() {
+        if (fromCurFld.getValue() != null && toCurFld.getValue() != null && dateFld.getValue() != null) {
+            ExchangeRateService exchangeRateService = ContextProvider.getBean(ExchangeRateService.class);
+            try {
+                exchange = exchangeRateService.exchangeResult(fromCurFld.getValue().getCode(), toCurFld.getValue().getCode(), businessId, buySellGrp.getValue().equalsIgnoreCase("Buy") ? "b" : "s",dateFld.getValue(), AuthenticatedUser.token());
+                fxFld.setValue(BigDecimal.valueOf(exchange.getRate()));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     private void validate(CurrencyExchangeVO currencyExchangeVO) {
@@ -222,6 +388,8 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
         }
         businessId = Long.valueOf(business);
         filter.setBusinessId(businessId);
+        toAccountFld.load(businessId, Reference.EXCHANGE);
+        fromAccountFld.load(businessId, Reference.EXCHANGE);
 
         refresh(AuthenticatedUser.token());
     }

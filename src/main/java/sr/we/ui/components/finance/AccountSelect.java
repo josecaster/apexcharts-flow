@@ -26,10 +26,19 @@ public class AccountSelect extends Select<Account> {
     private List<Account> accounts1;
     private AccountVO accountVO;
 
+    public AccountSelect() {
+    }
+
     public AccountSelect(Long businessId, TransactionType transactionType) {
         this(businessId,Reference.ALL_ASSETS);
     }
     public AccountSelect(Long businessId, Reference reference) {
+        load(businessId, reference);
+//        setLabel(getTranslation("sr.we.payment.method"));
+//        setHelperText(getTranslation("sr.we.type.of.business.info"));
+    }
+
+    public void load(Long businessId, Reference reference) {
         AccountService pojoService = ContextProvider.getBean(AccountService.class);
         String token = AuthenticatedUser.token();
 
@@ -93,8 +102,6 @@ public class AccountSelect extends Select<Account> {
                 getDataProvider().fetch(new Query<>()).collect(Collectors.toList()).clear();
             }
         });
-//        setLabel(getTranslation("sr.we.payment.method"));
-//        setHelperText(getTranslation("sr.we.type.of.business.info"));
     }
 
     public void setCurrency(Long currency) {

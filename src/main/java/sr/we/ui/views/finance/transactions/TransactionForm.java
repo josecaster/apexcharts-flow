@@ -14,12 +14,13 @@ import sr.we.data.controller.PaymentTransactionService;
 import sr.we.data.controller.UserAccessService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Currency;
+import sr.we.shekelflowcore.entity.CurrencyExchange;
 import sr.we.shekelflowcore.entity.PaymentTransaction;
 import sr.we.shekelflowcore.entity.helper.Executable;
 import sr.we.shekelflowcore.entity.helper.TransactionCategory;
 import sr.we.shekelflowcore.entity.helper.vo.PaymentTransactionVO;
-import sr.we.shekelflowcore.enums.TransactionType;
 import sr.we.shekelflowcore.enums.Reference;
+import sr.we.shekelflowcore.enums.TransactionType;
 import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.CurrencyExchangePrivilege;
@@ -33,12 +34,13 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class TransactionForm extends FormLayout {
 
     private final CurrencySelect currencySelect;
     private final BigDecimalField exchangeRate;
-    private final H4 convertedAmountLbl,changeLbl;
+    private final H4 convertedAmountLbl, changeLbl;
     private final BigDecimalField amountFld, currencyAmountFld, receivedFld;
     private final PaymentMethodSelect paymentMethodSelect;
     private final AccountSelect accountSelect;
@@ -57,11 +59,13 @@ public class TransactionForm extends FormLayout {
 
     private Executable refresh;
     private FormItem category;
+    private boolean fromToCurrency,exchange = false;
+    private CurrencyExchange currencyExchange;
+
 
     public TransactionForm(BigDecimal rest, LocalDate initDate, Long businessId, Currency fromCurrency, Currency selectedCurrency, Reference reference, Long referenceId) {
         this(rest, initDate, businessId, fromCurrency, selectedCurrency, reference, referenceId, reference.getPlusMin());
     }
-
 
     public TransactionForm(BigDecimal rest, LocalDate initDate, Long businessId, Currency fromCurrency, Currency selectedCurrency, Reference reference, Long referenceId, TransactionType transactionType) {
 
@@ -89,12 +93,12 @@ public class TransactionForm extends FormLayout {
         element1.setAttribute("theme", "badge");
         element1.getStyle().set("font-size", "var(--lumo-font-size-xl)");
         paymentMethodSelect = new PaymentMethodSelect();
-        if(reference == null){
+        if (reference == null) {
             accountSelect = new AccountSelect(businessId, transactionType);
         } else {
             accountSelect = new AccountSelect(businessId, reference);
         }
-        categorySelect = new CategorySelect(transactionType,businessId);
+        categorySelect = new CategorySelect(transactionType, businessId);
         memoFld = new TextArea();
         currencySelect = new CurrencySelect(true);
         currencyAmountFld.setPrefixComponent(currencySelect);
@@ -145,16 +149,25 @@ public class TransactionForm extends FormLayout {
             currencyAmountFld.setValue(val);
             convertedAmountLbl.setText(selectedCurrency.getCode() + " " + Constants.CURRENCY_FORMAT.format(val));
 //            currencyAmountFld.setReadOnly(exchangeRate.getValue().compareTo(BigDecimal.ONE) == 0);
-            if(exchangeRate.getValue().compareTo(BigDecimal.ONE) == 0) {
+            if (exchangeRate.getValue().compareTo(BigDecimal.ONE) == 0) {
                 currencyAmountFld.setHelperText(null);
             } else {
-                currencyAmountFld.setHelperText( currencyFrom.getValue().getCode()+" "+Constants.CURRENCY_FORMAT.format(amountFld.getValue())+//
-                        " - "+//
-                        currencySelect.getValue().getCode()+" "+Constants.CURRENCY_FORMAT.format(val)+" | fx-rate: "+Constants.CURRENCY_FORMAT.format(h.getValue()));
+                currencyAmountFld.setHelperText(currencyFrom.getValue().getCode() + " " + Constants.CURRENCY_FORMAT.format(amountFld.getValue()) +//
+                        " - " +//
+                        currencySelect.getValue().getCode() + " " + Constants.CURRENCY_FORMAT.format(val) + " | fx-rate: " + Constants.CURRENCY_FORMAT.format(h.getValue()));
             }
         });
 
         currencySelect.addValueChangeListener(g -> {
+            if(g.getValue() == null){
+                return;
+            }
+            if(exchange){
+                if(g.getValue().getId().compareTo(currencyFrom.getValue().getId()) == 0){
+                    currencyFrom.setValue(currencyExchange.getCurrencyFrom().getId().compareTo(g.getValue().getId()) == 0 ? currencyExchange.getCurrencyTo() : currencyExchange.getCurrencyFrom());
+                }
+            }
+
             accountSelect.setCurrency(g.getValue() == null ? null : g.getValue().getId());
             if (currencyFrom.getValue() == null) {
                 exchangeRate.setValue(rest);
@@ -162,11 +175,27 @@ public class TransactionForm extends FormLayout {
             }
             ExchangeRateService exchangeRateService = ContextProvider.getBean(ExchangeRateService.class);
             try {
-                BigDecimal exchange = exchangeRateService.exchange(currencyFrom.getValue().getCode(), g.getValue().getCode(), businessId, AuthenticatedUser.token());
+                BigDecimal exchange = exchangeRateService.exchange(currencyFrom.getValue().getCode(), g.getValue().getCode(), businessId,dateFld.getValue(), AuthenticatedUser.token());
                 exchangeRate.setValue(exchange);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+        });
+        categorySelect.addValueChangeListener(g -> {
+            if (g.getValue() != null) {
+                TransactionCategory value = g.getValue();
+                if (value.getReference().compareTo(Reference.EXCHANGE) == 0) {
+                    Optional<CurrencyExchange> any = categorySelect.getExchanges().stream().filter(f -> f.getId().compareTo(g.getValue().getReferenceId()) == 0).findAny();
+                    if (any.isPresent()) {
+                        currencyExchange = any.get();
+                        currencySelect.setItems(currencyExchange.getCurrencyTo(), currencyExchange.getCurrencyFrom());
+                        setCurrency(currencyExchange.getCurrencyFrom());
+                        exchange = true;
+                        return;
+                    }
+                }
+            }
+            exchange = false;
         });
 
         // add default values
@@ -191,7 +220,7 @@ public class TransactionForm extends FormLayout {
                     currencyAmountFld.setValue(val);
                 }
             } else {
-                if(!fromToCurrency) {
+                if (!fromToCurrency) {
                     if (exchangeRate.getValue() != null) {
                         BigDecimal val = amountFld.getValue().multiply(exchangeRate.getValue());
                         convertedAmountLbl.setText(selectedCurrency.getCode() + " " + Constants.CURRENCY_FORMAT.format(val));
@@ -206,7 +235,7 @@ public class TransactionForm extends FormLayout {
             if (f.isFromClient()) {
 
                 if (exchangeRate.getValue() != null && exchangeRate.getValue().compareTo(BigDecimal.ONE) == 0) {
-                    if(rest != null && (currencyAmountFld.getValue() == null || currencyAmountFld.getValue().compareTo(rest) >= 0)) {
+                    if (rest != null && (currencyAmountFld.getValue() == null || currencyAmountFld.getValue().compareTo(rest) >= 0)) {
                         currencyAmountFld.setValue(amountFld.getValue());
                         receivedFld.setValue(amountFld.getValue());
                     }
@@ -217,9 +246,9 @@ public class TransactionForm extends FormLayout {
                     amountFld.setValue(val);
                     convertedAmountLbl.setText(selectedCurrency.getCode() + " " + Constants.CURRENCY_FORMAT.format(currencyAmountFld.getValue()));
 
-                    currencyAmountFld.setHelperText( currencyFrom.getValue().getCode()+" "+Constants.CURRENCY_FORMAT.format(amountFld.getValue())+//
-                            " - "+//
-                            currencySelect.getValue().getCode()+" "+Constants.CURRENCY_FORMAT.format(currencyAmountFld.getValue())+" | fx-rate: "+Constants.CURRENCY_FORMAT.format(exchangeRate.getValue()));
+                    currencyAmountFld.setHelperText(currencyFrom.getValue().getCode() + " " + Constants.CURRENCY_FORMAT.format(amountFld.getValue()) +//
+                            " - " +//
+                            currencySelect.getValue().getCode() + " " + Constants.CURRENCY_FORMAT.format(currencyAmountFld.getValue()) + " | fx-rate: " + Constants.CURRENCY_FORMAT.format(exchangeRate.getValue()));
                 }
             }
             receivedFld.setValue(f.getValue());
@@ -227,9 +256,9 @@ public class TransactionForm extends FormLayout {
 
         receivedFld.addValueChangeListener(f -> {
 
-            if(receivedFld.getValue() != null && currencyAmountFld.getValue() != null) {
+            if (receivedFld.getValue() != null && currencyAmountFld.getValue() != null) {
                 change = receivedFld.getValue().subtract(currencyAmountFld.getValue());
-                if(change.compareTo(BigDecimal.ZERO) < 0){
+                if (change.compareTo(BigDecimal.ZERO) < 0) {
                     receivedFld.setValue(currencyAmountFld.getValue());
                 }
                 changeLbl.setText(Constants.CURRENCY_FORMAT.format(change));
@@ -252,7 +281,7 @@ public class TransactionForm extends FormLayout {
 //        field.setMargin(false);
 //        field.setPadding(false);
         addFormItem(accountSelect, "Account");
-        if(reference == null || referenceId == null) {
+        if (reference == null || referenceId == null) {
             category = addFormItem(categorySelect, "Category");
         }
 //        addFormItem(convertedAmountLbl, "Exchnaged amount");
@@ -266,7 +295,6 @@ public class TransactionForm extends FormLayout {
         setResponsiveSteps(new ResponsiveStep("0", 1), new ResponsiveStep("500", 2));
         setMaxWidth("750px");
     }
-private boolean fromToCurrency = false;
 
     public PaymentTransaction save() {
         PaymentTransactionVO paymentTransactionVO = new PaymentTransactionVO();
@@ -279,12 +307,12 @@ private boolean fromToCurrency = false;
         BigDecimal multiply = paymentTransactionVO.getAmount().multiply(paymentTransactionVO.getExchangeRate());
         paymentTransactionVO.setConvertedAmount(currencyAmountFld.getValue());
         paymentTransactionVO.setTransactionType(transactionType);
-        if(reference != null && referenceId != null) {
+        if (reference != null && referenceId != null) {
             paymentTransactionVO.setReference(reference);
             paymentTransactionVO.setReferenceId(referenceId);
         } else {
             TransactionCategory value = categorySelect.getValue();
-            if(value != null){
+            if (value != null) {
                 paymentTransactionVO.setReference(value.getReference());
                 paymentTransactionVO.setReferenceId(value.getReferenceId());
             }

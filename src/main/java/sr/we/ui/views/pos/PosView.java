@@ -789,7 +789,7 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
     private void setTicket(PosHeader posHeader) {
         init();
         productTitle.setText("Ticket #" + posHeader.getHeaderSeq());
-        itemsGrid.setTicket(posHeader, posHeader.getPrice(), BigDecimal.ONE, business2.getCurrency());
+        itemsGrid.setTicket(posHeader, posHeader.getConvertedAmount(), posHeader.getExchangeRate(), posHeader.getCurrencyTo(), posHeader.getPosStart().getTargetDate().toLocalDate());
 
         BigDecimal reduce = itemsGrid.getItemList().stream().map(Item::getResult).reduce(BigDecimal.ZERO, BigDecimal::add);
 //        reduce = reduce.add(feeList.stream().map(Fee::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add));

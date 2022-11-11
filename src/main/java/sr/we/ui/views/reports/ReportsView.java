@@ -15,6 +15,7 @@ import sr.we.demo.about.AboutView;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.security.Privileges;
+import sr.we.shekelflowcore.security.privileges.AccountsPrivilege;
 import sr.we.shekelflowcore.security.privileges.ServicesPrivilege;
 import sr.we.ui.components.BreadCrumb;
 import sr.we.ui.components.NotYetClick;
@@ -59,7 +60,7 @@ public class ReportsView extends LitTemplate implements BeforeEnterObserver {
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         UserAccessService userAccesService = ContextProvider.getBean(UserAccessService.class);
-        boolean hasAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new ServicesPrivilege(), Privileges.READ);
+        boolean hasAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new AccountsPrivilege(), Privileges.READ);
         if (!hasAccess) {
             UI.getCurrent().navigate(AboutView.class);
         }

@@ -32,6 +32,8 @@ import sr.we.ui.views.pos.ProductOrService;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -51,6 +53,8 @@ public class ItemGrid extends Grid<Item> {
     private PosHeader posHeader;
     private InterExecutable<Object, List<Item>> execute;
     private Business business2;
+
+    private LocalDate localDate;
 
     public ItemGrid() {
         setExecute(total());
@@ -212,17 +216,7 @@ public class ItemGrid extends Grid<Item> {
 
         currencySelect.addValueChangeListener(g -> {
             if (g.isFromClient()) {
-                if (currencySelect.getValue() == null) {
-                    exchangeRateFld.setValue(BigDecimal.ZERO);
-                    return;
-                }
-                ExchangeRateService exchangeRateService = ContextProvider.getBean(ExchangeRateService.class);
-                try {
-                    BigDecimal exchange = exchangeRateService.exchange(business2.getCurrency().getCode(), g.getValue().getCode(), business2.getId(), AuthenticatedUser.token());
-                    exchangeRateFld.setValue(exchange);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                exchange();
             }
         });
 
@@ -233,6 +227,21 @@ public class ItemGrid extends Grid<Item> {
             }
         });
 
+    }
+
+    private void exchange() {
+        Currency value = currencySelect.getValue();
+        if (value== null) {
+            exchangeRateFld.setValue(BigDecimal.ZERO);
+            return;
+        }
+        ExchangeRateService exchangeRateService = ContextProvider.getBean(ExchangeRateService.class);
+        try {
+            BigDecimal exchange = exchangeRateService.exchange(value.getCode(),business2.getCurrency().getCode(), business2.getId(),localDate, AuthenticatedUser.token());
+            exchangeRateFld.setValue(exchange);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private VerticalLayout getVariableLayout(Item d) {
@@ -387,9 +396,9 @@ public class ItemGrid extends Grid<Item> {
         }
     }
 
-    public void setTicket(PosHeader posHeader, BigDecimal convertedAmount, BigDecimal exchangeRate, Currency currencyTo) {
+    public void setTicket(PosHeader posHeader, BigDecimal convertedAmount, BigDecimal exchangeRate, Currency currencyTo, LocalDate localDate) {
         this.posHeader = posHeader;
-
+        this.localDate = localDate;
         activateListener = false;
 //        init();
 //        productTitle.setText("Ticket #" + posHeader.getHeaderSeq());
@@ -450,14 +459,18 @@ public class ItemGrid extends Grid<Item> {
 
         BigDecimal reduce = getItemList().stream().map(Item::getResult).reduce(BigDecimal.ZERO, BigDecimal::add);
 //        reduce = reduce.add(feeList.stream().map(Fee::getCalcPrice).reduce(BigDecimal.ZERO, BigDecimal::add));
-        posHeaderVO.setPrice(reduce);
+        posHeaderVO.setExchangeRate(exchangeRateFld.getValue()/*BigDecimal.ONE*/);
+        posHeaderVO.setPrice(reduce.divide(posHeaderVO.getExchangeRate(), 2, RoundingMode.HALF_UP));
         posHeaderVO.setRemoveList(getRemoveList());
-        posHeaderVO.setExchangeRate(/*exchangeRateFld.getValue()*/BigDecimal.ONE);
-        posHeaderVO.setConvertedAmount(posHeaderVO.getPrice().multiply(posHeaderVO.getExchangeRate()));
-        posHeaderVO.setCurrencyFrom(currencySelect.getValue().getId());
+        posHeaderVO.setConvertedAmount(reduce);
+        posHeaderVO.setCurrencyFrom(business2.getCurrency().getId());
         posHeaderVO.setCurrencyTo(currencySelect.getValue().getId());
         posHeaderVO.setDiscount(discountFld.getValue());
         return posHeaderVO;
+    }
+
+    public void setLocalDate(LocalDate localDate) {
+        this.localDate = localDate;
     }
 
     public void setExecute(InterExecutable<Object, List<Item>> execute) {
@@ -472,7 +485,10 @@ public class ItemGrid extends Grid<Item> {
         return new InterExecutable<Object, List<Item>>() {
             @Override
             public Object build(List<Item> itemList) {
-                itemList.stream().forEach(f -> f.setCurrency(currencySelect.getValue()));
+                itemList.stream().forEach(f ->{
+                    f.setLocalDate(localDate);
+                    f.setCurrency(currencySelect.getValue());
+                });
                 total = itemList.stream().map(Item::getCalcPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
 //        total = total.add(feeList.stream().map(Fee::getCalcPrice).reduce(BigDecimal.ZERO, BigDecimal::add));
                 BigDecimal value = null;//exchangeRateFld.getValue();
@@ -493,5 +509,10 @@ public class ItemGrid extends Grid<Item> {
         this.business2 = business2;
         currencySelect.setValue(business2.getCurrency());
         exchangeRateFld.setValue(BigDecimal.ONE);
+    }
+
+    public void refresh() {
+        execute.build(itemList);
+        getDataProvider().refreshAll();
     }
 }

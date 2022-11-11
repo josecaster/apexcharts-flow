@@ -23,10 +23,12 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import sr.we.ContextProvider;
 import sr.we.data.controller.BusinessService;
+import sr.we.data.controller.ExchangeRateService;
 import sr.we.data.controller.JournalEntryService;
 import sr.we.data.controller.UserAccessService;
 import sr.we.demo.about.AboutView;
 import sr.we.security.AuthenticatedUser;
+import sr.we.shekelflowcore.entity.Currency;
 import sr.we.shekelflowcore.entity.*;
 import sr.we.shekelflowcore.entity.helper.PagingResult;
 import sr.we.shekelflowcore.entity.helper.vo.JournalsEntryVO;
@@ -34,19 +36,17 @@ import sr.we.shekelflowcore.enums.ChartOfAccountTypes;
 import sr.we.shekelflowcore.enums.ChartOfAccounts;
 import sr.we.shekelflowcore.enums.TransactionType;
 import sr.we.shekelflowcore.security.Privileges;
-import sr.we.shekelflowcore.security.privileges.ServicesPrivilege;
+import sr.we.shekelflowcore.security.privileges.AccountsPrivilege;
 import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.shekelflowcore.settings.util.DateUtil;
 import sr.we.ui.components.BreadCrumb;
 import sr.we.ui.views.MainLayout;
 
 import javax.annotation.security.RolesAllowed;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -98,6 +98,7 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
     protected Tabs currencyTabs;
     private List<JournalsEntry> result;
     private List<Item> last, first, second;
+    private Map<Long, BigDecimal> fxMap;
 
     /**
      * Creates a new BalanceSheetView.
@@ -146,18 +147,18 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
         treeGrid.addComponentColumn(person -> {
             HorizontalLayout horizontalLayout = new HorizontalLayout();
             List<JournalsEntry> values = person.getValues();
-            if(values != null){
+            if (values != null) {
                 List<JournalsEntry> known = values.stream().filter(f -> f.getCurrencyTo().getCode().equalsIgnoreCase(getSelectedCurrency())).toList();
                 List<JournalsEntry> unknown = values.stream().filter(f -> !f.getCurrencyTo().getCode().equalsIgnoreCase(getSelectedCurrency())).toList();
-                if(!unknown.isEmpty()){
+                if (!unknown.isEmpty()) {
                     JournalsEntry journalsEntry = unknown.get(0);
                     BigDecimal reduce = unknown.stream().map(getJournalsEntryBigDecimalFunction1()).reduce(BigDecimal.ZERO, BigDecimal::add);
                     BigDecimal reduce1 = known.stream().map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
-                    Span span = new Span("("+journalsEntry.getCurrencyTo().getCode() + " " +Constants.CURRENCY_FORMAT.format(reduce)+"&"+getSelectedCurrency()+ " " +Constants.CURRENCY_FORMAT.format(reduce1)+")");
+                    Span span = new Span("(" + journalsEntry.getCurrencyTo().getCode() + " " + Constants.CURRENCY_FORMAT.format(reduce) + "&" + getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(reduce1) + ")");
                     horizontalLayout.add(span);
                 }
             }
-            Span span = new Span(getSelectedCurrency() + " " +Constants.CURRENCY_FORMAT.format(person.getAmount()));
+            Span span = new Span(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(person.getAmount()));
             if (person.getChartOfAccounts() != null) {
                 span.addClassNames(LumoUtility.FontWeight.BOLD, LumoUtility.TextColor.PRIMARY);
             } else if (person.getChartOfAccountTypes() != null) {
@@ -176,7 +177,7 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         UserAccessService userAccesService = ContextProvider.getBean(UserAccessService.class);
-        boolean hasAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new ServicesPrivilege(), Privileges.READ);
+        boolean hasAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new AccountsPrivilege(), Privileges.READ);
         if (!hasAccess) {
             UI.getCurrent().navigate(AboutView.class);
         }
@@ -247,14 +248,37 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
         toBePaidOut.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(liabilities));
         total.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(sum));
     }
+
     private Function<JournalsEntry, BigDecimal> getJournalsEntryBigDecimalFunction1() {
         return g -> g.getAccount().getAccountType().getType().getPlusMin(g.getDebCred()).compareTo(TransactionType.WITHDRAWAL) == 0//
                 ? g.getConvertedAmount().multiply(BigDecimal.valueOf(-1)) : g.getConvertedAmount();
     }
 
     private Function<JournalsEntry, BigDecimal> getJournalsEntryBigDecimalFunction() {
-        return g -> g.getAccount().getAccountType().getType().getPlusMin(g.getDebCred()).compareTo(TransactionType.WITHDRAWAL) == 0//
-                ? g.getAmount().multiply(BigDecimal.valueOf(-1)) : g.getAmount();
+        return g -> {
+            if (g.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.ASSETS) == 0 || g.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.INC) == 0 || g.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.EXP) == 0 && g.getCurrencyTo().getId().compareTo(g.getCurrencyFrom().getId()) != 0) {
+                if (fxMap == null) {
+                    fxMap = new HashMap<>();
+                }
+                BigDecimal rate = fxMap.get(g.getCurrencyTo().getId());
+                if (rate == null) {
+                    ExchangeRateService exchangeRateService = ContextProvider.getBean(ExchangeRateService.class);
+                    try {
+                        rate = exchangeRateService.exchange( g.getCurrencyFrom().getCode(),g.getCurrencyTo().getCode(), Long.valueOf(business), "b",LocalDate.now(), AuthenticatedUser.token());
+                        fxMap.put(g.getCurrencyTo().getId(), rate);
+
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                BigDecimal multiply = rate.multiply(g.getAccount().getAccountType().getType().getPlusMin(g.getDebCred()).compareTo(TransactionType.WITHDRAWAL) == 0//
+                        ? g.getConvertedAmount().multiply(BigDecimal.valueOf(-1)) : g.getConvertedAmount());
+                return multiply;
+            }
+            BigDecimal bigDecimal = g.getAccount().getAccountType().getType().getPlusMin(g.getDebCred()).compareTo(TransactionType.WITHDRAWAL) == 0//
+                    ? g.getAmount().multiply(BigDecimal.valueOf(-1)) : g.getAmount();
+            return bigDecimal;
+        };
     }
 
     private String getSelectedCurrency() {
@@ -314,7 +338,7 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
         protected BigDecimal amount;
         protected ChartOfAccounts chartOfAccounts;
         protected ChartOfAccountTypes chartOfAccountTypes;
-        private  List<JournalsEntry> values;
+        private List<JournalsEntry> values;
 
         public Item(String caption, BigDecimal amount, ChartOfAccountTypes chartOfAccountTypes) {
             this.caption = caption;
@@ -322,7 +346,7 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
             this.chartOfAccountTypes = chartOfAccountTypes;
         }
 
-        public Item(String caption, BigDecimal amount,List<JournalsEntry> values) {
+        public Item(String caption, BigDecimal amount, List<JournalsEntry> values) {
             this.caption = caption;
             this.amount = amount;
             this.values = values;
