@@ -120,6 +120,8 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
     private PaymentMethodSelect paymentMethodTo;
     @Id("flip-btn")
     private Button flipBtn;
+    @Id("prev-fx-fld")
+    private BigDecimalField prevFxFld;
 
     /**
      * Creates a new CurrencyExchangeView.
@@ -281,6 +283,7 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
             vo.setAccountFrom(fromAccountFld.getValue().getId());
             vo.setBuySell(buySellGrp.getValue().equalsIgnoreCase("Buy") ? "b" : "s");
             vo.setRate(fxFld.getValue());
+            vo.setPrevRate(prevFxFld.getValue());
             vo.setFxId(exchange.getId());
             vo.setBusinessId(businessId);
             vo.setLogDate(dateFld.getValue());
@@ -330,6 +333,7 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
             try {
                 exchange = exchangeRateService.exchangeResult(fromCurFld.getValue().getCode(), toCurFld.getValue().getCode(), businessId, buySellGrp.getValue().equalsIgnoreCase("Buy") ? "b" : "s",dateFld.getValue(), AuthenticatedUser.token());
                 fxFld.setValue(BigDecimal.valueOf(exchange.getRate()));
+                prevFxFld.setValue(BigDecimal.valueOf(exchange.getRate()));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

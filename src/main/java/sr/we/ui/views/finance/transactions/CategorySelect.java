@@ -53,19 +53,19 @@ public class CategorySelect extends Select<TransactionCategory> {
         List<TransactionCategory> assetAccounts = accounts(Reference.ASSETS, accountVO);
         List<TransactionCategory> liabilityAccounts = accounts(Reference.LCC, accountVO);
         List<TransactionCategory> equityAccounts = accounts(Reference.EQ, accountVO);
-        List<TransactionCategory> exchangeList = exchange(businessId);
+//        List<TransactionCategory> exchangeList = exchange(businessId);
 
         int incomeAccountsSize = incomeAccounts.size();
         int assetAccountsSize = assetAccounts.size();
         int liabilityAccountsSize = liabilityAccounts.size();
         int equityAccountsSize = equityAccounts.size();
-        int exchangeSize = exchangeList.size();
+//        int exchangeSize = exchangeList.size();
 
         accounts.addAll(incomeAccounts);
         accounts.addAll(assetAccounts);
         accounts.addAll(liabilityAccounts);
         accounts.addAll(equityAccounts);
-        accounts.addAll(exchangeList);
+//        accounts.addAll(exchangeList);
 
         setItems(accounts);
 
@@ -92,16 +92,16 @@ public class CategorySelect extends Select<TransactionCategory> {
             last++;
         }
 
-        if (exchangeSize > 0) {
-            last += liabilityAccountsSize;
-            Span span = new Span("Exchange");
-            span.addClassNames(LumoUtility.Margin.NONE, LumoUtility.FontWeight.BOLD,LumoUtility.TextColor.SECONDARY);
-            VerticalLayout component = new VerticalLayout(span, new Hr());
-            component.setPadding(false);
-            component.setSpacing(false);
-            addComponentAtIndex(last, component);
-            last++;
-        }
+//        if (exchangeSize > 0) {
+//            last += liabilityAccountsSize;
+//            Span span = new Span("Exchange");
+//            span.addClassNames(LumoUtility.Margin.NONE, LumoUtility.FontWeight.BOLD,LumoUtility.TextColor.SECONDARY);
+//            VerticalLayout component = new VerticalLayout(span, new Hr());
+//            component.setPadding(false);
+//            component.setSpacing(false);
+//            addComponentAtIndex(last, component);
+//            last++;
+//        }
     }
 
     private List<TransactionCategory> exchange(Long businessId) {
@@ -128,19 +128,19 @@ public class CategorySelect extends Select<TransactionCategory> {
         List<TransactionCategory> assetAccounts = accounts(Reference.ASSETS, accountVO);
         List<TransactionCategory> liabilityAccounts = accounts(Reference.LCC, accountVO);
         List<TransactionCategory> equityAccounts = accounts(Reference.EQ, accountVO);
-        List<TransactionCategory> exchangeList = exchange(businessId);
+//        List<TransactionCategory> exchangeList = exchange(businessId);
 
         int expenseAccountsSize = expenseAccounts.size();
         int assetAccountsSize = assetAccounts.size();
         int liabilityAccountsSize = liabilityAccounts.size();
         int equityAccountsSize = equityAccounts.size();
-        int exchangeSize = exchangeList.size();
+//        int exchangeSize = exchangeList.size();
 
         accounts.addAll(expenseAccounts);
         accounts.addAll(assetAccounts);
         accounts.addAll(liabilityAccounts);
         accounts.addAll(equityAccounts);
-        accounts.addAll(exchangeList);
+//        accounts.addAll(exchangeList);
 
         setItems(accounts);
 
@@ -161,16 +161,16 @@ public class CategorySelect extends Select<TransactionCategory> {
             last++;
         }
 
-        if (exchangeSize > 0) {
-            last += liabilityAccountsSize;
-            Span span = new Span("Exchange");
-            span.addClassNames(LumoUtility.Margin.NONE, LumoUtility.FontWeight.BOLD,LumoUtility.TextColor.SECONDARY);
-            VerticalLayout component = new VerticalLayout(span, new Hr());
-            component.setPadding(false);
-            component.setSpacing(false);
-            addComponentAtIndex(last, component);
-            last++;
-        }
+//        if (exchangeSize > 0) {
+//            last += liabilityAccountsSize;
+//            Span span = new Span("Exchange");
+//            span.addClassNames(LumoUtility.Margin.NONE, LumoUtility.FontWeight.BOLD,LumoUtility.TextColor.SECONDARY);
+//            VerticalLayout component = new VerticalLayout(span, new Hr());
+//            component.setPadding(false);
+//            component.setSpacing(false);
+//            addComponentAtIndex(last, component);
+//            last++;
+//        }
     }
 
     private VerticalLayout header(ChartOfAccounts inc) {

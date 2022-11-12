@@ -256,25 +256,25 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
 
     private Function<JournalsEntry, BigDecimal> getJournalsEntryBigDecimalFunction() {
         return g -> {
-            if (g.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.ASSETS) == 0 || g.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.INC) == 0 || g.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.EXP) == 0 && g.getCurrencyTo().getId().compareTo(g.getCurrencyFrom().getId()) != 0) {
-                if (fxMap == null) {
-                    fxMap = new HashMap<>();
-                }
-                BigDecimal rate = fxMap.get(g.getCurrencyTo().getId());
-                if (rate == null) {
-                    ExchangeRateService exchangeRateService = ContextProvider.getBean(ExchangeRateService.class);
-                    try {
-                        rate = exchangeRateService.exchange( g.getCurrencyFrom().getCode(),g.getCurrencyTo().getCode(), Long.valueOf(business), "b",LocalDate.now(), AuthenticatedUser.token());
-                        fxMap.put(g.getCurrencyTo().getId(), rate);
-
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                BigDecimal multiply = rate.multiply(g.getAccount().getAccountType().getType().getPlusMin(g.getDebCred()).compareTo(TransactionType.WITHDRAWAL) == 0//
-                        ? g.getConvertedAmount().multiply(BigDecimal.valueOf(-1)) : g.getConvertedAmount());
-                return multiply;
-            }
+//            if (g.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.ASSETS) == 0 || g.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.INC) == 0 || g.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.EXP) == 0 && g.getCurrencyTo().getId().compareTo(g.getCurrencyFrom().getId()) != 0) {
+//                if (fxMap == null) {
+//                    fxMap = new HashMap<>();
+//                }
+//                BigDecimal rate = fxMap.get(g.getCurrencyTo().getId());
+//                if (rate == null) {
+//                    ExchangeRateService exchangeRateService = ContextProvider.getBean(ExchangeRateService.class);
+//                    try {
+//                        rate = exchangeRateService.exchange( g.getCurrencyFrom().getCode(),g.getCurrencyTo().getCode(), Long.valueOf(business), "b",LocalDate.now(), AuthenticatedUser.token());
+//                        fxMap.put(g.getCurrencyTo().getId(), rate);
+//
+//                    } catch (IOException e) {
+//                        throw new RuntimeException(e);
+//                    }
+//                }
+//                BigDecimal multiply = rate.multiply(g.getAccount().getAccountType().getType().getPlusMin(g.getDebCred()).compareTo(TransactionType.WITHDRAWAL) == 0//
+//                        ? g.getConvertedAmount().multiply(BigDecimal.valueOf(-1)) : g.getConvertedAmount());
+//                return multiply;
+//            }
             BigDecimal bigDecimal = g.getAccount().getAccountType().getType().getPlusMin(g.getDebCred()).compareTo(TransactionType.WITHDRAWAL) == 0//
                     ? g.getAmount().multiply(BigDecimal.valueOf(-1)) : g.getAmount();
             return bigDecimal;

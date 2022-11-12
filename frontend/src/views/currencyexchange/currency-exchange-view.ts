@@ -3,12 +3,13 @@ import '@vaadin/form-layout/src/vaadin-form-layout.js';
 import '@vaadin/vertical-layout/src/vaadin-vertical-layout.js';
 import '@vaadin/vaadin-ordered-layout/src/vaadin-vertical-layout.js';
 import '@vaadin/form-layout/src/vaadin-form-item.js';
-import '@vaadin/flow-frontend/vaadin-big-decimal-field.js';
 import '@vaadin/horizontal-layout/src/vaadin-horizontal-layout.js';
-import '@vaadin/button/src/vaadin-button.js';
 import '@vaadin/tabs/src/vaadin-tabs.js';
-import '@vaadin/date-picker/src/vaadin-date-picker.js';
 import '@vaadin/select/src/vaadin-select.js';
+import '@vaadin/flow-frontend/vaadin-big-decimal-field.js';
+import '@vaadin/button/src/vaadin-button.js';
+import '@vaadin/scroller/src/vaadin-scroller.js';
+import '@vaadin/date-picker/src/vaadin-date-picker.js';
 
 @customElement('currency-exchange-view')
 export class CurrencyExchangeView extends LitElement {
@@ -62,25 +63,26 @@ export class CurrencyExchangeView extends LitElement {
     <div id="rate-grid-layout" style="align-self: stretch;"></div>
    </vaadin-vertical-layout>
   </vaadin-vertical-layout>
-  <vaadin-vertical-layout theme="spacing" colspan="1" style="height: 100%;">
-   <vaadin-vertical-layout theme="spacing" class="my-cart-white shadow-s" style="height: 100%; padding: var(--lumo-space-m); margin: var(--lumo-space-s); align-self: stretch;" colspan="1">
+  <vaadin-vertical-layout theme="spacing" colspan="1" style="height: 100%; margin: var(--lumo-space-s);" class="my-cart-white shadow-s">
+   <vaadin-scroller theme="spacing" style="height: 100%; align-self: stretch; padding: var(--lumo-space-m); margin: var(--lumo-space-s);" colspan="1">
     <h3 style="margin: 0px;">Exchange currencies</h3>
     <vaadin-date-picker id="date-fld" style="align-self: stretch;"></vaadin-date-picker>
     <vaadin-select value="Item one" id="from-cur-fld" style="width: 100%;" label="From" placeholder="Select currency" required></vaadin-select>
     <vaadin-select id="from-account-fld" style="width: 100%;" placeholder="Select account" required></vaadin-select>
-    <vaadin-select value="Item one" id="payment-method-from" style="align-self: stretch;" required></vaadin-select>
+    <vaadin-select value="Item one" id="payment-method-from" style="align-self: stretch; width: 100%;" required></vaadin-select>
     <vaadin-button id="flip-btn" style="align-self: center;" tabindex="0"></vaadin-button>
     <vaadin-select value="Item one" style="width: 100%;" label="To" id="to-cur-fld" placeholder="Select currency" required></vaadin-select>
-    <vaadin-select value="Item one" id="to-account-fld" style="align-self: stretch;" placeholder="Select account" required></vaadin-select>
+    <vaadin-select value="Item one" id="to-account-fld" style="align-self: stretch; width: 100%;" placeholder="Select account" required></vaadin-select>
     <vaadin-select value="Item one" id="payment-method-to" style="width: 100%;" required></vaadin-select>
     <div id="radio-div" style="align-self: center;"></div>
     <vaadin-big-decimal-field id="amount-fld" style="width: 100%;"></vaadin-big-decimal-field>
-    <vaadin-big-decimal-field id="fx-fld" style="align-self: stretch; width: 100%;" label="Exchange rate"></vaadin-big-decimal-field>
+    <vaadin-big-decimal-field id="fx-fld" style="width: 100%;" label="Exchange rate"></vaadin-big-decimal-field>
+    <vaadin-big-decimal-field id="prev-fx-fld" style="width: 100%;" label="Previous exchange rate"></vaadin-big-decimal-field>
     <vaadin-big-decimal-field id="converted-amount-fld" style="width: 100%;"></vaadin-big-decimal-field>
     <vaadin-button id="exchange-btn" style="margin-left:auto;" tabindex="0" theme="primary">
       Exchange 
     </vaadin-button>
-   </vaadin-vertical-layout>
+   </vaadin-scroller>
   </vaadin-vertical-layout>
  </vaadin-form-layout>
 </vaadin-vertical-layout>
