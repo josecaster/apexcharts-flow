@@ -387,8 +387,8 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
         });
 
 //        productservicesRadio.addValueChangeListener(f -> {
-        CallbackDataProvider<ProductOrService, String> dataProvider = null;
-        DataProvider<ProductOrServiceGrid, Void> dataProviderGrid = null;
+//        CallbackDataProvider<ProductOrService, String> dataProvider = null;
+//        DataProvider<ProductOrServiceGrid, Void> dataProviderGrid = null;
 //            if (f.getValue().compareTo(Radio.PRODUCTS) == 0) {
 //                filterCmb.setPlaceholder("Filter products");
 //
@@ -399,12 +399,20 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
         filterCmb.setPlaceholder("Filter services");
 
 
-        dataProvider = DataProviders.getServices(business);
-        dataProviderGrid = DataProviders.getServicesGrid(business);
+//        dataProvider = DataProviders.getServices(business);
+//        dataProviderGrid = DataProviders.getServicesGrid(business);
 //            }
 //
-        filterCmb.setItems(dataProvider);
-        grid.setItems(dataProviderGrid);
+//        filterCmb.setItems(dataProvider);
+//        grid.setItems(dataProviderGrid);
+        ServicesVO vo = new ServicesVO();
+        vo.setBusiness(Long.valueOf(business));
+        ItemsService productService = ContextProvider.getBean(ItemsService.class);
+        List<Items> list1 = productService.list(AuthenticatedUser.token(), vo).getResult();
+        List<ProductOrService> list = list1.stream().map(ProductOrService::new).collect(Collectors.toList());
+
+        List<ProductOrServiceGrid> list2 = DataProviders.toGrid(list);
+        grid.setItems(list2);
 //        });
 
 //        productservicesRadio.setValue(Radio.SERVICES);

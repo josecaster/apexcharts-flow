@@ -36,13 +36,14 @@ public class ItemsService extends MyController {
         });
     }
 
-    public PagingResult<Items> list(String accessToken, Long businessId) {
+    public PagingResult<Items> list(String accessToken, ServicesVO vo) {
         RestTemplate restTemplate = new RestTemplate();
-        String fooResourceUrl = configProperties.getRest() + Routes.ITEMS_LIST + "?businessId=" + businessId;
-        HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
+        String body = new GsonBuilder().registerTypeAdapter(LocalDate.class, new LocalDateAdapter()).create().toJson(vo);
+        String fooResourceUrl = configProperties.getRest() + Routes.ITEMS_LIST;
+        HttpEntity<String> httpEntity = getAuthHttpEntity(body,accessToken);
 
         return encapsulate(() -> {
-            ResponseEntity<String> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, String.class);
+            ResponseEntity<String> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.POST, httpEntity, String.class);
             String content = exchange.getBody();
             Type collectionType = new TypeToken<PagingResult<Items>>(){}.getType();
             PagingResult<Items> myJson = new GsonBuilder().registerTypeAdapter(LocalDate.class, new LocalDateAdapter()).registerTypeAdapter(byte[].class, new ByteArrayAdapter())

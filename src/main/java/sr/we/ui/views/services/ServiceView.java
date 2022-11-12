@@ -22,6 +22,8 @@ import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.ServicesPrivilege;
 import sr.we.ui.components.BreadCrumb;
 import sr.we.ui.views.MainLayout;
+import sr.we.ui.views.currencyexchange.CurrencyExchangeDataProvider;
+import sr.we.ui.views.pos.DataProviders;
 
 import javax.annotation.security.RolesAllowed;
 import java.util.*;
@@ -106,8 +108,8 @@ public class ServiceView extends LitTemplate implements BeforeEnterObserver {
         business1.ifPresent(s -> business = s);
 
         ItemsService itemsService = ContextProvider.getBean(ItemsService.class);
-        List<Items> list = itemsService.list(AuthenticatedUser.token(), Long.valueOf(business)).getResult();
-        grid.setItems(list);
+//        List<Items> list = itemsService.list(AuthenticatedUser.token(), Long.valueOf(business)).getResult();
+        grid.setItems(DataProviders.getItems(business));
     }
 
 }
