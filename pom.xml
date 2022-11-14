@@ -18,7 +18,8 @@
 
     <properties>
         <java.version>17</java.version>
-        <vaadin.version>23.1.13</vaadin.version>
+        <vaadin.version>23.2.8</vaadin.version>
+        <!--<vaadin.version>23.1.13</vaadin.version>-->
         <functionaljava.version>5.0</functionaljava.version>
     </properties>
 
@@ -70,6 +71,16 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.vaadin.addons.yuri0x7c1.bslayout</groupId>
+            <artifactId>bs-layout</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.appreciated</groupId>
+            <artifactId>apexcharts</artifactId>
+            <version>2.0.0-beta12</version>
+        </dependency>
+        <dependency>
             <groupId>org.vaadin.addons.HTMLtoCANVAS</groupId>
             <artifactId>HTMLtoCANVAS</artifactId>
             <version>1.0.0</version>
@@ -78,6 +89,20 @@
             <groupId>org.vaadin.addons.stefan</groupId>
             <artifactId>clipboard</artifactId>
             <version>1.0.2</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>vaadin-board-flow</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>vaadin-grid-pro-flow</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>vaadin-charts-flow</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.oracle.database.jdbc</groupId>
@@ -280,14 +305,14 @@
             <artifactId>so-charts</artifactId>
             <version>3.0.0</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-board-flow</artifactId>
-        </dependency>
-        <dependency>
+        </dependency>-->
+        <!--<dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-charts-flow</artifactId>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>com.infraleap</groupId>
             <artifactId>animate-css</artifactId>

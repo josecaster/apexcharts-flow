@@ -3,9 +3,6 @@ package sr.we.demo.overview;
 
 import com.storedobject.chart.SOChart;
 import com.vaadin.flow.component.Component;
-//import com.vaadin.flow.component.board.Board;
-//import com.vaadin.flow.component.charts.Chart;
-//import com.vaadin.flow.component.charts.model.*;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -59,7 +56,7 @@ public class OverviewView /*extends Main*/ {
         Icon i = icon.create();
         i.addClassNames("box-border", "p-xs");
 
-        Span badge = new Span(i, new Span(prefix + percentage.toString()));
+        Span badge = new Span(i, new Span(prefix + percentage));
         badge.getElement().getThemeList().add(theme);
 
         VerticalLayout layout = new VerticalLayout(h2, span, badge);

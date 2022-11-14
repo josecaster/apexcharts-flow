@@ -3,8 +3,6 @@ package sr.we.ui.views.pos;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.board.Board;
-import com.vaadin.flow.component.board.Row;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -26,14 +24,15 @@ import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.provider.CallbackDataProvider;
-import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import org.vaadin.addons.yuri0x7c1.bslayout.BsColumn;
+import org.vaadin.addons.yuri0x7c1.bslayout.BsLayout;
+import org.vaadin.addons.yuri0x7c1.bslayout.BsRow;
 import sr.we.ContextProvider;
 import sr.we.data.controller.*;
 import sr.we.demo.about.AboutView;
@@ -632,26 +631,35 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
     }
 
     private Component rowBoard(ProductOrServiceGrid productOrServiceGrid) {
-        Board board = new Board();
-        Row row = board.addRow();
+        BsLayout board = new BsLayout();
+        BsRow row = board.addRow();
+
         if (productOrServiceGrid.getOne() != null) {
-            row.add(itemCard(productOrServiceGrid.getOne()));
+            BsColumn column = row.addColumn().withSize(BsColumn.Size.XS);
+            column.addClassNames(LumoUtility.Margin.SMALL, LumoUtility.BoxShadow.XSMALL);
+            column.add(itemCard(productOrServiceGrid.getOne()));
         }
         if (productOrServiceGrid.getTwo() != null) {
-            row.add(itemCard(productOrServiceGrid.getTwo()));
+            BsColumn column = row.addColumn().withSize(BsColumn.Size.XS);
+            column.addClassNames(LumoUtility.Margin.SMALL, LumoUtility.BoxShadow.XSMALL);
+            column.add(itemCard(productOrServiceGrid.getTwo()));
         }
         if (productOrServiceGrid.getThree() != null) {
-            row.add(itemCard(productOrServiceGrid.getThree()));
+            BsColumn column = row.addColumn().withSize(BsColumn.Size.XS);
+            column.addClassNames(LumoUtility.Margin.SMALL, LumoUtility.BoxShadow.XSMALL);
+            column.add(itemCard(productOrServiceGrid.getThree()));
         }
         if (productOrServiceGrid.getFour() != null) {
-            row.add(itemCard(productOrServiceGrid.getFour()));
+            BsColumn column = row.addColumn().withSize(BsColumn.Size.XS);
+            column.addClassNames(LumoUtility.Margin.SMALL, LumoUtility.BoxShadow.XSMALL);
+            column.add(itemCard(productOrServiceGrid.getFour()));
         }
         return board;
     }
 
     public Component itemCard(ProductOrService productOrService) {
         VerticalLayout layout = new VerticalLayout();
-        layout.setClassName("my-cart-base");
+//        layout.setClassName("my-cart-base");
         UI current = UI.getCurrent();
         layout.addClickListener(f -> {
             itemsGrid.addItem(productOrService);
@@ -664,8 +672,7 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
         Items items = productOrService.getServices();
         String value = items.getId().toString();
         String title = items.getName();
-        double procent =
-                (items.getPrice() == null ? 0D : items.getPrice().doubleValue());
+        double procent = (items.getPrice() == null ? 0D : items.getPrice().doubleValue());
 
 
         H5 h2 = new H5(title);

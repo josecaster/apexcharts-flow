@@ -36,7 +36,7 @@ import sr.we.ui.components.BreadCrumb;
 import sr.we.ui.views.account.ChartOfAccountsView;
 import sr.we.ui.views.business.BusinessView;
 import sr.we.ui.views.currencyexchange.CurrencyExchangeView;
-import sr.we.ui.views.customers.CustomersView;
+import sr.we.ui.views.customers.CustomerView;
 import sr.we.ui.views.dashboard.DashboardView;
 import sr.we.ui.views.finance.loanrequests.RequestsView;
 import sr.we.ui.views.finance.loans.LoanView;
@@ -369,16 +369,16 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
         }
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(CustomerPrivilege.class), Privileges.READ)) {
             //current.access(() -> {
-            MenuItemInfo customers = new MenuItemInfo(getTranslation("sr.we.customers"), "icons/menus/icons8_customer_48px.png", CustomersView.class);
+            MenuItemInfo customers = new MenuItemInfo(getTranslation("sr.we.customers"), "icons/menus/icons8_customer_48px.png", CustomerView.class);
             list.add(customers);
 //            });
         }
-        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(PaymentsPrivilege.class), Privileges.INSERT)) {
-            //current.access(() -> {
-            MenuItemInfo transactions = new MenuItemInfo("Payments", "icons/menus/icons8_payment_history_48px.png", PaymentsView.class);
-            list.add(transactions);
-//            });
-        }
+//        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(PaymentsPrivilege.class), Privileges.INSERT)) {
+//            //current.access(() -> {
+//            MenuItemInfo transactions = new MenuItemInfo("Payments", "icons/menus/icons8_payment_history_48px.png", PaymentsView.class);
+//            list.add(transactions);
+////            });
+//        }
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(TransactionsPrivilege.class), Privileges.READ)) {
             //current.access(() -> {
             MenuItemInfo transactions = new MenuItemInfo("Transactions", "icons/menus/icons8_transaction_48px.png", TransactionsView.class);

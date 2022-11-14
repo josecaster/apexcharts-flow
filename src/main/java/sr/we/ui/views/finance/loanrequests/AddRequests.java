@@ -2,7 +2,6 @@ package sr.we.ui.views.finance.loanrequests;
 
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.board.Board;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -17,6 +16,9 @@ import com.vaadin.flow.dom.ThemeList;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.RouteParam;
 import com.vaadin.flow.router.RouteParameters;
+import org.vaadin.addons.yuri0x7c1.bslayout.BsColumn;
+import org.vaadin.addons.yuri0x7c1.bslayout.BsLayout;
+import org.vaadin.addons.yuri0x7c1.bslayout.BsRow;
 import sr.we.ContextProvider;
 import sr.we.data.controller.LoanRequestService;
 import sr.we.security.AuthenticatedUser;
@@ -250,7 +252,7 @@ public class AddRequests extends LitTemplate {
             loanRequest = loanRequestService.get(loanRequest.getId(), token);
             current.access(() -> {
                 boardLayout.removeAll();
-                Board board = new Board();
+                BsLayout board = new BsLayout();
                 boardLayout.add(board);
 
                 long reduce = 0L;
@@ -264,7 +266,7 @@ public class AddRequests extends LitTemplate {
                 Highlight initial_frequency = new Highlight("Initial Frequency", () -> loanRequest.getFreq().getCaption() + " " + loanRequest.getFreqVal().doubleValue(), () -> (double) finalReduce);
                 Highlight intrest = new Highlight("Intrest", () -> loanRequest.getIntrest() == null ? Constants.CURRENCY_FORMAT.format(0) : Constants.CURRENCY_FORMAT.format(loanRequest.getIntrest()), () -> null);
                 Highlight balance = new Highlight("Balance", () -> loanRequest.getBalance() == null ? Constants.CURRENCY_FORMAT.format(0) : Constants.CURRENCY_FORMAT.format(loanRequest.getBalance()), () -> loanRequest.getTransactionBalance() == null ? null : loanRequest.getTransactionBalance().doubleValue());
-                board.addRow(principal, initial_frequency, intrest, balance);
+                board.withRows(new BsRow().withColumns(new BsColumn(principal).withSize(BsColumn.Size.XS), new BsColumn(initial_frequency).withSize(BsColumn.Size.XS), new BsColumn(intrest).withSize(BsColumn.Size.XS), new BsColumn(balance).withSize(BsColumn.Size.XS)));
             });
         }).start();
 

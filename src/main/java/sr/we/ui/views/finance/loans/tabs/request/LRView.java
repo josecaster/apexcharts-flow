@@ -6,7 +6,6 @@ import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.accordion.AccordionPanel;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.avatar.AvatarVariant;
-import com.vaadin.flow.component.board.Board;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.details.DetailsVariant;
@@ -20,6 +19,9 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.*;
 import org.apache.commons.lang3.StringUtils;
+import org.vaadin.addons.yuri0x7c1.bslayout.BsColumn;
+import org.vaadin.addons.yuri0x7c1.bslayout.BsLayout;
+import org.vaadin.addons.yuri0x7c1.bslayout.BsRow;
 import sr.we.ContextProvider;
 import sr.we.data.controller.LoanRequestService;
 import sr.we.data.controller.UserAccessService;
@@ -70,10 +72,6 @@ public class LRView extends VerticalLayout implements BeforeEnterObserver {
 
     private LoanRequest loanRequest;
 
-    public static String getLocation(String business, String loan) {
-        return LoansView.getLocation(business, loan) + "/requests-overview";
-    }
-
     public LRView() {
         header = new H2();
 
@@ -112,6 +110,10 @@ public class LRView extends VerticalLayout implements BeforeEnterObserver {
 
     }
 
+    public static String getLocation(String business, String loan) {
+        return LoansView.getLocation(business, loan) + "/requests-overview";
+    }
+
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         UserAccessService userAccesService = ContextProvider.getBean(UserAccessService.class);
@@ -145,7 +147,7 @@ public class LRView extends VerticalLayout implements BeforeEnterObserver {
         BigDecimal amount = loanRequest.getAmount();
         LoanRequest.Status status = loanRequest.getStatus();
 
-        header.setText(customer.getName() + (StringUtils.isBlank(customer.getFirstName()) ? "" : " "+ customer.getFirstName()));
+        header.setText(customer.getName() + (StringUtils.isBlank(customer.getFirstName()) ? "" : " " + customer.getFirstName()));
         currency.setText(amount == null ? "" : amount.toPlainString());
         dodo(loanRequestService, status, false);
 
@@ -305,7 +307,7 @@ public class LRView extends VerticalLayout implements BeforeEnterObserver {
     private void payments(LoanRequestService loanRequestService, HasComponents layout) {
         List<LoanRequestPlan> loanRequestPlans = loanRequestService.listPlan(AuthenticatedUser.token(), loanRequest.getId()).getResult();
         layout.removeAll();
-        Board board = new Board();
+        BsLayout board = new BsLayout();
         layout.add(board);
 
         Long reduce = 0l;
@@ -318,7 +320,7 @@ public class LRView extends VerticalLayout implements BeforeEnterObserver {
         Highlight initial_frequency = new Highlight("Initial Frequency", () -> loanRequest.getFreq().getCaption() + " " + loanRequest.getFreqVal().doubleValue(), () -> finalReduce.doubleValue());
         Highlight intrest = new Highlight("Intrest", () -> loanRequest.getIntrest() == null ? Constants.CURRENCY_FORMAT.format(0) : Constants.CURRENCY_FORMAT.format(loanRequest.getIntrest()), () -> null);
         Highlight balance = new Highlight("Balance", () -> loanRequest.getBalance() == null ? Constants.CURRENCY_FORMAT.format(0) : Constants.CURRENCY_FORMAT.format(loanRequest.getBalance()), () -> loanRequest.getTransactionBalance() == null ? null : loanRequest.getTransactionBalance().doubleValue());
-        board.addRow(principal, initial_frequency, intrest, balance);
+        board.withRows(new BsRow().withColumns(new BsColumn(principal).withSize(BsColumn.Size.XS), new BsColumn(initial_frequency).withSize(BsColumn.Size.XS), new BsColumn(intrest).withSize(BsColumn.Size.XS), new BsColumn(balance).withSize(BsColumn.Size.XS)));
 
 
         LineAwesomeIcon lineAwesomeIcon = new LineAwesomeIcon("la la-plus");
@@ -530,11 +532,11 @@ public class LRView extends VerticalLayout implements BeforeEnterObserver {
         div.add(avatar);
 
 //        div.add(new Paragraph("It’s a place where you can grow your own UI 🤗"));
-        Board board = new Board();
-        board.addRow(new Highlight("Open loan requests", () -> "3", () -> 80.0), //
-                new Highlight("Closed loans", () -> "2", () -> 100.0), //
-                new Highlight("Approved loans", () -> "3", () -> 80.0), //
-                new Highlight("Declined loans", () -> "0", () -> 0.0));
+        BsLayout board = new BsLayout();
+        board.withRows(new BsRow().withColumns(new BsColumn(new Highlight("Open loan requests", () -> "3", () -> 80.0)), //
+                new BsColumn(new Highlight("Closed loans", () -> "2", () -> 100.0)), //
+                new BsColumn(new Highlight("Approved loans", () -> "3", () -> 80.0)), //
+                new BsColumn(new Highlight("Declined loans", () -> "0", () -> 0.0))));
         div.add(board);
 
 

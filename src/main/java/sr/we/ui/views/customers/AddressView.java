@@ -64,6 +64,8 @@ public class AddressView extends FormLayout {
 
     public CustomerAddressVO getCustomerAddressVO() {
         customerAddressVO = new CustomerAddressVO();
+        customerAddressVO.setNew(customerAddress == null);
+        customerAddressVO.setId(customerAddress == null ? null : customerAddress.getId());
         customerAddressVO.setAddress(addressFld.getValue());
         customerAddressVO.setAddress2(address2Fld.getValue());
         customerAddressVO.setCountry(countrySelect.getOptionalValue().isPresent() ? countrySelect.getOptionalValue().get().getId() : null);
@@ -75,6 +77,9 @@ public class AddressView extends FormLayout {
 
     public void setCustomerAddress(CustomerAddress customerAddress) {
         this.customerAddress = customerAddress;
+        if(customerAddress == null){
+            return;
+        }
         clear();
         if (StringUtils.isNotBlank(customerAddress.getAddress())) //
             addressFld.setValue(customerAddress.getAddress());

@@ -49,6 +49,8 @@ public class ContactView extends FormLayout {
 
     public CustomerContactVO getCustomerContactVO() {
         customerContactVO = new CustomerContactVO();
+        customerContactVO.setNew(customerContact == null);
+        customerContactVO.setId(customerContact == null ? null : customerContact.getId());
         customerContactVO.setName(firstnameField.getValue());
         customerContactVO.setName(lastnameField.getValue());
         customerContactVO.setEmail(emailField.getValue());
@@ -59,6 +61,9 @@ public class ContactView extends FormLayout {
 
     public void setCustomerContact(CustomerContact customerContact) {
         this.customerContact = customerContact;
+        if(customerContact == null){
+            return;
+        }
         clear();
         if (StringUtils.isNotBlank(customerContact.getName())) //
             firstnameField.setValue(customerContact.getName());

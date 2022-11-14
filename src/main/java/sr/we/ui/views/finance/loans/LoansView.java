@@ -2,7 +2,6 @@ package sr.we.ui.views.finance.loans;
 
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.board.Board;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.menubar.MenuBar;
@@ -37,11 +36,6 @@ public class LoansView extends VerticalLayout implements RouterLayout, HasDynami
     private final Span currency;
     private String business;
     private Loan loan;
-    private Board board;
-
-    public static String getLocation(String business, String loan) {
-        return MainLayout.getLocation(business) + "/view-loan/" + loan;
-    }
 
     public LoansView() {
         addClassName("loans-view");
@@ -66,10 +60,14 @@ public class LoansView extends VerticalLayout implements RouterLayout, HasDynami
         add(menus);
     }
 
+    public static String getLocation(String business, String loan) {
+        return MainLayout.getLocation(business) + "/view-loan/" + loan;
+    }
+
     private void settings(MenuBar menus) {
         UserAccessService userAccesService = ContextProvider.getBean(UserAccessService.class);
         boolean hasAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new LoanAssetsPrivilege(), Privileges.READ);
-        if(!hasAccess){
+        if (!hasAccess) {
             return;
         }
         menus.addItem(getTranslation("sr.we.settings"), e -> {
@@ -85,7 +83,7 @@ public class LoansView extends VerticalLayout implements RouterLayout, HasDynami
     private void customers(MenuBar menus) {
         UserAccessService userAccesService = ContextProvider.getBean(UserAccessService.class);
         boolean hasAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new CustomerPrivilege(), Privileges.READ);
-        if(!hasAccess){
+        if (!hasAccess) {
             return;
         }
         menus.addItem(getTranslation("sr.we.customers"), e -> {
@@ -101,7 +99,7 @@ public class LoansView extends VerticalLayout implements RouterLayout, HasDynami
     private void payments(MenuBar menus) {
         UserAccessService userAccesService = ContextProvider.getBean(UserAccessService.class);
         boolean hasAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new TransactionsPrivilege(), Privileges.READ);
-        if(!hasAccess){
+        if (!hasAccess) {
             return;
         }
         menus.addItem(getTranslation("sr.we.payments"), e -> {
@@ -117,7 +115,7 @@ public class LoansView extends VerticalLayout implements RouterLayout, HasDynami
     private void newRequests(MenuBar menus) {
         UserAccessService userAccesService = ContextProvider.getBean(UserAccessService.class);
         boolean hasAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new LoanRequestPrivilege(), Privileges.READ);
-        if(!hasAccess){
+        if (!hasAccess) {
             return;
         }
         menus.addItem(getTranslation("sr.we.new.requests"), e -> {
@@ -133,7 +131,7 @@ public class LoansView extends VerticalLayout implements RouterLayout, HasDynami
     private void dashboard(MenuBar menus) {
         UserAccessService userAccesService = ContextProvider.getBean(UserAccessService.class);
         boolean hasAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new LoanReportPrivilege(), Privileges.READ);
-        if(!hasAccess){
+        if (!hasAccess) {
             return;
         }
         menus.addItem(getTranslation("sr.we.dashboard"), e -> {
@@ -157,7 +155,7 @@ public class LoansView extends VerticalLayout implements RouterLayout, HasDynami
     public void beforeEnter(BeforeEnterEvent event) {
         UserAccessService userAccesService = ContextProvider.getBean(UserAccessService.class);
         boolean hasAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new LoanPrivilege(), Privileges.READ);
-        if(!hasAccess){
+        if (!hasAccess) {
             UI.getCurrent().navigate(AboutView.class);
         }
         RouteParameters routeParameters = event.getRouteParameters();

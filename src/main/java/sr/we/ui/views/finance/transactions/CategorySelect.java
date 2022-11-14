@@ -47,7 +47,7 @@ public class CategorySelect extends Select<TransactionCategory> {
 
         AccountVO accountVO = new AccountVO();
         accountVO.setBusiness(businessId);
-//        accountVO.setCurrency(0L);
+        accountVO.setCurrency(0L);
 
         List<TransactionCategory> incomeAccounts = accounts(Reference.INC, accountVO);
         List<TransactionCategory> assetAccounts = accounts(Reference.ASSETS, accountVO);

@@ -79,8 +79,8 @@ public abstract class StateListenerLayout extends Scroller {
         saveBtn.setEnabled(enable);
         stateChanged = enable;
         if (enable) {
-            saveBtn.focus();
-            saveBtn.scrollIntoView();
+//            saveBtn.focus();
+//            saveBtn.scrollIntoView();
         }
     }
 
