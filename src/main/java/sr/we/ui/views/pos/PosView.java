@@ -48,6 +48,7 @@ import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.ui.components.BreadCrumb;
 import sr.we.ui.components.MyDialog;
 import sr.we.ui.views.MainLayout;
+import sr.we.ui.views.ReRouteLayout;
 import sr.we.ui.views.finance.loanrequests.CustomerCmb;
 import sr.we.ui.views.finance.transactions.TransactionDialog;
 import sr.we.ui.views.invoice.ItemGrid;
@@ -725,6 +726,14 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
             BigDecimalField cashFld = new BigDecimalField();
             formLayout.addFormItem(cashFld, "Starting cash");
             dialog.add(formLayout);
+
+
+            com.vaadin.flow.component.button.Button cancelButton = new com.vaadin.flow.component.button.Button("Cancel", e -> {
+                UI.getCurrent().navigate(ReRouteLayout.class);
+                dialog.close();
+            });
+            dialog.getFooter().add(cancelButton);
+
             Button startBtn = new Button("Start");
             startBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
             startBtn.getElement().getStyle().set("margin-left", "auto");

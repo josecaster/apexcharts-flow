@@ -3,6 +3,7 @@ package sr.we.ui.views.currencyexchange;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -232,38 +233,46 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
         });
 
         addRateBtn.addClickListener(f -> {
-            ExchangeRateService productService = ContextProvider.getBean(ExchangeRateService.class);
-            String token = AuthenticatedUser.token();
+            ConfirmDialog confirmDialog = new ConfirmDialog();
+            confirmDialog.setHeader("Confirm addition exchange rate");
+            confirmDialog.setText("Are you sure that you want to add this exchange rate? ");
+            confirmDialog.setCancelable(true);
+            confirmDialog.addConfirmListener(g -> {
+                ExchangeRateService productService = ContextProvider.getBean(ExchangeRateService.class);
+                String token = AuthenticatedUser.token();
 
-            CurrencyExchangeVO currencyExchangeVO = new CurrencyExchangeVO();
-            currencyExchangeVO.setNew(true);
-            currencyExchangeVO.setCurrencyToId(currencyToSelect.getValue() == null ? null : currencyToSelect.getValue().getId());
-            currencyExchangeVO.setCurrencyFromId(currencyFromSelect.getValue() == null ? null : currencyFromSelect.getValue().getId());
+                CurrencyExchangeVO currencyExchangeVO = new CurrencyExchangeVO();
+                currencyExchangeVO.setNew(true);
+                currencyExchangeVO.setCurrencyToId(currencyToSelect.getValue() == null ? null : currencyToSelect.getValue().getId());
+                currencyExchangeVO.setCurrencyFromId(currencyFromSelect.getValue() == null ? null : currencyFromSelect.getValue().getId());
 
 
-            currencyExchangeVO.setAmountFrom(fromAmountFld.getValue());
-            currencyExchangeVO.setAmountTo(toAmountFld.getValue());
-            currencyExchangeVO.setBusinessId(businessId);
+                currencyExchangeVO.setAmountFrom(fromAmountFld.getValue());
+                currencyExchangeVO.setAmountTo(toAmountFld.getValue());
+                currencyExchangeVO.setBusinessId(businessId);
 
-            validate(currencyExchangeVO);
+                validate(currencyExchangeVO);
 
-            if (currencyExchangeVO.getCurrencyToId() == null || currencyExchangeVO.getCurrencyFromId() == null || currencyExchangeVO.getAmountTo() == null || currencyExchangeVO.getAmountFrom() == null) {
-                throw new ValidationException("Please fill in all the fields");
-            }
+                if (currencyExchangeVO.getCurrencyToId() == null || currencyExchangeVO.getCurrencyFromId() == null || currencyExchangeVO.getAmountTo() == null || currencyExchangeVO.getAmountFrom() == null) {
+                    throw new ValidationException("Please fill in all the fields");
+                }
 
-            if (currencyExchangeVO.getCurrencyToId().compareTo(currencyExchangeVO.getCurrencyFromId()) == 0) {
-                throw new ValidationException("Currencies cannot be the same");
-            }
-            productService.create(token, currencyExchangeVO);
+                if (currencyExchangeVO.getCurrencyToId().compareTo(currencyExchangeVO.getCurrencyFromId()) == 0) {
+                    throw new ValidationException("Currencies cannot be the same");
+                }
+                productService.create(token, currencyExchangeVO);
 
-            vaadinTabs.setSelectedTab(vaadinTab1);
-            refresh(token);
-            Notification notification = new Notification();
-            notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            notification.setText(getTranslation("sr.we.success"));
-            notification.setDuration(5000);
-            notification.setPosition(Notification.Position.MIDDLE);
-            notification.open();
+                vaadinTabs.setSelectedTab(vaadinTab1);
+                refresh(token);
+                Notification notification = new Notification();
+                notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                notification.setText(getTranslation("sr.we.success"));
+                notification.setDuration(5000);
+                notification.setPosition(Notification.Position.MIDDLE);
+                notification.open();
+            });
+            confirmDialog.open();
+
         });
 
         exchangeBtn.addClickListener(f -> {

@@ -45,7 +45,7 @@ export class CreateInvoiceView extends LitElement {
       <vaadin-text-field id="poso-number-fld" style="align-self: flex-end; "></vaadin-text-field>
      </vaadin-horizontal-layout>
      <vaadin-horizontal-layout theme="spacing" style="width: 400px;">
-      <label style="align-self: center; flex-shrink: 0; flex-grow: 1;text-align: end;">Payment date</label>
+      <label style="align-self: center; flex-shrink: 0; flex-grow: 1;text-align: end;">Invoice date</label>
       <vaadin-date-picker id="payment-date-fld" style="align-self: flex-end; "></vaadin-date-picker>
      </vaadin-horizontal-layout>
      <vaadin-horizontal-layout theme="spacing" style="width: 400px;">
