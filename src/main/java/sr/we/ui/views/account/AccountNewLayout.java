@@ -4,8 +4,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.router.RouteParam;
-import com.vaadin.flow.router.RouteParameters;
 import org.apache.commons.lang3.StringUtils;
 import sr.we.ContextProvider;
 import sr.we.data.controller.AccountService;
@@ -13,9 +11,9 @@ import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.helper.Executable;
 import sr.we.shekelflowcore.entity.helper.vo.AccountVO;
 import sr.we.ui.components.general.BankSelect;
-import sr.we.ui.views.StateListenerLayout;
 import sr.we.ui.components.general.BusinessCurrencySelect;
-import sr.we.ui.views.dashboard.DashboardView;
+import sr.we.ui.views.ReRouteLayout;
+import sr.we.ui.views.StateListenerLayout;
 
 public class AccountNewLayout extends StateListenerLayout {
 
@@ -31,7 +29,7 @@ public class AccountNewLayout extends StateListenerLayout {
     private String business;
 
     private String accountType;
-
+    private Executable executable;
 
     public AccountNewLayout() {
         layout = new FormLayout();
@@ -75,7 +73,7 @@ public class AccountNewLayout extends StateListenerLayout {
 
         currencyFld.setRequiredIndicatorVisible(true);
 
-        state(nameFld, accountId, currencyFld,bankSelect);
+        state(nameFld, accountId, currencyFld, bankSelect);
 
         layout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
     }
@@ -97,13 +95,11 @@ public class AccountNewLayout extends StateListenerLayout {
         redirectToParent();
     }
 
-    private Executable executable;
-
     private void redirectToParent() {
 //        QueryParameters queryParameters = QueryParameters.fromString("id=" + loan.getId());
 //        UI.getCurrent().navigate(LoansViewTabRequests.getLocation(business), queryParameters);
-        if(executable == null) {
-            UI.getCurrent().navigate(DashboardView.class, new RouteParameters(new RouteParam("business", business)));
+        if (executable == null) {
+            UI.getCurrent().navigate(ReRouteLayout.class);
         } else {
             executable.build();
         }
@@ -130,15 +126,12 @@ public class AccountNewLayout extends StateListenerLayout {
 //        if (accountId.isEmpty()) {
 //            return false;
 //        }
-        if (currencyFld.isEmpty()) {
-            return false;
-        }
-        return true;
+        return !currencyFld.isEmpty();
     }
 
     public void setBusiness(String business) {
         this.business = business;
-        if(StringUtils.isNotBlank(business)){
+        if (StringUtils.isNotBlank(business)) {
             bankSelect.load(Long.valueOf(business));
         }
     }

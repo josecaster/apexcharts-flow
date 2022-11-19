@@ -10,9 +10,12 @@ import sr.we.shekelflowcore.entity.Business;
 import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.entity.ThisUser;
 import sr.we.shekelflowcore.entity.helper.Token;
+import sr.we.shekelflowcore.security.PrivilegeModeAbstract;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.LoanReportPrivilege;
+import sr.we.shekelflowcore.security.privileges.TransactionsPrivilege;
 import sr.we.ui.views.dashboard.DashboardView;
+import sr.we.ui.views.dashboard.MainDashboardView;
 import sr.we.ui.views.login.NotActiveDialog;
 import sr.we.ui.views.person.PersonView;
 import sr.we.ui.views.personform.PersonFormView;
@@ -59,9 +62,9 @@ public class ReRouteLayout extends VerticalLayout implements BeforeEnterObserver
     public void beforeEnter(BeforeEnterEvent event) {
 
         AuthenticatedUser bean = ContextProvider.getBean(AuthenticatedUser.class);
-        Optional<ThisUser> thisUser = bean.get();
+        Optional<ThisUser> thisUser = AuthenticatedUser.get();
         if (!thisUser.isPresent()) {
-            bean.logout();
+            AuthenticatedUser.logout();
         }
 
         ThisUser thisUser1 = thisUser.get();
@@ -94,11 +97,18 @@ public class ReRouteLayout extends VerticalLayout implements BeforeEnterObserver
         Business business = businessService.get(null, AuthenticatedUser.token());
         Optional<Business> max = businesses.stream().filter(f -> f.getCounter().compareTo(0L) != 0).max(Comparator.comparingLong(Business::getCounter));
         UserAccessService userAccessService = ContextProvider.getBean(UserAccessService.class);
-        if(userAccessService.hasAccess(AuthenticatedUser.token(),new LoanReportPrivilege(), Privileges.READ)) {
+        if (userAccessService.hasAccess(AuthenticatedUser.token(), new LoanReportPrivilege(), Privileges.READ)) {
             if (business != null) {
                 event.forwardTo(DashboardView.class, new RouteParameters(new RouteParam("business", business.getId().toString())));
             } else {
                 event.forwardTo(DashboardView.class, new RouteParameters(new RouteParam("business", "0")));
+            }
+        }
+        if (userAccessService.hasAccess(AuthenticatedUser.token(), PrivilegeModeAbstract.getInstance(TransactionsPrivilege.class), Privileges.READ)) {
+            if (business != null) {
+                event.forwardTo(MainDashboardView.class, new RouteParameters(new RouteParam("business", business.getId().toString())));
+            } else {
+                event.forwardTo(MainDashboardView.class, new RouteParameters(new RouteParam("business", "0")));
             }
         } else {
             if (business != null) {

@@ -11,6 +11,7 @@ import sr.we.ui.views.account.ChartOfAccountsView;
 import sr.we.ui.views.currencyexchange.CurrencyExchangeView;
 import sr.we.ui.views.customers.CustomerView;
 import sr.we.ui.views.dashboard.DashboardView;
+import sr.we.ui.views.dashboard.MainDashboardView;
 import sr.we.ui.views.finance.loanrequests.RequestsView;
 import sr.we.ui.views.finance.loans.LoanView;
 import sr.we.ui.views.finance.transactions.TransactionsView;
@@ -44,6 +45,8 @@ public class MenuBuilder {
         UI current = UI.getCurrent();
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(LoanReportPrivilege.class), Privileges.READ)) {
             menu.addNaviItem(current.getTranslation("sr.we.dashboard"), "icons/menus/icons8_dashboard_48px.png", DashboardView.class);
+        } else if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(TransactionsPrivilege.class), Privileges.READ)){
+            menu.addNaviItem(current.getTranslation("sr.we.dashboard"), "icons/menus/icons8_dashboard_48px.png", MainDashboardView.class);
         }
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(LoanPrivilege.class), Privileges.READ)) {
             menu.addNaviItem(current.getTranslation("sr.we.loans"), "icons/menus/icons8_debt_48px.png", LoanView.class);

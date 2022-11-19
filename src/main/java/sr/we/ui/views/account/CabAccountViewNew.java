@@ -12,7 +12,7 @@ import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.enums.ChartOfAccountTypes;
 import sr.we.ui.components.MyDialog;
 import sr.we.ui.views.MainLayout;
-import sr.we.ui.views.dashboard.DashboardView;
+import sr.we.ui.views.ReRouteLayout;
 
 import javax.annotation.security.RolesAllowed;
 import java.util.Optional;
@@ -23,14 +23,8 @@ public class CabAccountViewNew extends VerticalLayout implements BeforeEnterObse
 
     private final Dialog dialog;
     private final AccountNewLayout loanRequestStateView;
-
-    public static String getLocation(String business) {
-        return MainLayout.getLocation(business) + "/cab-account-new";
-    }
     private String business;
     private Loan loan;
-
-
     public CabAccountViewNew() {
 
         loanRequestStateView = new AccountNewLayout();
@@ -50,10 +44,13 @@ public class CabAccountViewNew extends VerticalLayout implements BeforeEnterObse
 
     }
 
-    private void redirectToParent() {
-        UI.getCurrent().navigate(DashboardView.class, new RouteParameters(new RouteParam("business", business)));
+    public static String getLocation(String business) {
+        return MainLayout.getLocation(business) + "/cab-account-new";
     }
 
+    private void redirectToParent() {
+        UI.getCurrent().navigate(ReRouteLayout.class);
+    }
 
 
     @Override
