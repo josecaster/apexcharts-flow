@@ -11,8 +11,6 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.littemplate.LitTemplate;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
@@ -22,6 +20,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
 import sr.we.ContextProvider;
+import sr.we.CustomNotificationHandler;
 import sr.we.data.controller.ExchangeRateService;
 import sr.we.data.controller.UserAccessService;
 import sr.we.demo.about.AboutView;
@@ -33,6 +32,7 @@ import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.entity.helper.adapter.CurrencyExchangeBody;
 import sr.we.shekelflowcore.entity.helper.vo.CurrencyExchangeVO;
 import sr.we.shekelflowcore.enums.Reference;
+import sr.we.shekelflowcore.exception.SuccessThrowable;
 import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.CurrencyExchangePrivilege;
@@ -68,6 +68,7 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
     private final CurrencyExchangeVO filter;
     private final Tab vaadinTab;
     private final Tab vaadinTab2;
+    private final RadioButtonGroup<String> buySellGrp;
     @Id("rate-grid-layout")
     private Div rateGridLayout;
     @Id("add-rate-btn")
@@ -97,7 +98,6 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
     private CurrencySelect fromCurFld;
     @Id("to-cur-fld")
     private CurrencySelect toCurFld;
-    private final RadioButtonGroup<String> buySellGrp;
     @Id("fx-fld")
     private BigDecimalField fxFld;
     @Id("to-account-fld")
@@ -131,7 +131,7 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
         // You can initialise any data required for the connected UI components here.
         dateFld.setValue(LocalDate.now());
         dateFld.addValueChangeListener(f -> {
-           exchange();
+            exchange();
         });
 
 
@@ -155,7 +155,7 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
                 return;
             }
             if (f.isFromClient() && fxFld.getValue() != null) {
-                convertedAmountFld.setValue(f.getValue().divide(fxFld.getValue(),6, RoundingMode.HALF_UP));
+                convertedAmountFld.setValue(f.getValue().divide(fxFld.getValue(), 6, RoundingMode.HALF_UP));
             }
         });
         convertedAmountFld.addValueChangeListener(f -> {
@@ -264,12 +264,7 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
 
                 vaadinTabs.setSelectedTab(vaadinTab1);
                 refresh(token);
-                Notification notification = new Notification();
-                notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                notification.setText(getTranslation("sr.we.success"));
-                notification.setDuration(5000);
-                notification.setPosition(Notification.Position.MIDDLE);
-                notification.open();
+                CustomNotificationHandler.notify_(new SuccessThrowable());
             });
             confirmDialog.open();
 
@@ -309,12 +304,7 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
             fxFld.clear();
 
 
-            Notification notification = new Notification();
-            notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            notification.setText(getTranslation("sr.we.success"));
-            notification.setDuration(5000);
-            notification.setPosition(Notification.Position.MIDDLE);
-            notification.open();
+            CustomNotificationHandler.notify_(new SuccessThrowable());
         });
 
         currencyFromSelect.addValueChangeListener(f -> {
@@ -340,7 +330,7 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
         if (fromCurFld.getValue() != null && toCurFld.getValue() != null && dateFld.getValue() != null) {
             ExchangeRateService exchangeRateService = ContextProvider.getBean(ExchangeRateService.class);
             try {
-                exchange = exchangeRateService.exchangeResult(fromCurFld.getValue().getCode(), toCurFld.getValue().getCode(), businessId, buySellGrp.getValue().equalsIgnoreCase("Buy") ? "b" : "s",dateFld.getValue(), AuthenticatedUser.token());
+                exchange = exchangeRateService.exchangeResult(fromCurFld.getValue().getCode(), toCurFld.getValue().getCode(), businessId, buySellGrp.getValue().equalsIgnoreCase("Buy") ? "b" : "s", dateFld.getValue(), AuthenticatedUser.token());
                 fxFld.setValue(BigDecimal.valueOf(exchange.getRate()));
                 prevFxFld.setValue(BigDecimal.valueOf(exchange.getRate()));
             } catch (IOException e) {

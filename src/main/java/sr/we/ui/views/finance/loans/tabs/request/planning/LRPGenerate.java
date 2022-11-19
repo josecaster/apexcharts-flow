@@ -7,13 +7,13 @@ import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.H4;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.function.ValueProvider;
 import sr.we.ContextProvider;
+import sr.we.CustomNotificationHandler;
 import sr.we.data.controller.LoanRequestService;
 import sr.we.data.controller.UserAccessService;
 import sr.we.security.AuthenticatedUser;
@@ -22,6 +22,7 @@ import sr.we.shekelflowcore.entity.LoanRequestPlan;
 import sr.we.shekelflowcore.entity.helper.Executable;
 import sr.we.shekelflowcore.entity.helper.adapter.LoanRequestSchedulePlan;
 import sr.we.shekelflowcore.entity.helper.adapter.LoanRequestSchedulePlanDetail;
+import sr.we.shekelflowcore.exception.PrimaryThrowable;
 import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.LoanRequestPlanPrivilege;
@@ -54,7 +55,7 @@ public class LRPGenerate extends VerticalLayout {
             public LineAwesomeIcon apply(LoanRequestSchedulePlanDetail loanRequestPlanning) {
                 LineAwesomeIcon lineAwesomeIcon = new LineAwesomeIcon("la la-pencil");
                 lineAwesomeIcon.addClickListener(f -> {
-                    Notification.show("Payment recording");
+                    CustomNotificationHandler.notify_(new PrimaryThrowable("Payment Recording"));
                 });
                 return lineAwesomeIcon;
             }
@@ -125,7 +126,7 @@ public class LRPGenerate extends VerticalLayout {
 //        factorField.setValue(new FactorField.Value(Loan.FactorType.P, 100d));
 
         Button button = new Button("Generate planning");
-        button.addThemeVariants(ButtonVariant.LUMO_PRIMARY,ButtonVariant.LUMO_CONTRAST);
+        button.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_CONTRAST);
         UserAccessService userAccesService = ContextProvider.getBean(UserAccessService.class);
         boolean hasAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new LoanRequestPlanPrivilege(), Privileges.EXECUTE);
         button.setVisible(hasAccess);
@@ -133,7 +134,7 @@ public class LRPGenerate extends VerticalLayout {
 
         Button save = new Button("Save");
         save.setVisible(false);
-        save.addThemeVariants(ButtonVariant.LUMO_PRIMARY,ButtonVariant.LUMO_SUCCESS);
+        save.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
 //        hasAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new LoanRequestPlanPrivilege(), Privileges.INSERT);
 //        save.setVisible(hasAccess);
         horizontalLayout.add(save);
@@ -179,14 +180,14 @@ public class LRPGenerate extends VerticalLayout {
 //            FactorField.Value value = factorField.getValue();
             Double value = numberField.getValue();
             LocalDate value1 = datePicker.getValue();
-            if(value == null || value1 == null){
+            if (value == null || value1 == null) {
                 throw new ValidationException("Required fields are not filled");
             }
             loanRequestPlan = loanRequestService.generatePlanning(loanRequestPLanType.getValue(), value.longValue(), value1, checkbox.getValue(), loanRequest.getId(), AuthenticatedUser.token());
             List<LoanRequestSchedulePlanDetail> loanRequestPlannings = forPlan();
             if (loanRequestPlannings != null && !loanRequestPlannings.isEmpty()) {
                 boolean hasAccess2 = userAccesService.hasAccess(AuthenticatedUser.token(), new LoanRequestPlanPrivilege(), Privileges.INSERT);
-                if(hasAccess2) {
+                if (hasAccess2) {
                     save.setVisible(true);
                     button.setVisible(false);
                 }

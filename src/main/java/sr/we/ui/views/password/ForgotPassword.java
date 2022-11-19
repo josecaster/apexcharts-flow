@@ -8,7 +8,6 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
@@ -16,11 +15,12 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.flow.server.auth.AnonymousAllowed;
 import org.apache.commons.lang3.StringUtils;
 import sr.we.ContextProvider;
 import sr.we.CustomErrorHandler;
+import sr.we.CustomNotificationHandler;
 import sr.we.data.controller.UserService;
+import sr.we.shekelflowcore.exception.SuccessThrowable;
 import sr.we.ui.components.EmailAddress;
 import sr.we.ui.views.login.IntroView;
 import sr.we.ui.views.login.LoginView;
@@ -122,9 +122,8 @@ public class ForgotPassword extends VerticalLayout implements BeforeEnterObserve
             vo.password = passwordField.getValue();
             vo.temp = random;
             userService.reset(vo);
-            Notification.show("Password reset done");
+            CustomNotificationHandler.notify_(new SuccessThrowable("Password reset completed"));
             UI.getCurrent().navigate(LoginView.class);
-
         });
     }
 

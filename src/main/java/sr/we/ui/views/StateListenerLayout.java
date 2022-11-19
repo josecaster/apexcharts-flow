@@ -6,12 +6,12 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Hr;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import sr.we.CustomNotificationHandler;
+import sr.we.shekelflowcore.exception.SuccessThrowable;
 
 import java.util.Arrays;
 
@@ -39,17 +39,12 @@ public abstract class StateListenerLayout extends Scroller {
         actionLayout = new VerticalLayout(horizontalLayout);
         actionLayout.setPadding(false);
         actionLayout.setMargin(false);
-        setContent(new VerticalLayout(layout,new Hr(),actionLayout));
+        setContent(new VerticalLayout(layout, new Hr(), actionLayout));
         stateChanged(false, false);
 
         saveBtn.addClickListener(f -> {
             onSave();
-            Notification notification = new Notification();
-            notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            notification.setText(getTranslation("sr.we.success"));
-            notification.setDuration(5000);
-            notification.setPosition(Notification.Position.MIDDLE);
-            notification.open();
+            CustomNotificationHandler.notify_(new SuccessThrowable());
         });
         discardBtn.addClickListener(f -> onDiscard());
 

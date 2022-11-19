@@ -5,7 +5,6 @@ import com.vaadin.flow.component.html.Header;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.login.LoginI18n;
 import com.vaadin.flow.component.login.LoginOverlay;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.VaadinSession;
@@ -49,7 +48,7 @@ public class LoginView extends LoginOverlay implements BeforeLeaveObserver, Afte
         setForgotPasswordButtonVisible(true);
         addForgotPasswordListener(f -> {
             UI.getCurrent().navigate(IntroView.class);
-            if(isOpened()){
+            if (isOpened()) {
                 setOpened(false);
             }
         });
@@ -60,37 +59,37 @@ public class LoginView extends LoginOverlay implements BeforeLeaveObserver, Afte
     @Override
     public void beforeLeave(BeforeLeaveEvent beforeLeaveEvent) {
         AuthenticatedUser bean = ContextProvider.getBean(AuthenticatedUser.class);
-        Optional<ThisUser> thisUser = bean.get();
-        if(!thisUser.isPresent()){
+        Optional<ThisUser> thisUser = AuthenticatedUser.get();
+        if (!thisUser.isPresent()) {
             return;
         }
         ThisUser thisUser1 = thisUser.get();
         Token token = thisUser1.getToken();
-        SpringVaadinSession.getCurrent().setAttribute("Token",token.getToken());
+        SpringVaadinSession.getCurrent().setAttribute("Token", token.getToken());
     }
 
     @Override
     public void afterNavigation(AfterNavigationEvent event) {
         Map<String, List<String>> parameters = event.getLocation().getQueryParameters().getParameters();
         boolean isError = parameters.containsKey("error");
+        boolean isVerif = parameters.containsKey("verif");
+        if (isVerif) {
+            String verify = parameters.get("verif").get(0);
+            SpringVaadinSession.getCurrent().setAttribute("Verify", verify);
+        } else {
+            SpringVaadinSession.getCurrent().setAttribute("Verify", null);
+        }
         if (isError) {
             VaadinServletRequest vsr = VaadinServletRequest.getCurrent();
             HttpServletRequest req = vsr.getHttpServletRequest();
             javax.servlet.http.HttpSession sess = req.getSession();
             AuthenticationException ex = (AuthenticationException) sess.getAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
             if (ex == null) {
-            }
-            else {
-                Notification.show(ex.getMessage());
+            } else {
                 sess.removeAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);// already reported so clear
+                throw ex;
             }
         }
-        boolean isVerif = parameters.containsKey("verif");
-        if (isVerif) {
-            String verify = parameters.get("verif").get(0);
-            SpringVaadinSession.getCurrent().setAttribute("Verify",verify);
-        } else {
-            SpringVaadinSession.getCurrent().setAttribute("Verify",null);
-        }
+
     }
 }

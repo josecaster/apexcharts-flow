@@ -2,16 +2,15 @@ package sr.we.ui.views.login;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Hr;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import org.apache.commons.lang3.StringUtils;
 import sr.we.ContextProvider;
+import sr.we.CustomNotificationHandler;
 import sr.we.data.controller.UserService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Business;
+import sr.we.shekelflowcore.exception.PrimaryThrowable;
 import sr.we.ui.components.EmailAddress;
 import sr.we.ui.components.MyDialog;
 
@@ -49,7 +48,7 @@ public class ResetPasswordDialog extends Button {
         Button sendButton = new Button("Send email", e -> {
 
             String value = emailField.getValue();
-            if(StringUtils.isBlank(value)){
+            if (StringUtils.isBlank(value)) {
                 emailField.setInvalid(true);
                 return;
             }
@@ -62,13 +61,8 @@ public class ResetPasswordDialog extends Button {
                 UserService bean = ContextProvider.getBean(UserService.class);
                 bean.publishReset(emailField.getValue());
 
-                current.access(()->{
-                    Notification notification = new Notification();
-                    notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                    notification.setText("You will receive an email with further instructions");
-                    notification.setDuration(6000);
-                    notification.setPosition(Notification.Position.MIDDLE);
-                    notification.open();
+                current.access(() -> {
+                    CustomNotificationHandler.notify_(new PrimaryThrowable("You will receive an email with further instructions"));
                 });
             }).start();
             new Thread(() -> {
@@ -87,7 +81,7 @@ public class ResetPasswordDialog extends Button {
 
         });
         Button cancelButton = new Button("Cancel", e -> dialog.close());
-        dialog.getFooter().add(sendButton,cancelButton);
+        dialog.getFooter().add(sendButton, cancelButton);
         boolean clear = false;
         addClickListener(e -> dialog.open());
     }

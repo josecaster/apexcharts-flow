@@ -12,8 +12,6 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.formlayout.FormLayout.FormItem;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.littemplate.LitTemplate;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
@@ -35,6 +33,7 @@ import net.sf.jasperreports.engine.JRException;
 import org.apache.commons.lang3.StringUtils;
 import org.vaadin.addon.stefan.clipboard.ClientsideClipboard;
 import sr.we.ContextProvider;
+import sr.we.CustomNotificationHandler;
 import sr.we.data.controller.BusinessService;
 import sr.we.data.controller.InvoiceService;
 import sr.we.data.controller.UserAccessService;
@@ -45,6 +44,8 @@ import sr.we.shekelflowcore.entity.Currency;
 import sr.we.shekelflowcore.entity.*;
 import sr.we.shekelflowcore.entity.helper.vo.InvoiceVO;
 import sr.we.shekelflowcore.enums.Reference;
+import sr.we.shekelflowcore.exception.PrimaryThrowable;
+import sr.we.shekelflowcore.exception.SuccessThrowable;
 import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.POSPrivilege;
@@ -224,12 +225,7 @@ public class InvoiceSummaryView extends LitTemplate implements BeforeEnterObserv
 
                         current.access(() -> {
                             if (emailSend) {
-                                Notification notification = new Notification();
-                                notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                                notification.setText(getTranslation("sr.we.success"));
-                                notification.setDuration(5000);
-                                notification.setPosition(Notification.Position.MIDDLE);
-                                notification.open();
+                                CustomNotificationHandler.notify_(new SuccessThrowable());
                             }
                         });
                     }
@@ -265,12 +261,7 @@ public class InvoiceSummaryView extends LitTemplate implements BeforeEnterObserv
 //
 //                        current.access(() -> {
 //                            if (emailSend) {
-//                                Notification notification = new Notification();
-//                                notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-//                                notification.setText(getTranslation("sr.we.success"));
-//                                notification.setDuration(5000);
-//                                notification.setPosition(Notification.Position.MIDDLE);
-//                                notification.open();
+//                                CustomNotificationHandler.notify_(new SuccessThrowable());
 //                            }
 //                        });
 //                    }
@@ -288,7 +279,7 @@ public class InvoiceSummaryView extends LitTemplate implements BeforeEnterObserv
             component1.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
             component1.addClickListener(c -> {
                 ClientsideClipboard.writeToClipboard(sharableLink);
-                Notification.show("Sharable link copied");
+                CustomNotificationHandler.notify_(new PrimaryThrowable("Sharable link copied!"));
             });
             HorizontalLayout horizontalLayout = new HorizontalLayout();
             horizontalLayout.setWidthFull();

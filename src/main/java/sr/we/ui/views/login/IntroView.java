@@ -4,15 +4,19 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.*;
-import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
-import com.vaadin.flow.router.*;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.spring.SpringVaadinSession;
@@ -20,13 +24,15 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import sr.we.ContextProvider;
 import sr.we.CustomErrorHandler;
+import sr.we.CustomNotificationHandler;
 import sr.we.data.controller.UserService;
 import sr.we.security.CustomAuthenticationProvider;
 import sr.we.shekelflowcore.entity.ThisUser;
 import sr.we.shekelflowcore.entity.helper.vo.UserVO;
+import sr.we.shekelflowcore.exception.PrimaryThrowable;
+import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.ui.components.EmailAddress;
 import sr.we.ui.components.MyDialog;
-import sr.we.ui.views.person.PersonView;
 
 import java.util.List;
 import java.util.Map;
@@ -37,8 +43,7 @@ import java.util.Map;
 @PageTitle("Home")
 @Route(value = "")
 @AnonymousAllowed
-public class IntroView extends VerticalLayout implements BeforeEnterObserver{
-
+public class IntroView extends VerticalLayout implements BeforeEnterObserver {
 
 
     public IntroView() {
@@ -55,8 +60,6 @@ public class IntroView extends VerticalLayout implements BeforeEnterObserver{
         verticalLayout.add(img);
 
 
-
-
         verticalLayout.add(new H2("Register for FREE, today"));
         verticalLayout.add(new Paragraph("Simple bookkeeping and payment solutions for small business owners 🤗"));
 
@@ -70,7 +73,7 @@ public class IntroView extends VerticalLayout implements BeforeEnterObserver{
         passwordField.setHelperText("A password must be at least 8 characters. It has to have at least one letter and one digit.");
         passwordField.setPattern("^(?=.*[0-9])(?=.*[a-zA-Z]).{8}.*$");
         passwordField.setErrorMessage("Not a valid password");
-        verticalLayout.add(new FormLayout(emailField,passwordField));
+        verticalLayout.add(new FormLayout(emailField, passwordField));
 
         Button registerBtn = new Button("Register");
         registerBtn.setWidthFull();
@@ -83,7 +86,7 @@ public class IntroView extends VerticalLayout implements BeforeEnterObserver{
         setDefaultHorizontalComponentAlignment(Alignment.CENTER);
         getStyle().set("text-align", "center");
 
-        verticalLayout. add(new Hr());
+        verticalLayout.add(new Hr());
 
         ResetPasswordDialog button = new ResetPasswordDialog(new MyDialog());
         button.setText("Forgot password?");
@@ -101,31 +104,32 @@ public class IntroView extends VerticalLayout implements BeforeEnterObserver{
         HorizontalLayout headerLayout = new HorizontalLayout();
         headerLayout.setWidthFull();
         headerLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-        headerLayout.add(button,go_to_login);
-        add(headerLayout,verticalLayout);
+        headerLayout.add(button, go_to_login);
+        add(headerLayout, verticalLayout);
 
         registerBtn.addClickListener(f -> {
-            if(emailField.isInvalid()){
+            if (emailField.isInvalid()) {
                 return;
             }
-            if(passwordField.isInvalid()){
+            if (passwordField.isInvalid()) {
                 return;
             }
 
             UserService userService = ContextProvider.getBean(UserService.class);
             UserVO vo = new UserVO(emailField.getValue(), passwordField.getValue());
             ThisUser thisUser = userService.create(vo);
-            if(thisUser != null){
+            if (thisUser != null) {
+                CustomNotificationHandler.notify_(new PrimaryThrowable("Successfully Registered"));
                 Authentication authenticate = new CustomAuthenticationProvider().authenticate(new UsernamePasswordAuthenticationToken(emailField.getValue(), passwordField.getValue()));
-                if(!authenticate.isAuthenticated()){
-                    Notification.show("Not Authenticated");
+                if (!authenticate.isAuthenticated()) {
                 } else {
                     UI.getCurrent().navigate(LoginView.class);
                 }
+            } else {
+                throw new ValidationException("You are not registered successfully");
             }
         });
     }
-
 
 
     @Override
@@ -134,7 +138,7 @@ public class IntroView extends VerticalLayout implements BeforeEnterObserver{
         boolean isVerif = parameters.containsKey("verif");
         if (isVerif) {
             String verify = parameters.get("verif").get(0);
-            SpringVaadinSession.getCurrent().setAttribute("Verify",verify);
+            SpringVaadinSession.getCurrent().setAttribute("Verify", verify);
             event.forwardTo(LoginView.class);
         }
     }
