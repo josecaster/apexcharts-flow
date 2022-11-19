@@ -13,6 +13,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.apache.commons.lang3.StringUtils;
 import sr.we.ContextProvider;
 import sr.we.data.controller.PersonService;
@@ -38,6 +39,7 @@ public class GeneralView extends StateListenerLayout implements BeforeEnterObser
     private final TextField firstName;
     private final TextField lastName;
     private final TextField ssn;
+    private final VerticalLayout layout;
     private Person person;
 
     public GeneralView() {
@@ -48,6 +50,7 @@ public class GeneralView extends StateListenerLayout implements BeforeEnterObser
         setSizeFull();
 
         FormLayout fLayout = new FormLayout();
+        fLayout.addClassNames("my-cart-white", LumoUtility.BoxShadow.SMALL);
         fLayout.getElement().getStyle().set("align-self", "center");
         add(fLayout);
         fLayout.setResponsiveSteps(
@@ -56,14 +59,14 @@ public class GeneralView extends StateListenerLayout implements BeforeEnterObser
                 // Use two columns, if layout's width exceeds 500px
                 new FormLayout.ResponsiveStep("500px", 2));
 
-        VerticalLayout layout = new VerticalLayout();
+        layout = new VerticalLayout();
         fLayout.add(layout);
 
         Image img = new Image("images/empty-plant.png", "placeholder plant");
         img.setWidth("200px");
         layout.add(img);
 
-        H2 almost_there = new H2("Almost there");
+        H2 almost_there = new H2("First Step (1/2)");
         layout.add(almost_there);
         Paragraph paragraph = new Paragraph("Tell us a bit about yourself");
         layout.add(paragraph);

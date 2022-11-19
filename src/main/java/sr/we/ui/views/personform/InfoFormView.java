@@ -12,6 +12,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.apache.commons.lang3.StringUtils;
 import sr.we.ContextProvider;
 import sr.we.data.controller.PersonFormService;
@@ -51,6 +52,7 @@ public class InfoFormView extends StateListenerLayout implements BeforeEnterObse
         setSizeFull();
 
         FormLayout fLayout = new FormLayout();
+        fLayout.addClassNames("my-cart-white", LumoUtility.BoxShadow.SMALL);
         fLayout.getElement().getStyle().set("align-self", "center");
         add(fLayout);
         fLayout.setResponsiveSteps(
@@ -66,7 +68,7 @@ public class InfoFormView extends StateListenerLayout implements BeforeEnterObse
         img.setWidth("200px");
         layout.add(img);
 
-        H2 almost_there = new H2("Almost there");
+        H2 almost_there = new H2("Last Step (2/2)");
         layout.add(almost_there);
         Paragraph paragraph = new Paragraph("Tell us a bit about yourself");
         layout.add(paragraph);

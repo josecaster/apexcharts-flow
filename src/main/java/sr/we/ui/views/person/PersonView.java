@@ -13,6 +13,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import sr.we.ContextProvider;
 import sr.we.data.controller.PersonService;
 import sr.we.security.AuthenticatedUser;
@@ -41,6 +42,7 @@ public class PersonView extends StateListenerLayout implements BeforeEnterObserv
     private final TextField ssn;
     private final GenderSelect genderSelect;
     private final DatePicker birthDate;
+    private final VerticalLayout layout;
     private ThisUser user;
 
     public PersonView() {
@@ -51,6 +53,7 @@ public class PersonView extends StateListenerLayout implements BeforeEnterObserv
         setSizeFull();
 
         FormLayout fLayout = new FormLayout();
+        fLayout.addClassNames("my-cart-white", LumoUtility.BoxShadow.SMALL);
         fLayout.getElement().getStyle().set("align-self", "center");
         add(fLayout);
         fLayout.setResponsiveSteps(
@@ -60,14 +63,14 @@ public class PersonView extends StateListenerLayout implements BeforeEnterObserv
                 new FormLayout.ResponsiveStep("500px", 2)
         );
 
-        VerticalLayout layout = new VerticalLayout();
+        layout = new VerticalLayout();
         fLayout.add(layout);
 
         Image img = new Image("images/empty-plant.png", "placeholder plant");
         img.setWidth("200px");
         layout.add(img);
 
-        H2 almost_there = new H2("Almost there");
+        H2 almost_there = new H2("First Step (1/2)");
         layout.add(almost_there);
         Paragraph paragraph = new Paragraph("Tell us a bit about yourself");
         layout.add(paragraph);
@@ -167,11 +170,10 @@ public class PersonView extends StateListenerLayout implements BeforeEnterObserv
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        AuthenticatedUser bean = ContextProvider.getBean(AuthenticatedUser.class);
-        Optional<ThisUser> thisUser = bean.get();
+        Optional<ThisUser> thisUser = AuthenticatedUser.get();
         boolean present = thisUser.isPresent();
         if(!present){
-            bean.logout();
+            AuthenticatedUser.logout();
             throw new ValidationException("Invalid Authentication");
         }
         user = thisUser.get();
