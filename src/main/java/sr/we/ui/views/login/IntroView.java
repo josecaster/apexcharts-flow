@@ -120,7 +120,7 @@ public class IntroView extends VerticalLayout implements BeforeEnterObserver{
                 if(!authenticate.isAuthenticated()){
                     Notification.show("Not Authenticated");
                 } else {
-                    UI.getCurrent().navigate(PersonView.class);
+                    UI.getCurrent().navigate(LoginView.class);
                 }
             }
         });

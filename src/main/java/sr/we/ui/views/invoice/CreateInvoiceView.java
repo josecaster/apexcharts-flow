@@ -141,13 +141,20 @@ public class CreateInvoiceView extends LitTemplate {
         contextMenu.setOpenOnClick(true);
         contextMenu.addItem("Create new customer", g -> {
             customerLayout.removeAll();
-            firstNameFld = new TextField();
             lastNameFld = new TextField();
+            lastNameFld.setHelperText(getTranslation("sr.we.customer.name.info"));
+            lastNameFld.setRequired(true);
+            lastNameFld.setRequiredIndicatorVisible(true);
+            lastNameFld.setWidthFull();
+
+            firstNameFld = new TextField();
+            firstNameFld.setHelperText(getTranslation("sr.we.customer.first.name.info"));
+            firstNameFld.setWidthFull();
             mobileNumberFld = new TextField();
             emailFld = new EmailField();
 
-            firstNameFld.setPlaceholder("Firstname");
-            lastNameFld.setPlaceholder("Name");
+            firstNameFld.setPlaceholder(getTranslation("sr.we.customer.first.name"));
+            lastNameFld.setPlaceholder(getTranslation("sr.we.customer.name"));
             mobileNumberFld.setPlaceholder("Mobile number");
             emailFld.setPlaceholder("Email-address");
 
@@ -156,7 +163,7 @@ public class CreateInvoiceView extends LitTemplate {
             mobileNumberFld.setWidthFull();
             emailFld.setWidthFull();
 
-            customerLayout.add(firstNameFld, lastNameFld, mobileNumberFld, emailFld);
+            customerLayout.add(lastNameFld,firstNameFld, mobileNumberFld, emailFld);
         });
         contextMenu.addItem("Choose existing customer", g -> {
             customerLayout.removeAll();

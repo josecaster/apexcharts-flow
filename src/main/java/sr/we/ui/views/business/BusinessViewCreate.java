@@ -15,6 +15,7 @@ import sr.we.ui.components.business.BusinessOrganisationTypeSelect;
 import sr.we.ui.components.business.BusinessTypeSelect;
 import sr.we.ui.components.general.CountrySelect;
 import sr.we.ui.components.general.BusinessCurrencySelect;
+import sr.we.ui.views.ReRouteLayout;
 import sr.we.ui.views.StateListenerLayout;
 import sr.we.ui.views.settings.SettingsLayout;
 
@@ -86,7 +87,7 @@ public class BusinessViewCreate extends StateListenerLayout implements HasDynami
 //        notification.setPosition(Notification.Position.MIDDLE);
 //        notification.open();
 
-        UI.getCurrent().navigate(BusinessView.class);
+        UI.getCurrent().navigate(ReRouteLayout.class);
 
 
     }

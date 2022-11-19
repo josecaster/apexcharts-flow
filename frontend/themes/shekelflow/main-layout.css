@@ -50,7 +50,7 @@
   display: flex;
   margin-left: var(--lumo-space-s);
   margin-right: var(--lumo-space-s);
-  padding: var(--lumo-space-s);
+  padding: var(--lumo-space-xs);
   position: relative;
   color: var(--lumo-secondary-text-color);
 }
@@ -59,7 +59,7 @@
   display: flex;
   margin-left: var(--lumo-space-s);
   margin-right: var(--lumo-space-s);
-  padding: var(--lumo-space-s);
+  padding: var(--lumo-space-xs);
   position: relative;
   color: var(--lumo-primary-color);
 }

@@ -280,13 +280,20 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
         contextMenu.setOpenOnClick(true);
         contextMenu.addItem("Create new customer", g -> {
             VerticalLayout customerLayout = new VerticalLayout();
-            TextField firstNameFld = new TextField();
             TextField lastNameFld = new TextField();
+            lastNameFld.setHelperText(getTranslation("sr.we.customer.name.info"));
+            lastNameFld.setRequired(true);
+            lastNameFld.setRequiredIndicatorVisible(true);
+            lastNameFld.setWidthFull();
+
+            TextField firstNameFld = new TextField();
+            firstNameFld.setHelperText(getTranslation("sr.we.customer.first.name.info"));
+            firstNameFld.setWidthFull();
             TextField mobileNumberFld = new TextField();
             EmailField emailFld = new EmailField();
 
-            firstNameFld.setPlaceholder("Firstname");
-            lastNameFld.setPlaceholder("Name");
+            firstNameFld.setPlaceholder(getTranslation("sr.we.customer.first.name"));
+            lastNameFld.setPlaceholder(getTranslation("sr.we.customer.name"));
             mobileNumberFld.setPlaceholder("Mobile number");
             emailFld.setPlaceholder("Email-address");
 

@@ -105,6 +105,10 @@ public class ChartOfAccountsView extends LitTemplate implements BeforeEnterObser
 
     }
 
+    public static String getLocation(String business) {
+        return MainLayout.getLocation(business) + "/chart-of-accounts";
+    }
+
     private void addAccounts(ChartOfAccounts assets) {
         List<ChartOfAccountTypes> collect = list.stream().filter(g -> {
             return g.getChartOfAccounts().compareTo(assets) == 0;

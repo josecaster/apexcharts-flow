@@ -55,7 +55,7 @@ public class AuthenticatedUser {
         return null;
     }
 
-    public void logout() {
+    public static void logout() {
         VaadinSession.getCurrent().getSession().invalidate();
         UI.getCurrent().getPage().setLocation(SecurityConfiguration.LOGOUT_URL);
 //        SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();

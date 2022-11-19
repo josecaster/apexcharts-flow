@@ -15,6 +15,7 @@ import sr.we.shekelflowcore.enums.ChartOfAccounts;
 import sr.we.shekelflowcore.enums.Reference;
 import sr.we.shekelflowcore.enums.TransactionType;
 import sr.we.ui.views.account.CabAccountViewNew;
+import sr.we.ui.views.account.ChartOfAccountsView;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -96,7 +97,7 @@ public class AccountSelect extends Select<Account> {
 
                     }
                 });
-                Anchor routerLink = new Anchor(CabAccountViewNew.getLocation(businessId.toString()), "+ Add account", AnchorTarget.BLANK);
+                Anchor routerLink = new Anchor(ChartOfAccountsView.getLocation(businessId.toString()), "+ Add account", AnchorTarget.BLANK);
                 add(routerLink);
             } else {
                 getDataProvider().fetch(new Query<>()).collect(Collectors.toList()).clear();

@@ -148,6 +148,17 @@ public class UserService extends MyController {
         });
     }
 
+    public ThisUser get(Long id, String accessToken) {
+        RestTemplate restTemplate = new RestTemplate();
+        String fooResourceUrl
+                = configProperties.getRest()+ Routes.USER_GET+"?id="+id;
+        return encapsulate(() -> {
+            HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
+            ResponseEntity<ThisUser> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, ThisUser.class);
+            return exchange.getBody();
+        });
+    }
+
     public static class Auth {
 
         public String username, password, temp, confirmPassword;

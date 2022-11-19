@@ -24,6 +24,7 @@ import sr.we.ContextProvider;
 import sr.we.CustomErrorHandler;
 import sr.we.data.controller.BusinessService;
 import sr.we.data.controller.UserAccessService;
+import sr.we.data.controller.UserService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.entity.ThisUser;
@@ -33,6 +34,8 @@ import sr.we.shekelflowcore.security.PrivilegeModeAbstract;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.*;
 import sr.we.ui.components.BreadCrumb;
+import sr.we.ui.components.MenuBuilder;
+import sr.we.ui.components.NaviMenu;
 import sr.we.ui.views.account.ChartOfAccountsView;
 import sr.we.ui.views.business.BusinessView;
 import sr.we.ui.views.currencyexchange.CurrencyExchangeView;
@@ -163,46 +166,47 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
         }
 
 
-        if (genMenu) {
-            nav.removeAll();
-            // Wrap the links in a list; improves accessibility
-            current = UI.getCurrent();
-            token = AuthenticatedUser.token();
-            UnorderedList list = new UnorderedList();
-            list.addClassNames("navigation-list");
-            for (MenuItemInfo menuItem : createMenuItems()) {
-//            if (accessChecker.hasAccess(menuItem.getView())) {
-                list.add(menuItem);
+//        if (genMenu) {
+//            nav.removeAll();
+//            // Wrap the links in a list; improves accessibility
+//            current = UI.getCurrent();
+//            token = AuthenticatedUser.token();
+//            UnorderedList list = new UnorderedList();
+//            list.addClassNames("navigation-list");
+////            for (MenuItemInfo menuItem : createMenuItems()) {
+////            if (accessChecker.hasAccess(menuItem.getView())) {
+////                list.add(menuItem);
+////            }
+////            }
+//            //current.access(() -> {
+//            nav.add(list);
+////                });
+//
+//            UserService userService = ContextProvider.getBean(UserService.class);
+//            thisUser = userService.get(thisUser.getId(), AuthenticatedUser.token());
+//            List<Role> collect = thisUser.getUsersRoles().stream().filter(f -> {
+//
+//                if (businessId.isEmpty() || businessId.equalsIgnoreCase("0")) {
+//                    return f.getBusiness() == null;
+//                } else {
+//                    return f.getBusinessId() != null && f.getBusinessId().toString().equalsIgnoreCase(businessId);
+//                }
+//            }).map(UsersRoles::getRole).collect(Collectors.toList());
+//            if (collect.isEmpty()) {
+//                BusinessService businessService = ContextProvider.getBean(BusinessService.class);
+//                businessService.unselectAll(token);
+//                event.forwardTo(ReRouteLayout.class);
+//            } else {
+//                roleSelect.setItems(collect);
+//                Optional<UsersRoles> max = thisUser.getUsersRoles().stream().//
+//                        filter(f -> collect.stream().anyMatch(g -> g.getId().compareTo(f.getRole().getId()) == 0)).//
+//                        max(Comparator.comparingLong(f -> f.getCounter() == null ? 0L : f.getCounter()));
+//                if (max.isPresent()) {
+//                    UsersRoles usersRoles = max.get();
+//                    roleSelect.setValue(usersRoles.getRole());
+//                }
 //            }
-            }
-            //current.access(() -> {
-            nav.add(list);
-//                });
-
-
-            List<Role> collect = thisUser.getUsersRoles().stream().filter(f -> {
-
-                if (businessId.isEmpty() || businessId.equalsIgnoreCase("0")) {
-                    return f.getBusiness() == null;
-                } else {
-                    return f.getBusinessId() != null && f.getBusinessId().toString().equalsIgnoreCase(businessId);
-                }
-            }).map(f -> f.getRole()).collect(Collectors.toList());
-            if (collect.isEmpty()) {
-                BusinessService businessService = ContextProvider.getBean(BusinessService.class);
-                businessService.unselectAll(token);
-                event.forwardTo(ReRouteLayout.class);
-            } else {
-                roleSelect.setItems(collect);
-                Optional<UsersRoles> max = thisUser.getUsersRoles().stream().//
-                        filter(f -> collect.stream().anyMatch(g -> g.getId().compareTo(f.getRole().getId()) == 0)).//
-                        max(Comparator.comparingLong(f -> f.getCounter() == null ? 0L : f.getCounter()));
-                if (max.isPresent()) {
-                    UsersRoles usersRoles = max.get();
-                    roleSelect.setValue(usersRoles.getRole());
-                }
-            }
-        }
+//        }
 
     }
 
@@ -304,12 +308,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
     }
 
     private Nav createNavigation() {
-        nav = new Nav();
-        nav.addClassNames("menu-item-container");
-        nav.getElement().setAttribute("aria-labelledby", "views");
-
-
-        return nav;
+        return initNaviItems();
     }
 
     private Nav createSettings() {
@@ -338,101 +337,15 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
         };
     }
 
-    private MenuItemInfo[] createMenuItems() {
-        List<MenuItemInfo> list = new ArrayList<>();
-        UserAccessService userAccessService = ContextProvider.getBean(UserAccessService.class);
-
-
-        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(LoanReportPrivilege.class), Privileges.READ)) {
-            //current.access(() -> {
-            MenuItemInfo dashboard = new MenuItemInfo(getTranslation("sr.we.dashboard"), "icons/menus/icons8_dashboard_48px.png", DashboardView.class);
-            list.add(dashboard);
-//            });
-        }
-        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(LoanPrivilege.class), Privileges.READ)) {
-            //current.access(() -> {
-            MenuItemInfo loans = new MenuItemInfo(getTranslation("sr.we.loans"), "icons/menus/icons8_debt_48px.png", LoanView.class);
-            list.add(loans);
-//            });
-        }
-        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(LoanRequestPrivilege.class), Privileges.READ)) {
-            //current.access(() -> {
-            MenuItemInfo loans = new MenuItemInfo(getTranslation("sr.we.loan.requests"), "icons/menus/icons8_lend_48px.png", RequestsView.class);
-            list.add(loans);
-//            });
-        }
-        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(CurrencyExchangePrivilege.class), Privileges.READ)) {
-            //current.access(() -> {
-            MenuItemInfo customers = new MenuItemInfo(getTranslation("sr.we.currency.exchange"), "icons/menus/icons8_currency_exchange_48px.png", CurrencyExchangeView.class);
-            list.add(customers);
-//            });
-        }
-        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(CustomerPrivilege.class), Privileges.READ)) {
-            //current.access(() -> {
-            MenuItemInfo customers = new MenuItemInfo(getTranslation("sr.we.customers"), "icons/menus/icons8_customer_48px.png", CustomerView.class);
-            list.add(customers);
-//            });
-        }
-//        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(PaymentsPrivilege.class), Privileges.INSERT)) {
-//            //current.access(() -> {
-//            MenuItemInfo transactions = new MenuItemInfo("Payments", "icons/menus/icons8_payment_history_48px.png", PaymentsView.class);
-//            list.add(transactions);
-////            });
-//        }
-        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(TransactionsPrivilege.class), Privileges.READ)) {
-            //current.access(() -> {
-            MenuItemInfo transactions = new MenuItemInfo("Transactions", "icons/menus/icons8_transaction_48px.png", TransactionsView.class);
-            list.add(transactions);
-//            });
-        }
-
-        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(InvoicesPrivilege.class), Privileges.READ)) {
-            //current.access(() -> {
-            MenuItemInfo transactions = new MenuItemInfo("Invoices", "icons/menus/icons8_invoice_48px.png", InvoiceView.class);
-            list.add(transactions);
-//            });
-        }
-
-        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(POSPrivilege.class), Privileges.INSERT)) {
-            //current.access(() -> {
-            MenuItemInfo transactions = new MenuItemInfo("Point of sale", "icons/menus/icons8_cash_register_48px.png", PosView.class);
-            list.add(transactions);
-//            });
-        }
-
-        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(POSPrivilege.class), Privileges.READ)) {
-            //current.access(() -> {
-            MenuItemInfo transactions = new MenuItemInfo("Tickets", "icons/menus/icons8_receipt_48px.png", TicketsGridView.class);
-            list.add(transactions);
-//            });
-        }
-
-        /*if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(ProductsPrivilege.class), Privileges.READ)) {
-            //current.access(() -> {
-                MenuItemInfo products = new MenuItemInfo("Products", "icons/menus/icons8_product_48px.png", ProductView.class);
-                list.add(products);
-//            });
-        }*/
-
-        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(ServicesPrivilege.class), Privileges.READ)) {
-            //current.access(() -> {
-            MenuItemInfo products = new MenuItemInfo("Products & Services", "icons/menus/icons8_product_48px.png", ServiceView.class);
-            list.add(products);
-//            });
-        }
-        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(AccountsPrivilege.class), Privileges.READ)) {
-            //current.access(() -> {
-            MenuItemInfo products = new MenuItemInfo("Chart of accounts", "icons/menus/icons8_ledger_48px.png", ChartOfAccountsView.class);
-            list.add(products);
-//            });
-        }
-        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(AccountsPrivilege.class), Privileges.READ)) {
-            //current.access(() -> {
-            MenuItemInfo products = new MenuItemInfo("Reports", "icons/menus/icons8_chart_48px.png", ReportsView.class);
-            list.add(products);
-//            });
-        }
-        return list.toArray(new MenuItemInfo[]{});
+    private Nav initNaviItems() {
+        nav = new Nav();
+        nav.addClassNames("menu-item-container");
+        nav.getElement().setAttribute("aria-labelledby", "views");
+        NaviMenu menu = new NaviMenu(businessId);
+        nav.add(menu);
+        menu.removeAll();
+        new MenuBuilder(businessId).buildMenu(menu);
+        return nav;
     }
 
 //    @Override
