@@ -31,6 +31,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.vaadin.addons.yuri0x7c1.bslayout.BsColumn;
 import org.vaadin.addons.yuri0x7c1.bslayout.BsLayout;
 import org.vaadin.addons.yuri0x7c1.bslayout.BsRow;
@@ -45,6 +46,7 @@ import sr.we.shekelflowcore.entity.helper.adapter.DashboardTransactionEvents;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.LoanReportPrivilege;
 import sr.we.shekelflowcore.settings.util.Constants;
+import sr.we.ui.components.BreadCrumb;
 import sr.we.ui.components.Highlight;
 import sr.we.ui.views.MainLayout;
 
@@ -54,7 +56,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@PageTitle("Dashboard")
+@BreadCrumb(titleKey = "sr.we.dashboard",optimizedMobile = true)
 @Route(value = "dashboard", layout = MainLayout.class)
 @RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
 public class DashboardView extends Main implements BeforeEnterObserver {
@@ -97,10 +99,10 @@ public class DashboardView extends Main implements BeforeEnterObserver {
 
         // Add it all together
         VerticalLayout serviceHealth = new VerticalLayout(header/*, chart*/);
-        serviceHealth.addClassName("p-l");
+        serviceHealth.addClassName(LumoUtility.Padding.XSMALL);
         serviceHealth.setPadding(false);
         serviceHealth.setSpacing(false);
-        serviceHealth.getElement().getThemeList().add("spacing-l");
+        serviceHealth.getElement().getThemeList().add("spacing-s");
         return serviceHealth;
     }
 
@@ -223,10 +225,10 @@ public class DashboardView extends Main implements BeforeEnterObserver {
         div = new Div();
         div.setWidthFull();
         VerticalLayout viewEvents = new VerticalLayout(header, div);
-        viewEvents.addClassName("p-l");
+        viewEvents.addClassName(LumoUtility.Padding.XSMALL);
         viewEvents.setPadding(false);
         viewEvents.setSpacing(false);
-        viewEvents.getElement().getThemeList().add("spacing-l");
+        viewEvents.getElement().getThemeList().add("spacing-s");
         return viewEvents;
     }
 
@@ -270,10 +272,10 @@ public class DashboardView extends Main implements BeforeEnterObserver {
 
         // Add it all together
         VerticalLayout serviceHealth = new VerticalLayout(header, grid);
-        serviceHealth.addClassName("p-l");
+        serviceHealth.addClassName(LumoUtility.Padding.XSMALL);
         serviceHealth.setPadding(false);
         serviceHealth.setSpacing(false);
-        serviceHealth.getElement().getThemeList().add("spacing-l");
+        serviceHealth.getElement().getThemeList().add("spacing-s");
         return serviceHealth;
     }
 

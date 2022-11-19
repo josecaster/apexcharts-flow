@@ -1,20 +1,33 @@
 package sr.we.ui.views.finance.transactions;
 
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.grid.HeaderRow;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import sr.we.ContextProvider;
+import sr.we.CustomNotificationHandler;
 import sr.we.data.controller.PaymentTransactionService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.PaymentTransaction;
+import sr.we.shekelflowcore.entity.helper.MappedSuperClass;
+import sr.we.shekelflowcore.entity.helper.vo.PaymentTransactionVO;
+import sr.we.shekelflowcore.exception.PrimaryThrowable;
 import sr.we.shekelflowcore.settings.util.Constants;
+import sr.we.ui.components.buttons.DeleteButton;
 import sr.we.ui.views.LineAwesomeIcon;
+
+import java.util.List;
+import java.util.Set;
 
 
 //@PreserveOnRefresh
 public class TransactionGrid extends VerticalLayout  {
 
+    private Set<PaymentTransaction> paymentTransactions;
     Grid<PaymentTransaction> grid = new Grid<>();
     private String business;
 
@@ -24,11 +37,36 @@ public class TransactionGrid extends VerticalLayout  {
         grid.setAllRowsVisible(true);
         grid.setClassName("resonate");
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
-        grid.addColumn(PaymentTransaction::getPaymentDate).setHeader("Payment date");
-        grid.addColumn(f -> f.getPaymentMethod().getDescription()).setHeader("Payment method");
-        grid.addColumn(f -> f.getAccount().getName()).setHeader("Account");
-        grid.addColumn(f -> f.getReference().getCaption() + " #" + f.getReferenceId()).setHeader("Reference");
+        Grid.Column<PaymentTransaction> payment_date = grid.addColumn(PaymentTransaction::getPaymentDate).setHeader("Payment date");
+        Grid.Column<PaymentTransaction> payment_method = grid.addColumn(f -> f.getPaymentMethod().getDescription()).setHeader("Payment method");
+        Grid.Column<PaymentTransaction> account = grid.addColumn(f -> f.getAccount().getName()).setHeader("Account");
+        Grid.Column<PaymentTransaction> reference = grid.addColumn(f -> f.getReference().getCaption() + " #" + f.getReferenceId()).setHeader("Reference");
         grid.addColumn(f -> Constants.CURRENCY_FORMAT.format(f.getConvertedAmount())).setHeader("Amount");
+
+        HeaderRow.HeaderCell join = grid.prependHeaderRow().join(payment_date, payment_method, account, reference);
+        Div transactionToolbar = new Div();
+        transactionToolbar.setWidthFull();
+        join.setComponent(transactionToolbar);
+
+        DeleteButton img = new DeleteButton();
+        transactionToolbar.add(img);
+
+        ConfirmDialog confirmDialog = new ConfirmDialog("Delete","Do you wish to delete the selected transactions?","Yes", g -> {
+            List<Long> longs = paymentTransactions.stream().map(MappedSuperClass::getId).toList();
+            PaymentTransactionVO paymentTransactionVO = new PaymentTransactionVO();
+            paymentTransactionVO.setIds(longs);
+            PaymentTransactionService paymentTransactionService = ContextProvider.getBean(PaymentTransactionService.class);
+            Long count = paymentTransactionService.delete(AuthenticatedUser.token(),paymentTransactionVO);
+            CustomNotificationHandler.notify_(new PrimaryThrowable(count+" items deleted"));
+            afterNavigation();
+        });
+        confirmDialog.setConfirmButtonTheme(LumoUtility.Background.ERROR);
+        confirmDialog.setCancelable(true);
+
+        img.addClickListener(f -> {
+            confirmDialog.open();
+        });
+
         grid.setClassNameGenerator(f -> {
             switch (f.getTransactionType()) {
                 case DEPOSIT -> {
@@ -55,63 +93,19 @@ public class TransactionGrid extends VerticalLayout  {
             }
             return lineAwesomeIcon;
         }).setHeader("Transaction");
-        grid.setSelectionMode(Grid.SelectionMode.SINGLE);
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
         grid.addSelectionListener(get -> {
-            /*Optional<PaymentTransaction> firstSelectedItem = get.getFirstSelectedItem();
-            if (firstSelectedItem.isPresent()) {
-                PaymentTransaction loan = firstSelectedItem.get();
-//                QueryParameters queryParameters = QueryParameters.fromString("id=" + loan.getId());
-//                UI.getCurrent().navigate(LoansViewTabDashboard.getLocation(business, loan.getId().toString()), queryParameters);
-                UI.getCurrent().navigate(LTabDashboard.class, //
-                        new RouteParameters(//
-                                new RouteParam("business", business),//
-                                new RouteParam("loan", loan.getId().toString())));
-            }*/
+            paymentTransactions = get.getAllSelectedItems();
+            if(paymentTransactions == null || paymentTransactions.isEmpty()){
+                img.setVisible(false);
+            }
+            img.setVisible(true);
         });
+
         add(grid);
+        setPadding(false);
+        setSpacing(false);
     }
-
-//    @Override
-//    protected void onCreateClick() {
-//        UI.getCurrent().navigate(LoansCreateView.class, new RouteParameters(new RouteParam("business", business)));
-//    }
-
-//    public static HorizontalLayout createCard(PaymentTransaction loan, String business, boolean showContext) {
-//        UI current = UI.getCurrent();
-//
-//        HorizontalLayout card = new HorizontalLayout();
-//        card.addClassName("card");
-//        card.setSpacing(false);
-////        card.getThemeList().add("spacing-s");
-//        card.setPadding(false);
-//
-//        VerticalLayout header = new VerticalLayout();
-//        header.addClassName("header");
-//        header.setSpacing(false);
-////        header.getThemeList().add("spacing-s");
-//        header.setPadding(false);
-//
-//        Span name = new Span(loan.getName());
-//        name.addClassName("name");
-//        Span date = new Span(loan.getCurrency().getName());
-//        date.addClassName("date");
-//        header.add(name, date);
-//
-//        card.add(header);
-//        Span pending = new Span("Balanced");
-//        pending.getElement().getStyle().set("height","fit-content");
-//        pending.getElement().getThemeList().add("badge contrast");
-//
-//        Span confirmed = new Span("Fixed");
-//        confirmed.getElement().getStyle().set("height","fit-content");
-//        confirmed.getElement().getThemeList().add("badge success");
-//        if (loan.getFixed()) {
-//            card.add(confirmed);
-//        } else {
-//            card.add(pending);
-//        }
-//        return card;
-//    }
 
     public void afterNavigation() {
         PaymentTransactionService loanService = ContextProvider.getBean(PaymentTransactionService.class);

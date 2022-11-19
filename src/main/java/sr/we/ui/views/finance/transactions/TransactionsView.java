@@ -3,32 +3,45 @@ package sr.we.ui.views.finance.transactions;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.*;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import sr.we.ContextProvider;
+import sr.we.CustomNotificationHandler;
 import sr.we.data.controller.BusinessService;
+import sr.we.data.controller.PaymentTransactionService;
 import sr.we.data.controller.UserAccessService;
 import sr.we.demo.about.AboutView;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Business;
+import sr.we.shekelflowcore.entity.PaymentTransaction;
 import sr.we.shekelflowcore.entity.Role;
+import sr.we.shekelflowcore.entity.helper.InterExecutable;
+import sr.we.shekelflowcore.entity.helper.vo.PaymentTransactionVO;
 import sr.we.shekelflowcore.enums.TransactionType;
+import sr.we.shekelflowcore.exception.PrimaryThrowable;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.TransactionsPrivilege;
 import sr.we.ui.components.BreadCrumb;
 import sr.we.ui.components.NotYetChange;
 import sr.we.ui.components.NotYetClick;
+import sr.we.ui.views.LineAwesomeIcon;
 import sr.we.ui.views.MainLayout;
 
 import javax.annotation.security.RolesAllowed;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * A Designer generated component for the transactions-view template.
@@ -57,6 +70,7 @@ public class TransactionsView extends LitTemplate implements AfterNavigationObse
     @Id("filter-field")
     private TextField filterField;
     private Business business;
+    private Set<PaymentTransaction> paymentTransactions;
 
     /**
      * Creates a new TransactionsView.
@@ -64,8 +78,11 @@ public class TransactionsView extends LitTemplate implements AfterNavigationObse
     public TransactionsView() {
         // You can initialise any data required for the connected UI components here.
 
+
+
         transactionGrid = new TransactionGrid();
         transactionsGridLayout.add(transactionGrid);
+
 
         moreBtn.addClickListener(f -> {
             JournalentryDialog journalentryDialog = new JournalentryDialog(Long.valueOf(businessString));

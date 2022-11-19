@@ -16,6 +16,8 @@ public @interface BreadCrumb {
 
     String titleKey() default "";
 
+    boolean optimizedMobile() default false;
+
     class NONE extends Component {
 
     }

@@ -146,4 +146,15 @@ public class InvoiceService extends MyController {
             return exchange.getBody();
         });
     }
+
+    public Long delete(String accessToken, InvoiceVO vo) {
+        return encapsulate(() -> {
+            String body = new GsonBuilder().create().toJson(vo);
+            RestTemplate restTemplate = new RestTemplate();
+            String fooResourceUrl = configProperties.getRest() + Routes.INVOICE_DELETE;
+            HttpEntity<String> httpEntity = getAuthHttpEntity(body, accessToken);
+            ResponseEntity<Long> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.POST, httpEntity, Long.class);
+            return exchange.getBody();
+        });
+    }
 }

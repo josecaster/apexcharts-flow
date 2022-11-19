@@ -3,25 +3,34 @@ package sr.we.ui.views.invoice;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.littemplate.LitTemplate;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.*;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import sr.we.ContextProvider;
+import sr.we.CustomNotificationHandler;
 import sr.we.data.controller.InvoiceService;
+import sr.we.data.controller.PaymentTransactionService;
 import sr.we.data.controller.UserAccessService;
 import sr.we.demo.about.AboutView;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Invoice;
 import sr.we.shekelflowcore.entity.Role;
+import sr.we.shekelflowcore.entity.helper.MappedSuperClass;
 import sr.we.shekelflowcore.entity.helper.vo.InvoiceVO;
+import sr.we.shekelflowcore.entity.helper.vo.PaymentTransactionVO;
+import sr.we.shekelflowcore.exception.PrimaryThrowable;
 import sr.we.shekelflowcore.security.PrivilegeModeAbstract;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.InvoicesPrivilege;
@@ -29,6 +38,7 @@ import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.ui.components.ArrowDownButton;
 import sr.we.ui.components.BreadCrumb;
 import sr.we.ui.components.NotYetChange;
+import sr.we.ui.components.buttons.DeleteButton;
 import sr.we.ui.views.LineAwesomeIcon;
 import sr.we.ui.views.MainLayout;
 
@@ -143,30 +153,62 @@ public class InvoiceView extends LitTemplate implements BeforeEnterObserver, Aft
         grid.setClassName("resonate");
         HeaderRow.HeaderCell join = grid.prependHeaderRow().join(statusColumn, dueColumn, dateColumn);
         Button close = new Button("Close");
-        close.setEnabled(false);
-        join.setComponent(new HorizontalLayout(close));
+        close.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        close.setVisible(false);
+        DeleteButton deleteButton = new DeleteButton();
+        HorizontalLayout component = new HorizontalLayout(deleteButton,close);
+        component.setAlignItems(FlexComponent.Alignment.CENTER);
+        join.setComponent(component);
         invoiceGridLayout.add(grid);
         grid.setAllRowsVisible(true);
 
 
         grid.addSelectionListener(g -> {
             if (g.getAllSelectedItems() == null) {
-                close.setEnabled(false);
+                close.setVisible(false);
+                deleteButton.setVisible(false);
                 return;
             }
+            deleteButton.setVisible(!g.getAllSelectedItems().isEmpty());
             boolean present = g.getAllSelectedItems().stream().anyMatch(f -> f.isFullyPayed() && f.getStatus().compareTo(Invoice.Status.OPEN) == 0);
-            close.setEnabled(present);
+            close.setVisible(present);
         });
-        close.addClickListener(f -> {
+        ConfirmDialog closeDialog = new ConfirmDialog("Close Invoices","Do you wish to close the selected invoices?","Yes", g -> {
             Set<Invoice> selectedItems = grid.getSelectedItems();
+            int i = 0;
             for(Invoice invoice : selectedItems){
+                if(!(invoice.isFullyPayed() && invoice.getStatus().compareTo(Invoice.Status.OPEN) == 0)){
+                    continue;
+                }
                 InvoiceService invoiceService = ContextProvider.getBean(InvoiceService.class);
                 InvoiceVO invoiceVO = new InvoiceVO();
                 invoiceVO.setId(invoice.getId());
                 invoiceVO.setStatus(Invoice.Status.CLOSED);
                 invoiceService.status(invoiceVO, AuthenticatedUser.token());
+                i++;
             }
+            CustomNotificationHandler.notify_(new PrimaryThrowable(i+" invoices closed"));
             refresh();
+        });
+        closeDialog.setConfirmButtonTheme(LumoUtility.Background.ERROR);
+        closeDialog.setCancelable(true);
+        close.addClickListener(f -> {
+            closeDialog.open();
+        });
+        ConfirmDialog confirmDialog = new ConfirmDialog("Delete Invoices","Do you wish to delete the selected invoices?","Yes", g -> {
+            List<Long> longs = grid.getSelectedItems().stream().map(MappedSuperClass::getId).toList();
+            InvoiceVO vo = new InvoiceVO();
+            vo.setIds(longs);
+            InvoiceService paymentTransactionService = ContextProvider.getBean(InvoiceService.class);
+            Long count = paymentTransactionService.delete(AuthenticatedUser.token(),vo);
+            CustomNotificationHandler.notify_(new PrimaryThrowable(count+" items deleted"));
+            refresh();
+        });
+        confirmDialog.setConfirmButtonTheme(LumoUtility.Background.ERROR);
+        confirmDialog.setCancelable(true);
+        deleteButton.addClickListener(f -> {
+
+            confirmDialog.open();
         });
     }
 

@@ -44,6 +44,18 @@ public class PaymentTransactionService extends MyController {
             return exchange.getBody();
         });
     }
+
+    public Long delete(String accessToken, PaymentTransactionVO vo) {
+        return encapsulate(() -> {
+            String body = new GsonBuilder()
+                    .registerTypeAdapter(LocalDate.class, new LocalDateAdapter()).create().toJson(vo);
+            RestTemplate restTemplate = new RestTemplate();
+            String fooResourceUrl = configProperties.getRest() + Routes.PAYMENT_TRANSACTION_DELETE;
+            HttpEntity<String> httpEntity = getAuthHttpEntity(body, accessToken);
+            ResponseEntity<Long> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.POST, httpEntity, Long.class);
+            return exchange.getBody();
+        });
+    }
 //
 //    public Business edit(String accessToken, BusinessVO vo){
 //        String body = new GsonBuilder().create().toJson(vo);

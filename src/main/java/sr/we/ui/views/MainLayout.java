@@ -16,6 +16,7 @@ import com.vaadin.flow.component.page.History;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.WebBrowser;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.spring.SpringVaadinSession;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -41,6 +42,7 @@ import sr.we.ui.views.business.BusinessView;
 import sr.we.ui.views.currencyexchange.CurrencyExchangeView;
 import sr.we.ui.views.customers.CustomerView;
 import sr.we.ui.views.dashboard.DashboardView;
+import sr.we.ui.views.dashboard.NotOptimized;
 import sr.we.ui.views.finance.loanrequests.RequestsView;
 import sr.we.ui.views.finance.loans.LoanView;
 import sr.we.ui.views.finance.payments.PaymentsView;
@@ -234,6 +236,15 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
 
     @Override
     public void setContent(Component content) {
+        if(isMobileDevice()) {
+            if (content != null) {
+                BreadCrumb annotation = content.getClass().getAnnotation(BreadCrumb.class);
+                if (annotation != null && !annotation.optimizedMobile()){
+                    super.setContent(new NotOptimized());
+                    return;
+                }
+            }
+        }
         super.setContent(content);
     }
 
@@ -268,14 +279,14 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
 //            UserService userService = ContextProvider.getBean(UserService.class);
 //            userService.select(AuthenticatedUser.token(), Long.valueOf(businessId), f.getValue());
         });
-        HorizontalLayout horizontalLayout = new HorizontalLayout(roleSelect);
-        horizontalLayout.setPadding(false);
-        horizontalLayout.setMargin(false);
-        horizontalLayout.setWidthFull();
-        horizontalLayout.setAlignItems(FlexComponent.Alignment.END);
-        horizontalLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+//        HorizontalLayout horizontalLayout = new HorizontalLayout(roleSelect);
+//        horizontalLayout.setPadding(false);
+//        horizontalLayout.setMargin(false);
+//        horizontalLayout.setWidthFull();
+//        horizontalLayout.setAlignItems(FlexComponent.Alignment.END);
+//        horizontalLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 
-        Header header = new Header(toggle, breadCrumbLayout, horizontalLayout);
+        Header header = new Header(toggle, breadCrumbLayout/*, horizontalLayout*/);
         header.addClassNames("view-header");
         header.addClassName(LumoUtility.Padding.Right.MEDIUM);
         return header;
@@ -462,5 +473,10 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
         }
 
 
+    }
+
+    public  static boolean isMobileDevice() {
+        WebBrowser webBrowser = VaadinSession.getCurrent().getBrowser();
+        return webBrowser.isAndroid() || webBrowser.isIPhone() || webBrowser.isWindowsPhone();
     }
 }
