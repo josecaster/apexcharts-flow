@@ -56,7 +56,6 @@ public class MenuBuilder {
         }
 
         NaviItem incomeParent = menu.addNaviItem("Income", "icons/menus/icons8_budget_48px.png", null);
-
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(CustomerPrivilege.class), Privileges.READ)) {
             menu.addNaviItem(incomeParent, current.getTranslation("sr.we.customers"), "icons/menus/icons8_customer_48px.png", CustomerView.class);
         }

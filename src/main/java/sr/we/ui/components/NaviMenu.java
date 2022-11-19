@@ -35,6 +35,9 @@ public class NaviMenu extends Div {
 
     public NaviItem addNaviItem(String menuTitle, String iconClass, Class<? extends Component> navigationTarget) {
         NaviItem item = new NaviItem(menuTitle, iconClass, navigationTarget,businessId);
+        if(navigationTarget == null){
+            item.setVisible(false);
+        }
         addNaviItem(item);
         return item;
     }
@@ -45,10 +48,12 @@ public class NaviMenu extends Div {
         addNaviItem(parent, item);
         if(parent != null){
             item.setVisible(false);
+            parent.setVisible(true);
         }
         if(parent != null && navigationTarget != null){
             item.getStyle().set("padding-left", "1em");
         }
+
         return item;
     }
 

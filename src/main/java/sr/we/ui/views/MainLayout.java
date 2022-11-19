@@ -166,47 +166,38 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
         }
 
 
-//        if (genMenu) {
-//            nav.removeAll();
-//            // Wrap the links in a list; improves accessibility
-//            current = UI.getCurrent();
-//            token = AuthenticatedUser.token();
-//            UnorderedList list = new UnorderedList();
-//            list.addClassNames("navigation-list");
-////            for (MenuItemInfo menuItem : createMenuItems()) {
-////            if (accessChecker.hasAccess(menuItem.getView())) {
-////                list.add(menuItem);
-////            }
-////            }
-//            //current.access(() -> {
-//            nav.add(list);
-////                });
-//
-//            UserService userService = ContextProvider.getBean(UserService.class);
-//            thisUser = userService.get(thisUser.getId(), AuthenticatedUser.token());
-//            List<Role> collect = thisUser.getUsersRoles().stream().filter(f -> {
-//
-//                if (businessId.isEmpty() || businessId.equalsIgnoreCase("0")) {
-//                    return f.getBusiness() == null;
-//                } else {
-//                    return f.getBusinessId() != null && f.getBusinessId().toString().equalsIgnoreCase(businessId);
-//                }
-//            }).map(UsersRoles::getRole).collect(Collectors.toList());
-//            if (collect.isEmpty()) {
-//                BusinessService businessService = ContextProvider.getBean(BusinessService.class);
-//                businessService.unselectAll(token);
-//                event.forwardTo(ReRouteLayout.class);
-//            } else {
-//                roleSelect.setItems(collect);
-//                Optional<UsersRoles> max = thisUser.getUsersRoles().stream().//
-//                        filter(f -> collect.stream().anyMatch(g -> g.getId().compareTo(f.getRole().getId()) == 0)).//
-//                        max(Comparator.comparingLong(f -> f.getCounter() == null ? 0L : f.getCounter()));
-//                if (max.isPresent()) {
-//                    UsersRoles usersRoles = max.get();
-//                    roleSelect.setValue(usersRoles.getRole());
-//                }
-//            }
-//        }
+        if (genMenu) {
+            nav.removeAll();
+            initNaviItems();
+            // Wrap the links in a list; improves accessibility
+            current = UI.getCurrent();
+            token = AuthenticatedUser.token();
+
+            UserService userService = ContextProvider.getBean(UserService.class);
+            thisUser = userService.get(thisUser.getId(), AuthenticatedUser.token());
+            List<Role> collect = thisUser.getUsersRoles().stream().filter(f -> {
+
+                if (businessId.isEmpty() || businessId.equalsIgnoreCase("0")) {
+                    return f.getBusiness() == null;
+                } else {
+                    return f.getBusinessId() != null && f.getBusinessId().toString().equalsIgnoreCase(businessId);
+                }
+            }).map(UsersRoles::getRole).collect(Collectors.toList());
+            if (collect.isEmpty()) {
+                BusinessService businessService = ContextProvider.getBean(BusinessService.class);
+                businessService.unselectAll(token);
+                event.forwardTo(ReRouteLayout.class);
+            } else {
+                roleSelect.setItems(collect);
+                Optional<UsersRoles> max = thisUser.getUsersRoles().stream().//
+                        filter(f -> collect.stream().anyMatch(g -> g.getId().compareTo(f.getRole().getId()) == 0)).//
+                        max(Comparator.comparingLong(f -> f.getCounter() == null ? 0L : f.getCounter()));
+                if (max.isPresent()) {
+                    UsersRoles usersRoles = max.get();
+                    roleSelect.setValue(usersRoles.getRole());
+                }
+            }
+        }
 
     }
 
@@ -308,6 +299,9 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
     }
 
     private Nav createNavigation() {
+        nav = new Nav();
+        nav.addClassNames("menu-item-container");
+        nav.getElement().setAttribute("aria-labelledby", "views");
         return initNaviItems();
     }
 
@@ -338,9 +332,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
     }
 
     private Nav initNaviItems() {
-        nav = new Nav();
-        nav.addClassNames("menu-item-container");
-        nav.getElement().setAttribute("aria-labelledby", "views");
+
         NaviMenu menu = new NaviMenu(businessId);
         nav.add(menu);
         menu.removeAll();
