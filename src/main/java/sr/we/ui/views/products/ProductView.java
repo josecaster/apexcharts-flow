@@ -21,6 +21,7 @@ import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.LoanPrivilege;
 import sr.we.shekelflowcore.security.privileges.ProductsPrivilege;
+import sr.we.ui.components.UIUtil;
 import sr.we.ui.views.MainLayout;
 
 import javax.annotation.security.RolesAllowed;
@@ -69,17 +70,17 @@ public class ProductView extends LitTemplate /*implements BeforeEnterObserver*/ 
         grid.addComponentColumn(f -> {
             if(f.getStatus().compareTo(Product.Status.Active) == 0){
                 Span active = new Span("Active");
-                active.getElement().getThemeList().add("badge success");
+                active.getElement().getThemeList().add(UIUtil.Badge.PILL+" success");
                 active.getElement().getStyle().set("height","fit-content");
                 return active;
             } else if (f.getStatus().compareTo(Product.Status.Draft) == 0){
                 Span draft = new Span("Draft");
-                draft.getElement().getThemeList().add("badge");
+                draft.getElement().getThemeList().add(UIUtil.Badge.PILL);
                 draft.getElement().getStyle().set("height","fit-content");
                 return draft;
             } else {
                 Span archive = new Span("Archive");
-                archive.getElement().getThemeList().add("badge contrast");
+                archive.getElement().getThemeList().add(UIUtil.Badge.PILL+" contrast");
                 archive.getElement().getStyle().set("height","fit-content");
                 return archive;
             }

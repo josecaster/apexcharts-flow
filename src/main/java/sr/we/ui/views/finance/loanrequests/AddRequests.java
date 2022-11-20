@@ -30,6 +30,7 @@ import sr.we.shekelflowcore.entity.helper.vo.LoanRequestAssetsVO;
 import sr.we.shekelflowcore.entity.helper.vo.LoanRequestVO;
 import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.ui.components.Highlight;
+import sr.we.ui.components.UIUtil;
 import sr.we.ui.views.LineAwesomeIcon;
 
 import java.util.ArrayList;
@@ -225,7 +226,7 @@ public class AddRequests extends LitTemplate {
         loanRequestStatusSpan.setVisible(true);
         loanRequestStatusSpan.setText(loanRequest.getStatus().name());
         ThemeList themeList = loanRequestStatusSpan.getElement().getThemeList();
-        themeList.add("badge");
+        themeList.add(UIUtil.Badge.PILL);
         if (loanRequest.getStatus().compareTo(LoanRequest.Status.REQUESTED) == 0) {
             themeList.add("primary");
         } else if (loanRequest.getStatus().compareTo(LoanRequest.Status.APPROVED) == 0) {

@@ -21,6 +21,7 @@ import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.ServicesPrivilege;
 import sr.we.ui.components.BreadCrumb;
+import sr.we.ui.components.UIUtil;
 import sr.we.ui.views.MainLayout;
 import sr.we.ui.views.currencyexchange.CurrencyExchangeDataProvider;
 import sr.we.ui.views.pos.DataProviders;
@@ -71,12 +72,12 @@ public class ServiceView extends LitTemplate implements BeforeEnterObserver {
         grid.addComponentColumn(f -> {
             if (f.getActive()) {
                 Span active = new Span("Active");
-                active.getElement().getThemeList().add("badge success");
+                active.getElement().getThemeList().add(UIUtil.Badge.PILL+" success");
                 active.getElement().getStyle().set("height", "fit-content");
                 return active;
             } else {
                 Span archive = new Span("Inactive");
-                archive.getElement().getThemeList().add("badge contrast");
+                archive.getElement().getThemeList().add(UIUtil.Badge.PILL+" contrast");
                 archive.getElement().getStyle().set("height", "fit-content");
                 return archive;
             }

@@ -13,6 +13,7 @@ import sr.we.shekelflowcore.entity.LoanRequestPlanDetail;
 import sr.we.shekelflowcore.entity.helper.Executable;
 import sr.we.shekelflowcore.enums.Reference;
 import sr.we.shekelflowcore.settings.util.Constants;
+import sr.we.ui.components.UIUtil;
 import sr.we.ui.views.LineAwesomeIcon;
 import sr.we.ui.views.finance.transactions.TransactionDialog;
 
@@ -57,7 +58,7 @@ public class LRPView extends VerticalLayout {
             public LineAwesomeIcon apply(LoanRequestPlanDetail detail) {
                 if (detail.isFullyPayed()) {
                     LineAwesomeIcon lineAwesomeIcon = new LineAwesomeIcon("la la-check");
-                    lineAwesomeIcon.getElement().getThemeList().add("badge primary success");
+                    lineAwesomeIcon.getElement().getThemeList().add(UIUtil.Badge.PILL+" primary success");
                     return lineAwesomeIcon;
                 }
                 LineAwesomeIcon lineAwesomeIcon = null;
@@ -82,7 +83,7 @@ public class LRPView extends VerticalLayout {
                     transactionDialog.open();
                 });
 
-                lineAwesomeIcon.getElement().getThemeList().add("badge primary error");
+                lineAwesomeIcon.getElement().getThemeList().add(UIUtil.Badge.PILL+" primary error");
                 return lineAwesomeIcon;
             }
         }).setHeader("Record Payment");
@@ -114,17 +115,17 @@ public class LRPView extends VerticalLayout {
 
                 if (loanRequestPlanning.isFullyPayed()) {
                     Span paid = new Span("Paid");
-                    paid.getElement().getThemeList().add("badge success");
+                    paid.getElement().getThemeList().add(UIUtil.Badge.PILL+" success");
                     span = paid;
                 } else {
 
                     if (loanRequestPlanning.getInitDate().isBefore(LocalDate.now())) {
                         Span pending = new Span("Overdue");
-                        pending.getElement().getThemeList().add("badge error");
+                        pending.getElement().getThemeList().add(UIUtil.Badge.PILL+" error");
                         span = pending;
                     } else {
                         Span confirmed = new Span("Pending");
-                        confirmed.getElement().getThemeList().add("badge contrast");
+                        confirmed.getElement().getThemeList().add(UIUtil.Badge.PILL+" contrast");
                         span = confirmed;
                     }
                 }

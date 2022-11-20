@@ -20,6 +20,7 @@ import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.LoanRequestPrivilege;
 import sr.we.shekelflowcore.settings.util.Constants;
+import sr.we.ui.components.UIUtil;
 import sr.we.ui.views.TableLayout;
 import sr.we.ui.views.finance.loans.tabs.request.LRCreateView;
 import sr.we.ui.views.business.BusinessView;
@@ -108,11 +109,11 @@ public class LTabRequests extends TableLayout implements AfterNavigationObserver
 
         if (eligible != null) {
             Span pending = new Span("Not Eligible");
-            pending.getElement().getThemeList().add("badge error");
+            pending.getElement().getThemeList().add(UIUtil.Badge.PILL+" error");
             pending.getElement().getStyle().set("height","fit-content");
 
             Span confirmed = new Span("Eligible");
-            confirmed.getElement().getThemeList().add("badge success");
+            confirmed.getElement().getThemeList().add(UIUtil.Badge.PILL+" success");
             confirmed.getElement().getStyle().set("height","fit-content");
 
             if (eligible) {
@@ -124,7 +125,7 @@ public class LTabRequests extends TableLayout implements AfterNavigationObserver
         switch (status) {
                 case REQUESTED -> {
                     Span pending = new Span("Requested");
-                    pending.getElement().getThemeList().add("badge");
+                    pending.getElement().getThemeList().add(UIUtil.Badge.PILL);
                     pending.getElement().getStyle().set("height","fit-content");
                     card.add(pending);
                 }
@@ -154,7 +155,7 @@ public class LTabRequests extends TableLayout implements AfterNavigationObserver
                 }*/
                 case APPROVED -> {
                     Span approved = new Span("Approved");
-                    approved.getElement().getThemeList().add("badge success");
+                    approved.getElement().getThemeList().add(UIUtil.Badge.PILL+" success");
                     approved.getElement().getStyle().set("height","fit-content");
                     card.add(approved);
                 }

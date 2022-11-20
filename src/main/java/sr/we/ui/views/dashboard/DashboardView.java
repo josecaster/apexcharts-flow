@@ -48,6 +48,7 @@ import sr.we.shekelflowcore.security.privileges.LoanReportPrivilege;
 import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.ui.components.BreadCrumb;
 import sr.we.ui.components.Highlight;
+import sr.we.ui.components.UIUtil;
 import sr.we.ui.views.MainLayout;
 
 import javax.annotation.security.RolesAllowed;
@@ -136,7 +137,7 @@ public class DashboardView extends Main implements BeforeEnterObserver {
     }
 
     private static String getStatusTheme(DashboardAccounts serviceHealth) {
-        String theme = "badge primary small";
+        String theme = UIUtil.Badge.PILL+" primary small";
         if (serviceHealth.getIn().compareTo(serviceHealth.getOut()) > 0) {
             theme += " success";
         } else if (serviceHealth.getIn().compareTo(serviceHealth.getOut()) < 0) {

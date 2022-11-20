@@ -13,6 +13,7 @@ import sr.we.shekelflowcore.entity.Business;
 import sr.we.shekelflowcore.entity.LoanRequest;
 import sr.we.shekelflowcore.entity.helper.MappedSuperClass;
 import sr.we.shekelflowcore.settings.util.Constants;
+import sr.we.ui.components.UIUtil;
 import sr.we.ui.views.finance.transactions.TransactionForm;
 
 import java.util.Optional;
@@ -56,12 +57,12 @@ public class PaymentsForm extends VerticalLayout {
         grid.addComponentColumn(f -> {
             if (f.isOverdue()) {
                 Span overdue = new Span("Overdue");
-                overdue.getElement().getThemeList().add("badge error");
+                overdue.getElement().getThemeList().add(UIUtil.Badge.PILL+" error");
                 overdue.getElement().getStyle().set("height", "fit-content");
                 return overdue;
             }
             Span pending = new Span("Pending");
-            pending.getElement().getThemeList().add("badge contrast");
+            pending.getElement().getThemeList().add(UIUtil.Badge.PILL+" contrast");
             pending.getElement().getStyle().set("height", "fit-content");
             return pending;
         }).setHeader("State");

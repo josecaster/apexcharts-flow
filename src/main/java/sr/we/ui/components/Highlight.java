@@ -47,7 +47,7 @@ public class Highlight extends VerticalLayout {
                     Icon i = icon.create();
                     i.addClassNames("box-border", "p-xs");
                     String prefix = "";
-                    String theme = "badge";
+                    String theme = UIUtil.Badge.PILL;
                     if (percentage != null) {
                         if (percentage == 0) {
                             prefix = "±";

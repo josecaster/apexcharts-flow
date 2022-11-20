@@ -5,6 +5,7 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
+import sr.we.ui.components.UIUtil;
 
 public class CustomersViewCard extends ListItem {
 
@@ -36,7 +37,7 @@ public class CustomersViewCard extends ListItem {
         description.addClassName("my-m");
 
         Span badge = new Span();
-        badge.getElement().setAttribute("theme", "badge");
+        badge.getElement().setAttribute("theme", UIUtil.Badge.PILL);
         badge.setText("Label");
 
         add(div, header, subtitle, description, badge);

@@ -22,6 +22,7 @@ import sr.we.shekelflowcore.entity.Loan;
 import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.LoanPrivilege;
+import sr.we.ui.components.UIUtil;
 import sr.we.ui.views.MainLayout;
 import sr.we.ui.views.finance.loans.tabs.LTabDashboard;
 
@@ -104,11 +105,11 @@ public class LoanView extends LitTemplate implements AfterNavigationObserver, Ha
         card.add(header);
         Span pending = new Span("Balanced");
         pending.getElement().getStyle().set("height", "fit-content");
-        pending.getElement().getThemeList().add("badge contrast");
+        pending.getElement().getThemeList().add(UIUtil.Badge.PILL+" contrast");
 
         Span confirmed = new Span("Fixed");
         confirmed.getElement().getStyle().set("height", "fit-content");
-        confirmed.getElement().getThemeList().add("badge success");
+        confirmed.getElement().getThemeList().add(UIUtil.Badge.PILL+" success");
         if (loan.getFixed()) {
             card.add(confirmed);
         } else {

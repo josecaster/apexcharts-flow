@@ -26,6 +26,7 @@ import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.CurrencyExchangePrivilege;
 import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.ui.components.TempDatePicker;
+import sr.we.ui.components.UIUtil;
 import sr.we.ui.components.finance.AccountSelect;
 import sr.we.ui.components.finance.PaymentMethodSelect;
 import sr.we.ui.components.general.CurrencySelect;
@@ -84,13 +85,13 @@ public class TransactionForm extends FormLayout {
         convertedAmountLbl = new H4(rest == null ? null : Constants.CURRENCY_FORMAT.format(rest));
         convertedAmountLbl.setClassName(LumoUtility.Margin.NONE);
         Element element = convertedAmountLbl.getElement();
-        element.setAttribute("theme", "badge primary");
+        element.setAttribute("theme", UIUtil.Badge.PILL+" primary");
         element.getStyle().set("font-size", "var(--lumo-font-size-xl)");
 
         changeLbl = new H4("0.00");
         changeLbl.setClassName(LumoUtility.Margin.NONE);
         Element element1 = changeLbl.getElement();
-        element1.setAttribute("theme", "badge");
+        element1.setAttribute("theme", UIUtil.Badge.PILL);
         element1.getStyle().set("font-size", "var(--lumo-font-size-xl)");
         paymentMethodSelect = new PaymentMethodSelect();
         if (reference == null) {

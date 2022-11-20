@@ -23,6 +23,7 @@ import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.shekelflowcore.settings.util.DateUtil;
 import sr.we.ui.components.NotYetChange;
 import sr.we.ui.components.NotYetClick;
+import sr.we.ui.components.UIUtil;
 import sr.we.ui.views.LineAwesomeIcon;
 import sr.we.ui.views.finance.transactions.TransactionDialog;
 import sr.we.ui.views.finance.transactions.TransactionsCmb;
@@ -78,7 +79,7 @@ public class TicketsView extends LitTemplate {
             public LineAwesomeIcon apply(PosHeader posHeader) {
                 if (posHeader.getRest().compareTo(BigDecimal.ZERO) == 0) {
                     LineAwesomeIcon lineAwesomeIcon = new LineAwesomeIcon("la la-check");
-                    lineAwesomeIcon.getElement().getThemeList().add("badge primary success");
+                    lineAwesomeIcon.getElement().getThemeList().add(UIUtil.Badge.PILL+" primary success");
                     return lineAwesomeIcon;
                 }
                 LineAwesomeIcon lineAwesomeIcon = null;
@@ -94,7 +95,7 @@ public class TicketsView extends LitTemplate {
                     transactionDialog.open();
                 });
 
-                lineAwesomeIcon.getElement().getThemeList().add("badge primary error");
+                lineAwesomeIcon.getElement().getThemeList().add(UIUtil.Badge.PILL+" primary error");
                 return lineAwesomeIcon;
             }
         }).setHeader("Record Payment");

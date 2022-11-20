@@ -38,6 +38,7 @@ import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.ui.components.FieldSet;
 import sr.we.ui.components.Highlight;
 import sr.we.ui.components.MyDialog;
+import sr.we.ui.components.UIUtil;
 import sr.we.ui.components.finance.LoanRequestStatusWizard;
 import sr.we.ui.views.LineAwesomeIcon;
 import sr.we.ui.views.ReRouteLayout;
@@ -183,7 +184,7 @@ public class LRView extends VerticalLayout implements BeforeEnterObserver {
         switch (status1) {
             case REQUESTED -> {
                 Span pending = new Span("Requested");
-                pending.getElement().getThemeList().add("badge");
+                pending.getElement().getThemeList().add(UIUtil.Badge.PILL);
                 card.add(pending);
                 break;
             }

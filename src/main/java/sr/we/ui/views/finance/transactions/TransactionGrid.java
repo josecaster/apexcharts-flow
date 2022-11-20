@@ -17,6 +17,7 @@ import sr.we.shekelflowcore.entity.helper.MappedSuperClass;
 import sr.we.shekelflowcore.entity.helper.vo.PaymentTransactionVO;
 import sr.we.shekelflowcore.exception.PrimaryThrowable;
 import sr.we.shekelflowcore.settings.util.Constants;
+import sr.we.ui.components.UIUtil;
 import sr.we.ui.components.buttons.DeleteButton;
 import sr.we.ui.views.LineAwesomeIcon;
 
@@ -84,11 +85,11 @@ public class TransactionGrid extends VerticalLayout  {
             switch (f.getTransactionType()) {
                 case DEPOSIT -> {
                     lineAwesomeIcon.add(new LineAwesomeIcon("la la-arrow-up"));
-                    lineAwesomeIcon.getElement().getThemeList().add("badge success");
+                    lineAwesomeIcon.getElement().getThemeList().add(UIUtil.Badge.PILL+" success");
                 }
                 case WITHDRAWAL -> {
                     lineAwesomeIcon.add(new LineAwesomeIcon("la la-arrow-down"));
-                    lineAwesomeIcon.getElement().getThemeList().add("badge error");
+                    lineAwesomeIcon.getElement().getThemeList().add(UIUtil.Badge.PILL+" error");
                 }
             }
             return lineAwesomeIcon;

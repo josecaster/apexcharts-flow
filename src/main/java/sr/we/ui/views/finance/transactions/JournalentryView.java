@@ -32,6 +32,7 @@ import sr.we.shekelflowcore.enums.DebCred;
 import sr.we.shekelflowcore.enums.TransactionType;
 import sr.we.shekelflowcore.enums.Reference;
 import sr.we.shekelflowcore.settings.util.Constants;
+import sr.we.ui.components.UIUtil;
 import sr.we.ui.components.finance.AccountSelect;
 import sr.we.ui.components.general.CurrencySelect;
 import sr.we.ui.views.LineAwesomeIcon;
@@ -224,8 +225,8 @@ public class JournalentryView extends LitTemplate {
         sumDebitH3.setClassName(LumoUtility.Margin.NONE);
         sumCreditH3.setClassName(LumoUtility.Margin.NONE);
 
-        sumDebitH3.getElement().setAttribute("theme", "badge primary");
-        sumCreditH3.getElement().setAttribute("theme", "badge primary");
+        sumDebitH3.getElement().setAttribute("theme", UIUtil.Badge.PILL+" primary");
+        sumCreditH3.getElement().setAttribute("theme", UIUtil.Badge.PILL+" primary");
 
         sumDebitH3.setText("Total " + Constants.CURRENCY_FORMAT.format(BigDecimal.ZERO));
         sumCreditH3.setText("Total " + Constants.CURRENCY_FORMAT.format(BigDecimal.ZERO));
@@ -241,7 +242,7 @@ public class JournalentryView extends LitTemplate {
 
         difference = new H3("Difference " + Constants.CURRENCY_FORMAT.format(BigDecimal.ZERO));
         difference.setClassName(LumoUtility.Margin.NONE);
-        difference.getElement().setAttribute("theme", "badge primary");
+        difference.getElement().setAttribute("theme", UIUtil.Badge.PILL+" primary");
         HorizontalLayout credit = new HorizontalLayout(difference);
         credit.setWidthFull();
         credit.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -269,14 +270,14 @@ public class JournalentryView extends LitTemplate {
             BigDecimal diff = debit.subtract(credit);
             difference.setText("Difference " + Constants.CURRENCY_FORMAT.format(diff));
             if (debit.compareTo(credit) != 0) {
-                sumDebitH3.getElement().setAttribute("theme", "badge error");
-                sumCreditH3.getElement().setAttribute("theme", "badge error");
+                sumDebitH3.getElement().setAttribute("theme", UIUtil.Badge.PILL+" error");
+                sumCreditH3.getElement().setAttribute("theme", UIUtil.Badge.PILL+" error");
             } else if ((debit).compareTo(credit) == 0 && debit.compareTo(BigDecimal.ZERO) != 0) {
-                sumDebitH3.getElement().setAttribute("theme", "badge success");
-                sumCreditH3.getElement().setAttribute("theme", "badge success");
+                sumDebitH3.getElement().setAttribute("theme", UIUtil.Badge.PILL+" success");
+                sumCreditH3.getElement().setAttribute("theme", UIUtil.Badge.PILL+" success");
             } else {
-                sumDebitH3.getElement().setAttribute("theme", "badge primary");
-                sumCreditH3.getElement().setAttribute("theme", "badge primary");
+                sumDebitH3.getElement().setAttribute("theme", UIUtil.Badge.PILL+" primary");
+                sumCreditH3.getElement().setAttribute("theme", UIUtil.Badge.PILL+" primary");
             }
         }
     }

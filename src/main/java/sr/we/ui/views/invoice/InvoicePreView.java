@@ -31,6 +31,7 @@ import sr.we.shekelflowcore.entity.PosHeader;
 import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.shekelflowcore.settings.util.DateUtil;
 import sr.we.ui.components.BreadCrumb;
+import sr.we.ui.components.UIUtil;
 import sr.we.ui.views.pos.Item;
 
 import java.io.ByteArrayInputStream;
@@ -236,15 +237,15 @@ public class InvoicePreView extends LitTemplate implements BeforeEnterObserver {
         invoicePreviewStatusSpan.getElement().getThemeList().remove("contrast");
         if (invoice.isFullyPayed()) {
             invoicePreviewStatusSpan.setText("Paid");
-            invoicePreviewStatusSpan.getElement().getThemeList().add("badge success");
+            invoicePreviewStatusSpan.getElement().getThemeList().add(UIUtil.Badge.PILL+" success");
         } else {
 
             if (invoice.getPaymentDue().isBefore(LocalDate.now())) {
                 invoicePreviewStatusSpan.setText("Overdue");
-                invoicePreviewStatusSpan.getElement().getThemeList().add("badge error");
+                invoicePreviewStatusSpan.getElement().getThemeList().add(UIUtil.Badge.PILL+" error");
             } else {
                 invoicePreviewStatusSpan.setText("Pending");
-                invoicePreviewStatusSpan.getElement().getThemeList().add("badge contrast");
+                invoicePreviewStatusSpan.getElement().getThemeList().add(UIUtil.Badge.PILL+" contrast");
             }
         }
 

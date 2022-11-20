@@ -38,6 +38,7 @@ import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.ui.components.ArrowDownButton;
 import sr.we.ui.components.BreadCrumb;
 import sr.we.ui.components.NotYetChange;
+import sr.we.ui.components.UIUtil;
 import sr.we.ui.components.buttons.DeleteButton;
 import sr.we.ui.views.LineAwesomeIcon;
 import sr.we.ui.views.MainLayout;
@@ -85,15 +86,15 @@ public class InvoiceView extends LitTemplate implements BeforeEnterObserver, Aft
                 invoiceViewStatusSpan.removeClassName("menu-item-icon");
                 if (invoice.isFullyPayed()) {
                     invoiceViewStatusSpan.setText(invoice.getStatus().getDisplay() + " : Paid");
-                    invoiceViewStatusSpan.getElement().getThemeList().add("badge success");
+                    invoiceViewStatusSpan.getElement().getThemeList().add(UIUtil.Badge.PILL+" success");
                 } else {
 
                     if (invoice.getPaymentDue().isBefore(LocalDate.now())) {
                         invoiceViewStatusSpan.setText(invoice.getStatus().getDisplay() + " : Overdue");
-                        invoiceViewStatusSpan.getElement().getThemeList().add("badge error");
+                        invoiceViewStatusSpan.getElement().getThemeList().add(UIUtil.Badge.PILL+" error");
                     } else {
                         invoiceViewStatusSpan.setText(invoice.getStatus().getDisplay() + " : Pending");
-                        invoiceViewStatusSpan.getElement().getThemeList().add("badge contrast");
+                        invoiceViewStatusSpan.getElement().getThemeList().add(UIUtil.Badge.PILL+" contrast");
                     }
                 }
                 return invoiceViewStatusSpan;

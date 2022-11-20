@@ -28,6 +28,7 @@ import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.LoanPrivilege;
 import sr.we.shekelflowcore.security.privileges.LoanRequestPrivilege;
 import sr.we.shekelflowcore.settings.util.Constants;
+import sr.we.ui.components.UIUtil;
 import sr.we.ui.views.MainLayout;
 import sr.we.ui.views.finance.loans.tabs.request.LRView;
 import sr.we.ui.views.products.AddProductsView;
@@ -116,7 +117,7 @@ public class RequestsView extends LitTemplate implements BeforeEnterObserver , A
         loanRequestStatusSpan.setVisible(true);
         loanRequestStatusSpan.setText(loanRequest.getStatus().name());
         ThemeList themeList = loanRequestStatusSpan.getElement().getThemeList();
-        themeList.add("badge");
+        themeList.add(UIUtil.Badge.PILL);
         if (loanRequest.getStatus().compareTo(LoanRequest.Status.REQUESTED) == 0) {
             themeList.add("primary");
         } else if (loanRequest.getStatus().compareTo(LoanRequest.Status.APPROVED) == 0) {
