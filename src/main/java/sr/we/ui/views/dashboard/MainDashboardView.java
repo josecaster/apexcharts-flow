@@ -162,8 +162,8 @@ public class MainDashboardView extends Main implements BeforeEnterObserver {
 //        conf.getChart().setStyledMode(true);
         NoData noData = new NoData();
         noData.setText("No data present at the moment");
-        apexChartsBuilder = apexChartsBuilder.withChart(ChartBuilder.get().withType(Type.line).withHeight("400px").withZoom(ZoomBuilder.get().withEnabled(true).build()).build())//
-                .withStroke(StrokeBuilder.get().withCurve(Curve.smooth).build())//
+        apexChartsBuilder = apexChartsBuilder.withChart(ChartBuilder.get().withType(Type.LINE).withHeight("400px").withZoom(ZoomBuilder.get().withEnabled(true).build()).build())//
+                .withStroke(StrokeBuilder.get().withCurve(Curve.SMOOTH).build())//
 //                .withTitle(TitleSubtitleBuilder.get().withText("Chart").withAlign(Align.right).build())//
                 .withNoData(noData)//
                 .withGrid(GridBuilder.get().withRow(RowBuilder.get().withColors("#f3f3f3", "transparent").withOpacity(0.5).build()).build());//
