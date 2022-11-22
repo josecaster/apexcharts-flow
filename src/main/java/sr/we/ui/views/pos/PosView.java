@@ -167,7 +167,7 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
             }
 
 
-            TransactionDialog transactionDialog = new TransactionDialog(posHeader.getRest(), LocalDate.now(), Long.valueOf(business), business2.getCurrency(), business2.getCurrency(), Reference.POS, posHeader.getId());
+            TransactionDialog transactionDialog = new TransactionDialog(posHeader.getRest(), LocalDate.now(), Long.valueOf(business), business2.getCurrency(), business2.getCurrency(), Reference.POS, posHeader.getId(),posHeader.getCustomerId());
             transactionDialog.disableAmount();
             transactionDialog.setOnSave(() -> {
                 PosStartService posStartService = ContextProvider.getBean(PosStartService.class);

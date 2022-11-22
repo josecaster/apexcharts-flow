@@ -77,7 +77,7 @@ public class LRPView extends VerticalLayout {
                     Currency selectedCurrency = loanRequest.getCurrency();
                     Reference reference = Reference.LOAN_REQUEST_PLAN_DETAIL;
                     Long referenceId = detail.getId();
-                    TransactionDialog transactionDialog = new TransactionDialog(rest, initDate, businessId, fromCurrency, selectedCurrency, reference, referenceId);
+                    TransactionDialog transactionDialog = new TransactionDialog(rest, initDate, businessId, fromCurrency, selectedCurrency, reference, referenceId,(loanRequest.getCustomer() == null ? null : loanRequest.getCustomer().getId()));
                     transactionDialog.setNextReferenceId(loanRequest.getId());
                     transactionDialog.setRefresh(refresh);
                     transactionDialog.open();

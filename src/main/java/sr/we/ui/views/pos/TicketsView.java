@@ -89,7 +89,7 @@ public class TicketsView extends LitTemplate {
                     lineAwesomeIcon = new LineAwesomeIcon("la la-chevron-circle-down");
                 }
                 lineAwesomeIcon.addClickListener(f -> {
-                    TransactionDialog transactionDialog = new TransactionDialog(posHeader.getRest(), LocalDate.now(), business.getId(), business.getCurrency(), business.getCurrency(), Reference.POS, posHeader.getId());
+                    TransactionDialog transactionDialog = new TransactionDialog(posHeader.getRest(), LocalDate.now(), business.getId(), business.getCurrency(), business.getCurrency(), Reference.POS, posHeader.getId(),posHeader.getCustomerId());
                     transactionDialog.setOnSave(onSave);
                     transactionDialog.setRefresh(onRefresh);
                     transactionDialog.open();

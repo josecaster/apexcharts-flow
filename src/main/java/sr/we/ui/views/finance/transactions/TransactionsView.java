@@ -89,7 +89,7 @@ public class TransactionsView extends LitTemplate implements AfterNavigationObse
             journalentryDialog.open();
         });
         addIncomeBtn.addClickListener(f -> {
-            TransactionDialog transactionDialog = new TransactionDialog(null, LocalDate.now(), Long.valueOf(businessString), business.getCurrency(), business.getCurrency(), null, null, TransactionType.DEPOSIT);
+            TransactionDialog transactionDialog = new TransactionDialog(null, LocalDate.now(), Long.valueOf(businessString), business.getCurrency(), business.getCurrency(), null, null, TransactionType.DEPOSIT,null);
             transactionDialog.setRefresh(() -> {
                 transactionGrid.afterNavigation();
                 return null;
@@ -97,7 +97,7 @@ public class TransactionsView extends LitTemplate implements AfterNavigationObse
             transactionDialog.open();
         });
         addExpenseBtn.addClickListener(f -> {
-            TransactionDialog transactionDialog = new TransactionDialog(null, LocalDate.now(), Long.valueOf(businessString), business.getCurrency(), business.getCurrency(), null, null, TransactionType.WITHDRAWAL);
+            TransactionDialog transactionDialog = new TransactionDialog(null, LocalDate.now(), Long.valueOf(businessString), business.getCurrency(), business.getCurrency(), null, null, TransactionType.WITHDRAWAL,null);
             transactionDialog.setRefresh(() -> {
                 transactionGrid.afterNavigation();
                 return null;

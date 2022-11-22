@@ -84,7 +84,7 @@ public class LTabPayments extends PaymentsForm implements BeforeEnterObserver, A
         Currency fromCurrency = business.getCurrency();
         Currency selectedCurrency = business.getCurrency();
         Reference reference = Reference.LOAN_REQUEST_PLAN_DETAIL;
-        transactionForm = new TransactionForm(rest, now, businessId, fromCurrency, selectedCurrency, reference, null);
+        transactionForm = new TransactionForm(rest, now, businessId, fromCurrency, selectedCurrency, reference, null, null);
 
         layout.add(transactionForm);
     }

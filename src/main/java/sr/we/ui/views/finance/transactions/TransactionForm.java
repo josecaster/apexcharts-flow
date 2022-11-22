@@ -64,11 +64,11 @@ public class TransactionForm extends FormLayout {
     private CurrencyExchange currencyExchange;
 
 
-    public TransactionForm(BigDecimal rest, LocalDate initDate, Long businessId, Currency fromCurrency, Currency selectedCurrency, Reference reference, Long referenceId) {
-        this(rest, initDate, businessId, fromCurrency, selectedCurrency, reference, referenceId, reference.getPlusMin());
+    public TransactionForm(BigDecimal rest, LocalDate initDate, Long businessId, Currency fromCurrency, Currency selectedCurrency, Reference reference, Long referenceId, Long customerId) {
+        this(rest, initDate, businessId, fromCurrency, selectedCurrency, reference, referenceId, reference.getPlusMin(),customerId);
     }
 
-    public TransactionForm(BigDecimal rest, LocalDate initDate, Long businessId, Currency fromCurrency, Currency selectedCurrency, Reference reference, Long referenceId, TransactionType transactionType) {
+    public TransactionForm(BigDecimal rest, LocalDate initDate, Long businessId, Currency fromCurrency, Currency selectedCurrency, Reference reference, Long referenceId, TransactionType transactionType, Long customerId) {
 
         this.businessId = businessId;
         this.reference = reference;

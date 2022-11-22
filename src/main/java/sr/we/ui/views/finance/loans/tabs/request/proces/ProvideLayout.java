@@ -88,7 +88,7 @@ public class ProvideLayout extends LitTemplate {
             Currency selectedCurrency = vaadinSelect.getValue();
             Reference reference = Reference.LOAN_REQUEST;
             Long referenceId = loanRequest.getId();
-            TransactionDialog transactionDialog = new TransactionDialog(rest, initDate, businessId, fromCurrency, selectedCurrency, reference, referenceId);
+            TransactionDialog transactionDialog = new TransactionDialog(rest, initDate, businessId, fromCurrency, selectedCurrency, reference, referenceId,(loanRequest.getCustomer() == null ? null : loanRequest.getCustomer().getId()));
             transactionDialog.open();
             transactionDialog.setRefresh(refresh);
             transactionDialog.disableExchange();

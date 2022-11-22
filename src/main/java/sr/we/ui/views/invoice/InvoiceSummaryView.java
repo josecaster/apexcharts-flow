@@ -198,7 +198,7 @@ public class InvoiceSummaryView extends LitTemplate implements BeforeEnterObserv
             Reference reference = Reference.INVOICE;
             Long referenceId = invoice.getId();
 
-            TransactionDialog transactionDialog = new TransactionDialog(invoice.getRest(), LocalDate.now(), business2.getId(), fromCurrency, selectedCurrency, reference, referenceId);
+            TransactionDialog transactionDialog = new TransactionDialog(invoice.getRest(), LocalDate.now(), business2.getId(), fromCurrency, selectedCurrency, reference, referenceId,(invoice.getCustomer() == null ? null : invoice.getCustomer().getId()));
             transactionDialog.setNextReferenceId(invoice.getId());
             transactionDialog.setRefresh(() -> {
                 setByPosHeaderId(null, posHeaderId);

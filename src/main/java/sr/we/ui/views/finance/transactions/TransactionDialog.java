@@ -48,11 +48,11 @@ public class TransactionDialog extends MyDialog {
     private Button saveButton = null;
     private PaymentTransaction save;
 
-    public TransactionDialog(BigDecimal rest, LocalDate initDate, Long businessId, Currency fromCurrency, Currency selectedCurrency, Reference reference, Long referenceId) {
-        this(rest, initDate, businessId, fromCurrency, selectedCurrency, reference, referenceId, reference.getPlusMin());
+    public TransactionDialog(BigDecimal rest, LocalDate initDate, Long businessId, Currency fromCurrency, Currency selectedCurrency, Reference reference, Long referenceId, Long customerId) {
+        this(rest, initDate, businessId, fromCurrency, selectedCurrency, reference, referenceId, reference.getPlusMin(),customerId);
     }
 
-    public TransactionDialog(BigDecimal rest, LocalDate initDate, Long businessId, Currency fromCurrency, Currency selectedCurrency, Reference reference, Long referenceId, TransactionType transactionType) {
+    public TransactionDialog(BigDecimal rest, LocalDate initDate, Long businessId, Currency fromCurrency, Currency selectedCurrency, Reference reference, Long referenceId, TransactionType transactionType,Long customerId) {
 
         setHeaderTitle("Record a payment");
         Button closeButton = new Button(new Icon("lumo", "cross"), (e) -> {
@@ -69,7 +69,7 @@ public class TransactionDialog extends MyDialog {
         cancelButton.getStyle().set("margin-right", "auto");
         getFooter().add(cancelButton);
 
-        transactionForm = new TransactionForm(rest, initDate, businessId, fromCurrency, selectedCurrency, reference, referenceId, transactionType);
+        transactionForm = new TransactionForm(rest, initDate, businessId, fromCurrency, selectedCurrency, reference, referenceId, transactionType,customerId);
         add(transactionForm);
 
         saveButton = new Button("Save");
