@@ -21,18 +21,23 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.apache.commons.lang3.StringUtils;
 import sr.we.ContextProvider;
+import sr.we.CustomNotificationHandler;
 import sr.we.data.controller.BusinessService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Account;
 import sr.we.shekelflowcore.entity.Business;
 import sr.we.shekelflowcore.entity.Currency;
+import sr.we.shekelflowcore.entity.helper.TransactionCategory;
 import sr.we.shekelflowcore.entity.helper.vo.JournalsEntryVO;
 import sr.we.shekelflowcore.entity.helper.vo.PaymentTransactionVO;
 import sr.we.shekelflowcore.enums.DebCred;
 import sr.we.shekelflowcore.enums.TransactionType;
 import sr.we.shekelflowcore.enums.Reference;
+import sr.we.shekelflowcore.exception.PrimaryThrowable;
+import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.ui.components.UIUtil;
+import sr.we.ui.components.customer.CustomerButton;
 import sr.we.ui.components.finance.AccountSelect;
 import sr.we.ui.components.general.CurrencySelect;
 import sr.we.ui.views.LineAwesomeIcon;
@@ -81,6 +86,11 @@ public class JournalentryView extends LitTemplate {
     protected CurrencySelect currencyCmb;
     protected Business business;
     protected Currency currency;
+    @Id("customer-btn")
+    private CustomerButton customerBtn;
+    private BigDecimal debit;
+    private BigDecimal credit;
+    private BigDecimal diff;
 
     /**
      * Creates a new JournalentryView.
@@ -113,6 +123,10 @@ public class JournalentryView extends LitTemplate {
             description.setPlaceholder("Write a description");
             description.setValue(StringUtils.isBlank(f.getMemo()) ? "" : f.getMemo());
             description.setWidthFull();
+            description.addValueChangeListener(g -> {
+                f.setMemo(g.getValue());
+                grid.getDataProvider().refreshItem(f);
+            });
             return description;
         }).setHeader("Description");
         Grid.Column<JournalsEntryVO> accountColumn = grid.addComponentColumn(f -> {
@@ -263,11 +277,11 @@ public class JournalentryView extends LitTemplate {
 
     protected void refresh() {
         if (journalsEntryVOS != null && !journalsEntryVOS.isEmpty()) {
-            BigDecimal debit = journalsEntryVOS.stream().filter(f -> f.getAmount() != null && f.getDebCred().compareTo(DebCred.DEB) == 0).map(getJournalsEntryVOBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
-            BigDecimal credit = journalsEntryVOS.stream().filter(f -> f.getAmount() != null && f.getDebCred().compareTo(DebCred.CRED) == 0).map(getJournalsEntryVOBigDecimalFunction1()).reduce(BigDecimal.ZERO, BigDecimal::add);
+            debit = journalsEntryVOS.stream().filter(f -> f.getAmount() != null && f.getDebCred().compareTo(DebCred.DEB) == 0).map(getJournalsEntryVOBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
+            credit = journalsEntryVOS.stream().filter(f -> f.getAmount() != null && f.getDebCred().compareTo(DebCred.CRED) == 0).map(getJournalsEntryVOBigDecimalFunction1()).reduce(BigDecimal.ZERO, BigDecimal::add);
             sumDebitH3.setText("Total " + Constants.CURRENCY_FORMAT.format(debit));
             sumCreditH3.setText("Total " + Constants.CURRENCY_FORMAT.format(credit));
-            BigDecimal diff = debit.subtract(credit);
+            diff = debit.subtract(credit);
             difference.setText("Difference " + Constants.CURRENCY_FORMAT.format(diff));
             if (debit.compareTo(credit) != 0) {
                 sumDebitH3.getElement().setAttribute("theme", UIUtil.Badge.PILL+" error");
@@ -352,17 +366,33 @@ public class JournalentryView extends LitTemplate {
 
     public void setBusinessId(Long businessId) {
         this.businessId = businessId;
+        customerBtn.setBusinessId(businessId);
         BusinessService businessService = ContextProvider.getBean(BusinessService.class);
         business = businessService.get(businessId, AuthenticatedUser.token());
         currencyCmb.setValue(business.getCurrency());
     }
 
     public PaymentTransactionVO getVO() {
-        PaymentTransactionVO vo = new PaymentTransactionVO();
-        vo.setNew(true);
-        vo.setPaymentDate(transactionDatePicker.getValue());
-        vo.setMemo(transactionDescription.getValue());
-        vo.setJournals(grid.getDataProvider().fetch(new Query<>()).toList());
-        return vo;
+        if(diff.compareTo(BigDecimal.ZERO) != 0){
+            throw new ValidationException("This entry is not balanced. Difference needs to be 0.00");
+        }
+        PaymentTransactionVO paymentTransactionVO = new PaymentTransactionVO();
+        paymentTransactionVO.setNew(true);
+        paymentTransactionVO.setBusiness(businessId);
+        paymentTransactionVO.setPaymentDate(transactionDatePicker.getValue());
+        paymentTransactionVO.setMemo(transactionDescription.getValue());
+        paymentTransactionVO.setJournals(grid.getDataProvider().fetch(new Query<>()).toList());
+        paymentTransactionVO.setCustomerId(customerBtn.getCustomerId());
+        paymentTransactionVO.setAmount(debit);
+        paymentTransactionVO.setExchangeRate(BigDecimal.ONE);
+        paymentTransactionVO.setConvertedAmount(debit);
+        paymentTransactionVO.setReceived(credit);
+        paymentTransactionVO.setChange(BigDecimal.ZERO);
+        paymentTransactionVO.setReference(Reference.JOURNAL_ENTRY);
+        paymentTransactionVO.setCurrencyFrom(currencyCmb.getValue().getId());
+        paymentTransactionVO.setCurrencyTo(currencyCmb.getValue().getId());
+        paymentTransactionVO.setTransactionType(TransactionType.UNKNOWN);
+
+        return paymentTransactionVO;
     }
 }

@@ -30,20 +30,25 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.vaadin.addons.yuri0x7c1.bslayout.BsColumn;
 import org.vaadin.addons.yuri0x7c1.bslayout.BsLayout;
 import org.vaadin.addons.yuri0x7c1.bslayout.BsRow;
 import sr.we.ContextProvider;
+import sr.we.data.controller.BusinessService;
 import sr.we.data.controller.DashboardService;
+import sr.we.data.controller.JournalEntryService;
 import sr.we.data.controller.UserAccessService;
 import sr.we.demo.about.AboutView;
 import sr.we.security.AuthenticatedUser;
+import sr.we.shekelflowcore.entity.Business;
+import sr.we.shekelflowcore.entity.JournalsEntry;
 import sr.we.shekelflowcore.entity.Role;
+import sr.we.shekelflowcore.entity.helper.PagingResult;
 import sr.we.shekelflowcore.entity.helper.adapter.DashboardAccounts;
-import sr.we.shekelflowcore.entity.helper.adapter.DashboardTransactionEvents;
+import sr.we.shekelflowcore.entity.helper.vo.JournalsEntryVO;
+import sr.we.shekelflowcore.enums.*;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.TransactionsPrivilege;
 import sr.we.shekelflowcore.settings.util.Constants;
@@ -54,10 +59,15 @@ import sr.we.ui.views.MainLayout;
 
 import javax.annotation.security.RolesAllowed;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-@BreadCrumb(titleKey = "sr.we.dashboard",optimizedMobile = true)
+@BreadCrumb(titleKey = "sr.we.dashboard", optimizedMobile = true)
 @Route(value = "main-dashboard", layout = MainLayout.class)
 @RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
 public class MainDashboardView extends Main implements BeforeEnterObserver {
@@ -66,6 +76,7 @@ public class MainDashboardView extends Main implements BeforeEnterObserver {
     private Long businessId;
     private ApexChartsBuilder apexChartsBuilder;
     private Div div;
+    private Business business;
 
     public MainDashboardView() {
         addClassName("dashboard-view");
@@ -137,7 +148,7 @@ public class MainDashboardView extends Main implements BeforeEnterObserver {
     }
 
     private static String getStatusTheme(DashboardAccounts serviceHealth) {
-        String theme = UIUtil.Badge.PILL+" primary small";
+        String theme = UIUtil.Badge.PILL + " primary small";
         if (serviceHealth.getIn().compareTo(serviceHealth.getOut()) > 0) {
             theme += " success";
         } else if (serviceHealth.getIn().compareTo(serviceHealth.getOut()) < 0) {
@@ -149,8 +160,8 @@ public class MainDashboardView extends Main implements BeforeEnterObserver {
     public Component createViewEvents() {
         // Header
         Select year = new Select();
-        year.setItems("2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021");
-        year.setValue("2021");
+        year.setItems("2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022");
+        year.setValue("2022");
         year.setWidth("100px");
 
         HorizontalLayout header = createHeader("Cash Flow", "Cash coming in and going out of your business.");
@@ -162,7 +173,7 @@ public class MainDashboardView extends Main implements BeforeEnterObserver {
 //        conf.getChart().setStyledMode(true);
         NoData noData = new NoData();
         noData.setText("No data present at the moment");
-        apexChartsBuilder = apexChartsBuilder.withChart(ChartBuilder.get().withType(Type.LINE).withHeight("400px").withZoom(ZoomBuilder.get().withEnabled(true).build()).build())//
+        apexChartsBuilder = apexChartsBuilder.withChart(ChartBuilder.get().withType(Type.BAR).withHeight("400px").withZoom(ZoomBuilder.get().withEnabled(true).build()).build())//
                 .withStroke(StrokeBuilder.get().withCurve(Curve.SMOOTH).build())//
 //                .withTitle(TitleSubtitleBuilder.get().withText("Chart").withAlign(Align.right).build())//
                 .withNoData(noData)//
@@ -186,34 +197,27 @@ public class MainDashboardView extends Main implements BeforeEnterObserver {
             @Override
             public void run() {
 
-                DashboardService dashboardService = ContextProvider.getBean(DashboardService.class);
-//                List<DashboardTransactionEvents> transactionEvents = dashboardService.getTransactionEvents(token, businessId);
+                List<JournalsEntry> result = journalList(token);
+
+
                 current.access(() -> {
-                    Series<Number>[] listSeries = new Series[2/*transactionEvents.size()*/];
-//                    for (DashboardTransactionEvents dashboardTransactionEvents : transactionEvents) {
+                    Series<Number>[] listSeries = new Series[2];
 
                     Series<Number> flowin = new Series<>();
                     flowin.setName("Cash-in");
-                    flowin.setData(new Number[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+                    flowin.setData(getData(result, DebCred.DEB));
                     listSeries[0] = flowin;
 
                     Series<Number> flowout = new Series<>();
                     flowout.setName("Cash-out");
-                    flowout.setData(new Number[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+                    flowout.setData(getData(result, DebCred.CRED));
                     listSeries[1] = flowout;
-//                    }
                     apexChartsBuilder = apexChartsBuilder.withSeries(listSeries);
                     div.removeAll();
                     div.add(apexChartsBuilder.build());
                 });
             }
         }).start();
-
-
-//        conf.addSeries(new ListSeries("Berlin", 189, 191, 191, 196, 201, 203, 209, 212, 229, 242, 244, 247));
-//        conf.addSeries(new ListSeries("London", 138, 146, 148, 148, 152, 153, 163, 173, 178, 179, 185, 187));
-//        conf.addSeries(new ListSeries("New York", 65, 65, 66, 71, 93, 102, 108, 117, 127, 129, 135, 136));
-//        conf.addSeries(new ListSeries("Tokyo", 0, 11, 17, 23, 30, 42, 48, 49, 52, 54, 58, 62));
 
         // Add it all together
         div = new Div();
@@ -224,6 +228,82 @@ public class MainDashboardView extends Main implements BeforeEnterObserver {
         viewEvents.setSpacing(false);
         viewEvents.getElement().getThemeList().add("spacing-s");
         return viewEvents;
+    }
+
+    private List<JournalsEntry> journalList(String token) {
+        JournalEntryService journalEntryService = ContextProvider.getBean(JournalEntryService.class);
+        JournalsEntryVO vo = new JournalsEntryVO();
+        vo.setBusinessId(businessId);
+        vo.setAsOfDate(LocalDate.now());
+        PagingResult<JournalsEntry> list = journalEntryService.list(vo, token);
+
+        List<JournalsEntry> result = list.getResult();
+        return result;
+    }
+
+    private List<JournalsEntry> journalList(String token, LocalDate localDate) {
+        JournalEntryService journalEntryService = ContextProvider.getBean(JournalEntryService.class);
+        JournalsEntryVO vo = new JournalsEntryVO();
+        vo.setBusinessId(businessId);
+        vo.setAsOfDate(localDate);
+        PagingResult<JournalsEntry> list = journalEntryService.list(vo, token);
+
+        List<JournalsEntry> result = list.getResult();
+        return result;
+    }
+
+    private Number[] getData(List<JournalsEntry> result, DebCred debCred) {
+
+        Map<Month, List<JournalsEntry>> debit = result.stream().filter(f -> f.getDebCred().compareTo(debCred) == 0 && //
+                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.CAB) == 0 && //
+                        f.getCurrencyFrom().getCode().equalsIgnoreCase(business.getCurrency().getCode()))//
+                .collect(Collectors.groupingBy(f -> f.getJournals().getLogDate().getMonth()));
+
+//        Map<Month, List<JournalsEntry>> credit = result.stream().filter(f -> f.getDebCred().compareTo(DebCred.CRED) == 0 && //
+//                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.CAB) == 0 && //
+//                        f.getCurrencyFrom().getCode().equalsIgnoreCase(business.getCurrency().getCode()))//
+//                .collect(Collectors.groupingBy(f -> f.getJournals().getLogDate().getMonth()));
+
+        if (debCred.compareTo(DebCred.DEB) == 0) {
+
+            return new Number[]{getMonthValue(debit, Month.JANUARY),//
+                    getMonthValue(debit, Month.FEBRUARY),//
+                    getMonthValue(debit, Month.MARCH),//
+                    getMonthValue(debit, Month.APRIL),//
+                    getMonthValue(debit, Month.MAY),//
+                    getMonthValue(debit, Month.JUNE),//
+                    getMonthValue(debit, Month.JULY),//
+                    getMonthValue(debit, Month.AUGUST),//
+                    getMonthValue(debit, Month.SEPTEMBER),//
+                    getMonthValue(debit, Month.OCTOBER),//
+                    getMonthValue(debit, Month.NOVEMBER),//
+                    getMonthValue(debit, Month.DECEMBER)};
+        } else {
+            return new Number[]{getMonthValue(debit, Month.JANUARY).multiply(BigDecimal.valueOf(-1)),//
+                    getMonthValue(debit, Month.FEBRUARY).multiply(BigDecimal.valueOf(-1)),//
+                    getMonthValue(debit, Month.MARCH).multiply(BigDecimal.valueOf(-1)),//
+                    getMonthValue(debit, Month.APRIL).multiply(BigDecimal.valueOf(-1)),//
+                    getMonthValue(debit, Month.MAY).multiply(BigDecimal.valueOf(-1)),//
+                    getMonthValue(debit, Month.JUNE).multiply(BigDecimal.valueOf(-1)),//
+                    getMonthValue(debit, Month.JULY).multiply(BigDecimal.valueOf(-1)),//
+                    getMonthValue(debit, Month.AUGUST).multiply(BigDecimal.valueOf(-1)),//
+                    getMonthValue(debit, Month.SEPTEMBER).multiply(BigDecimal.valueOf(-1)),//
+                    getMonthValue(debit, Month.OCTOBER).multiply(BigDecimal.valueOf(-1)),//
+                    getMonthValue(debit, Month.NOVEMBER).multiply(BigDecimal.valueOf(-1)),//
+                    getMonthValue(debit, Month.DECEMBER).multiply(BigDecimal.valueOf(-1))};
+        }
+    }
+
+    private BigDecimal getMonthValue(Map<Month, List<JournalsEntry>> collect, Month month) {
+        return collect == null ? BigDecimal.ZERO : collect.get(month) == null ? BigDecimal.ZERO : collect.get(month).stream().map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private Function<JournalsEntry, BigDecimal> getJournalsEntryBigDecimalFunction() {
+        return g -> {
+            BigDecimal bigDecimal = g.getAccount().getAccountType().getType().getPlusMin(g.getDebCred()).compareTo(TransactionType.WITHDRAWAL) == 0//
+                    ? g.getAmount().multiply(BigDecimal.valueOf(-1)) : g.getAmount();
+            return bigDecimal;
+        };
     }
 
     public Component createServiceHealth() {
@@ -281,18 +361,70 @@ public class MainDashboardView extends Main implements BeforeEnterObserver {
             UI.getCurrent().navigate(AboutView.class);
         }
         board.removeAll();
-        Optional<String> business = event.getRouteParameters().get("business");
+        Optional<String> businessOptional = event.getRouteParameters().get("business");
         String token = AuthenticatedUser.token();
-        if (business.isPresent()) {
-            String businessString = business.get();
+        if (businessOptional.isPresent()) {
+            String businessString = businessOptional.get();
             businessId = Long.valueOf(businessString);
+            BusinessService businessService = ContextProvider.getBean(BusinessService.class);
+            business = businessService.get(businessId, AuthenticatedUser.token());
         }
         DashboardService dashboardService = ContextProvider.getBean(DashboardService.class);
-        if (business != null) {
+        if (businessOptional != null) {
+
+
             String format = Constants.CURRENCY_FORMAT.format(BigDecimal.ZERO);
             board.withRows(new BsRow().withColumns(//
-                            new BsColumn(new Highlight("Overdue payments", () -> format, () -> 0d)).withSize(BsColumn.Size.XS), //
-                            new BsColumn(new Highlight("Overdue Bills", () -> /*"54.6k"*/format, () -> /*-112.45*/0d)).withSize(BsColumn.Size.XS), //
+                            new BsColumn(new Highlight("Outstanding payments", () -> {
+                                List<JournalsEntry> result = journalList(token);
+                                BigDecimal otherAssets = result.stream().filter(f -> f.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.ASSETS) == 0 && !(
+
+                                                f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.CAB) == 0 ||//
+                                                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.INV) == 0 ||//
+                                                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.PPE) == 0 ||//
+                                                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.DA) == 0 ||//
+                                                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.VPVC) == 0 ||//
+                                                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OSTA) == 0 ||//
+                                                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OLTA) == 0 //
+                                        )
+
+                                                && f.getCurrencyFrom().getCode().equalsIgnoreCase(business.getCurrency().getCode()))//
+                                        .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
+                                return Constants.CURRENCY_FORMAT.format(otherAssets == null ? BigDecimal.ZERO : otherAssets);
+                            }, () -> {
+                                List<JournalsEntry> result = journalList(token);
+                                List<JournalsEntry> result2 = journalList(token, LocalDate.now().minusMonths(1));
+                                BigDecimal reduce = result.stream().filter(f -> f.getAccount().getSystemId() != null && f.getAccount().getSystemId().compareTo(SystemAccounts.AR.getId()) == 0 && //
+                                                f.getCurrencyFrom().getCode().equalsIgnoreCase(business.getCurrency().getCode()))//
+                                        .map(f -> f.getAmount() == null ? BigDecimal.ZERO : f.getDebCred().compareTo(DebCred.DEB) == 0 ? f.getAmount() : f.getAmount().multiply(BigDecimal.valueOf(-1L))).reduce(BigDecimal.ZERO, BigDecimal::add);
+                                reduce = reduce == null ? BigDecimal.ZERO : reduce;
+                                BigDecimal reduce2 = result2.stream().filter(f -> f.getAccount().getSystemId() != null && f.getAccount().getSystemId().compareTo(SystemAccounts.AR.getId()) == 0 && //
+                                                f.getCurrencyFrom().getCode().equalsIgnoreCase(business.getCurrency().getCode()))//
+                                        .map(f -> f.getAmount() == null ? BigDecimal.ZERO : f.getDebCred().compareTo(DebCred.DEB) == 0 ? f.getAmount() : f.getAmount().multiply(BigDecimal.valueOf(-1L))).reduce(BigDecimal.ZERO, BigDecimal::add);
+                                reduce2 = reduce2 == null ? BigDecimal.ZERO : reduce2;
+                                reduce = reduce2.subtract(reduce);
+                                return reduce == null ? 0d : reduce.doubleValue();
+
+                            })).withSize(BsColumn.Size.XS), //
+                            new BsColumn(new Highlight("Outstanding Bills", () -> {
+                                List<JournalsEntry> result = journalList(token);
+                                BigDecimal liabilities = result.stream().filter(f -> f.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.LCC) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(business.getCurrency().getCode()))//
+                                        .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
+                                return Constants.CURRENCY_FORMAT.format(liabilities == null ? BigDecimal.ZERO : liabilities);
+                            }, () -> {
+                                List<JournalsEntry> result = journalList(token);
+                                List<JournalsEntry> result2 = journalList(token, LocalDate.now().minusMonths(1));
+                                BigDecimal reduce = result.stream().filter(f -> f.getAccount().getSystemId() != null && f.getAccount().getSystemId().compareTo(SystemAccounts.AP.getId()) == 0 && //
+                                                f.getCurrencyFrom().getCode().equalsIgnoreCase(business.getCurrency().getCode()))//
+                                        .map(f -> f.getAmount() == null ? BigDecimal.ZERO : f.getDebCred().compareTo(DebCred.DEB) == 0 ? f.getAmount() : f.getAmount().multiply(BigDecimal.valueOf(-1L))).reduce(BigDecimal.ZERO, BigDecimal::add);
+                                reduce = reduce == null ? BigDecimal.ZERO : reduce;
+                                BigDecimal reduce2 = result2.stream().filter(f -> f.getAccount().getSystemId() != null && f.getAccount().getSystemId().compareTo(SystemAccounts.AP.getId()) == 0 && //
+                                                f.getCurrencyFrom().getCode().equalsIgnoreCase(business.getCurrency().getCode()))//
+                                        .map(f -> f.getAmount() == null ? BigDecimal.ZERO : f.getDebCred().compareTo(DebCred.DEB) == 0 ? f.getAmount() : f.getAmount().multiply(BigDecimal.valueOf(-1L))).reduce(BigDecimal.ZERO, BigDecimal::add);
+                                reduce2 = reduce2 == null ? BigDecimal.ZERO : reduce2;
+                                reduce = reduce2.subtract(reduce);
+                                return reduce == null ? 0d : reduce.doubleValue();
+                            })).withSize(BsColumn.Size.XS), //
                             new BsColumn(new Highlight("Next Payments ", () -> /*"54.6k"*/format, () -> /*-112.45*/0d)).withSize(BsColumn.Size.XS), //
                             new BsColumn(new Highlight("Transactions YTD", () -> /*"54.6k"*/format, () -> /*-112.45*/0d)).withSize(BsColumn.Size.XS)),
                     //

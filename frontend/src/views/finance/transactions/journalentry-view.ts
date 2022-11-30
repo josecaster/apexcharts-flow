@@ -26,6 +26,7 @@ export class JournalentryView extends LitElement {
   <vaadin-date-picker label="Date" style="align-self: flex-end;" id="transaction-date-picker"></vaadin-date-picker>
   <vaadin-select value="Item one" id="currency-cmb" style="align-self: flex-end;" label="Currency"></vaadin-select>
   <vaadin-text-field label="Description" id="transaction-description" type="text"></vaadin-text-field>
+  <vaadin-button id="customer-btn" style="align-self: flex-end;" tabindex="0"></vaadin-button>
  </vaadin-horizontal-layout>
  <div id="journal-table-layout" style="align-self: stretch;"></div>
  <vaadin-horizontal-layout theme="spacing" style="align-self: stretch;">

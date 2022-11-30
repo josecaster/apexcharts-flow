@@ -6,6 +6,7 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import sr.we.ContextProvider;
@@ -27,6 +28,7 @@ import sr.we.shekelflowcore.security.privileges.CurrencyExchangePrivilege;
 import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.ui.components.TempDatePicker;
 import sr.we.ui.components.UIUtil;
+import sr.we.ui.components.customer.CustomerButton;
 import sr.we.ui.components.finance.AccountSelect;
 import sr.we.ui.components.finance.PaymentMethodSelect;
 import sr.we.ui.components.general.CurrencySelect;
@@ -46,7 +48,7 @@ public class TransactionForm extends FormLayout {
     private final PaymentMethodSelect paymentMethodSelect;
     private final AccountSelect accountSelect;
     private final CategorySelect categorySelect;
-    private final TextArea memoFld;
+    private final TextField memoFld;
     private final DatePicker dateFld;
 
     private final Reference reference;
@@ -60,12 +62,14 @@ public class TransactionForm extends FormLayout {
 
     private Executable refresh;
     private FormItem category;
-    private boolean fromToCurrency,exchange = false;
+    private boolean fromToCurrency, exchange = false;
     private CurrencyExchange currencyExchange;
+    private final CustomerButton customerButton;
+    private Long customerId;
 
 
     public TransactionForm(BigDecimal rest, LocalDate initDate, Long businessId, Currency fromCurrency, Currency selectedCurrency, Reference reference, Long referenceId, Long customerId) {
-        this(rest, initDate, businessId, fromCurrency, selectedCurrency, reference, referenceId, reference.getPlusMin(),customerId);
+        this(rest, initDate, businessId, fromCurrency, selectedCurrency, reference, referenceId, reference.getPlusMin(), customerId);
     }
 
     public TransactionForm(BigDecimal rest, LocalDate initDate, Long businessId, Currency fromCurrency, Currency selectedCurrency, Reference reference, Long referenceId, TransactionType transactionType, Long customerId) {
@@ -85,7 +89,7 @@ public class TransactionForm extends FormLayout {
         convertedAmountLbl = new H4(rest == null ? null : Constants.CURRENCY_FORMAT.format(rest));
         convertedAmountLbl.setClassName(LumoUtility.Margin.NONE);
         Element element = convertedAmountLbl.getElement();
-        element.setAttribute("theme", UIUtil.Badge.PILL+" primary");
+        element.setAttribute("theme", UIUtil.Badge.PILL + " primary");
         element.getStyle().set("font-size", "var(--lumo-font-size-xl)");
 
         changeLbl = new H4("0.00");
@@ -100,7 +104,7 @@ public class TransactionForm extends FormLayout {
             accountSelect = new AccountSelect(businessId, reference);
         }
         categorySelect = new CategorySelect(transactionType, businessId);
-        memoFld = new TextArea();
+        memoFld = new TextField();
         currencySelect = new CurrencySelect(true);
         currencyAmountFld.setPrefixComponent(currencySelect);
 //        currencySelect.setLabel("To");
@@ -160,11 +164,11 @@ public class TransactionForm extends FormLayout {
         });
 
         currencySelect.addValueChangeListener(g -> {
-            if(g.getValue() == null){
+            if (g.getValue() == null) {
                 return;
             }
-            if(exchange){
-                if(g.getValue().getId().compareTo(currencyFrom.getValue().getId()) == 0){
+            if (exchange) {
+                if (g.getValue().getId().compareTo(currencyFrom.getValue().getId()) == 0) {
                     currencyFrom.setValue(currencyExchange.getCurrencyFrom().getId().compareTo(g.getValue().getId()) == 0 ? currencyExchange.getCurrencyTo() : currencyExchange.getCurrencyFrom());
                 }
             }
@@ -176,7 +180,7 @@ public class TransactionForm extends FormLayout {
             }
             ExchangeRateService exchangeRateService = ContextProvider.getBean(ExchangeRateService.class);
             try {
-                BigDecimal exchange = exchangeRateService.exchange(currencyFrom.getValue().getCode(), g.getValue().getCode(), businessId,dateFld.getValue(), AuthenticatedUser.token());
+                BigDecimal exchange = exchangeRateService.exchange(currencyFrom.getValue().getCode(), g.getValue().getCode(), businessId, dateFld.getValue(), AuthenticatedUser.token());
                 exchangeRate.setValue(exchange);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -270,7 +274,7 @@ public class TransactionForm extends FormLayout {
 
         // build
         FormItem payment_date = addFormItem(dateFld, "Payment date");
-        setColspan(payment_date, 2);
+        FormItem memo = addFormItem(memoFld, "Description");
 //        addFormItem(currencyFrom, "Currency");
 //        addFormItem(currencySelect, "Currency to");
 //        addFormItem(amountFld, "Amount");
@@ -285,20 +289,32 @@ public class TransactionForm extends FormLayout {
         if (reference == null || referenceId == null) {
             category = addFormItem(categorySelect, "Category");
         }
+        customerButton = new CustomerButton();
+        customerButton.setBusinessId(businessId);
+        customerButton.setCustomerId(customerId);
+        this.customerId = customerId;
+        if (this.customerId == null) {
+            addFormItem(customerButton, "Customer");
+        }
 //        addFormItem(convertedAmountLbl, "Exchnaged amount");
         addFormItem(receivedFld, "Paid");
         addFormItem(changeLbl, "Change");
         convertedAmountLbl.setWidthFull();
         receivedFld.setWidthFull();
         changeLbl.setWidthFull();
-        FormItem memo = addFormItem(memoFld, "Memo");
-        setColspan(memo, 2);
+
         setResponsiveSteps(new ResponsiveStep("0", 1), new ResponsiveStep("500", 2));
         setMaxWidth("750px");
     }
 
     public PaymentTransaction save() {
+
+        if(currencyAmountFld.getValue()==null){
+            throw new ValidationException("Required fields  cannot  be empty");
+        }
+
         PaymentTransactionVO paymentTransactionVO = new PaymentTransactionVO();
+        paymentTransactionVO.setCustomerId(customerButton.getCustomerId());
         paymentTransactionVO.setAmount(amountFld.getValue());
         paymentTransactionVO.setAccount(accountSelect.getValue().getId());
         paymentTransactionVO.setPaymentDate(dateFld.getValue());

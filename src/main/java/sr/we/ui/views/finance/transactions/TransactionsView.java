@@ -86,6 +86,10 @@ public class TransactionsView extends LitTemplate implements AfterNavigationObse
 
         moreBtn.addClickListener(f -> {
             JournalentryDialog journalentryDialog = new JournalentryDialog(Long.valueOf(businessString));
+            journalentryDialog.setRefresh(() -> {
+                transactionGrid.afterNavigation();
+                return null;
+            });
             journalentryDialog.open();
         });
         addIncomeBtn.addClickListener(f -> {

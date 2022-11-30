@@ -50,7 +50,9 @@ public class ReportsView extends LitTemplate implements BeforeEnterObserver {
      */
     public ReportsView() {
         // You can initialise any data required for the connected UI components here.
-        profitLoss.addClickListener(new NotYetClick<>());
+        profitLoss.addClickListener(f -> {
+            UI.getCurrent().navigate(ProfitLossView.getLocation(Long.valueOf(business).toString()));
+        });
         cashFlow.addClickListener(new NotYetClick<>());
         balanceSheet.addClickListener(f -> {
             UI.getCurrent().navigate(BalanceSheetView.getLocation(Long.valueOf(business).toString()));

@@ -1,6 +1,7 @@
 package sr.we.ui.components;
 
 import com.infraleap.animatecss.Animated;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
@@ -27,6 +28,11 @@ public class MyDialog extends Dialog {
     public void close() {
         super.close();
         Animated.animate(this, Animated.Animation.BACK_OUT_DOWN);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
     }
 
     @Override

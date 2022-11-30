@@ -47,6 +47,7 @@ import sr.we.shekelflowcore.security.privileges.POSPrivilege;
 import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.ui.components.BreadCrumb;
 import sr.we.ui.components.MyDialog;
+import sr.we.ui.components.customer.CustomerButton;
 import sr.we.ui.views.MainLayout;
 import sr.we.ui.views.ReRouteLayout;
 import sr.we.ui.views.finance.loanrequests.CustomerCmb;
@@ -118,8 +119,7 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
     @Id("top-bar-layout")
     private Element topBarLayout;
     @Id("customer-btn")
-    private Button customerBtn;
-    private Customer customer;
+    private CustomerButton customerBtn;
 
     /**
      * Creates a new PosView.
@@ -276,95 +276,7 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
         });
 
 
-        ContextMenu contextMenu = new ContextMenu(customerBtn);
-        contextMenu.setOpenOnClick(true);
-        contextMenu.addItem("Create new customer", g -> {
-            VerticalLayout customerLayout = new VerticalLayout();
-            TextField lastNameFld = new TextField();
-            lastNameFld.setHelperText(getTranslation("sr.we.customer.name.info"));
-            lastNameFld.setRequired(true);
-            lastNameFld.setRequiredIndicatorVisible(true);
-            lastNameFld.setWidthFull();
 
-            TextField firstNameFld = new TextField();
-            firstNameFld.setHelperText(getTranslation("sr.we.customer.first.name.info"));
-            firstNameFld.setWidthFull();
-            TextField mobileNumberFld = new TextField();
-            EmailField emailFld = new EmailField();
-
-            firstNameFld.setPlaceholder(getTranslation("sr.we.customer.first.name"));
-            lastNameFld.setPlaceholder(getTranslation("sr.we.customer.name"));
-            mobileNumberFld.setPlaceholder("Mobile number");
-            emailFld.setPlaceholder("Email-address");
-
-            firstNameFld.setWidthFull();
-            lastNameFld.setWidthFull();
-            mobileNumberFld.setWidthFull();
-            emailFld.setWidthFull();
-
-            customerLayout.add(firstNameFld, lastNameFld, mobileNumberFld, emailFld);
-            Dialog dialog1 = new MyDialog();
-            dialog1.setHeaderTitle("Add new customer");
-            dialog1.add(customerLayout);
-            Button cancel = new Button("Cancel", (e) -> dialog1.close());
-            cancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-            dialog1.getFooter().add(cancel);
-            Button save = new Button("Save");
-            save.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
-            dialog1.getFooter().add(save);
-            dialog1.open();
-
-
-            save.addClickListener(f -> {
-                CustomerVO customerVO = new CustomerVO();
-                customerVO.setNew(true);
-                customerVO.setFirstName(firstNameFld.getValue());
-                customerVO.setName(lastNameFld.getValue());
-                customerVO.setBusiness(business2.getId());
-
-                CustomerBody customerBody = new CustomerBody();
-                customerBody.setNew(true);
-                customerBody.setCustomerVO(customerVO);
-                CustomerContactVO customerContactVO = new CustomerContactVO();
-                customerContactVO.setMobile(mobileNumberFld.getValue());
-                customerContactVO.setEmail(emailFld.getValue());
-
-                customerBody.setCustomerContactVO(customerContactVO);
-                CustomerService customerService = ContextProvider.getBean(CustomerService.class);
-
-                customerBody.setCustomerBillingVO(new CustomerBillingVO());
-                customerBody.setCustomerShippingVO(new CustomerShippingVO());
-                customerBody.setShippingAddressVO(new CustomerAddressVO());
-                customerBody.setBillingAddressVO(new CustomerAddressVO());
-                Customer customer1 = customerService.create(AuthenticatedUser.token(), customerBody);
-                setCustomer(customer1);
-                dialog1.close();
-            });
-
-        });
-        contextMenu.addItem("Choose existing customer", g -> {
-            CustomerCmb existingCustomersCmb = new CustomerCmb();
-            existingCustomersCmb.setWidthFull();
-            existingCustomersCmb.setPlaceholder("Choose existing customer");
-            existingCustomersCmb.load(business2.getId());
-            Dialog dialog1 = new MyDialog();
-            dialog1.setHeaderTitle("Select customer");
-            dialog1.add(existingCustomersCmb);
-            Button cancel = new Button("Cancel", (e) -> dialog1.close());
-            cancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-            dialog1.getFooter().add(cancel);
-            Button save = new Button("Save");
-            save.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
-            dialog1.getFooter().add(save);
-            dialog1.open();
-
-            existingCustomersCmb.addValueChangeListener(f -> setCustomer(f.getValue()));
-        });
-    }
-
-    private void setCustomer(Customer customer) {
-        this.customer = customer;
-        customerBtn.setText(customer.getName() + ", " + customer.getFirstName());
     }
 
     private void init() {
@@ -576,7 +488,7 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
 
 
         PosHeaderVO vo = itemsGrid.getVO();
-        vo.setCustomerId(customer == null ? null : customer.getId());
+        vo.setCustomerId(customerBtn.getCustomerId());
         vo.setPosStart(posStart == null ? null : posStart.getId());
         vo.setCharged(false);
 //        List<PosHeaderDetailVO> collectItems = itemList.stream().map(f -> {
@@ -780,6 +692,7 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
     }
 
     private void refreshTickets() {
+        customerBtn.setBusiness(business2);
         ticketsList.clear();
         ticketsList.addAll(posStart.getPosHeader().stream().filter(f -> f.getCharged() == null || !f.getCharged()).collect(Collectors.toList()));
         ticketsGrid.setTickets(ticketsList, business2, () -> {

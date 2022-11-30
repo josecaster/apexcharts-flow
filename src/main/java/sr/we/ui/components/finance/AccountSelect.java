@@ -43,7 +43,7 @@ public class AccountSelect extends Select<Account> {
         AccountService pojoService = ContextProvider.getBean(AccountService.class);
         String token = AuthenticatedUser.token();
 
-        setItemLabelGenerator((f) -> f.getAccountType().getType().getCaption() +" > "+f.getName());
+        setItemLabelGenerator(Account::getName);
 
         accountVO = new AccountVO();
 
@@ -86,7 +86,7 @@ public class AccountSelect extends Select<Account> {
                     if(value != null && !value.isEmpty()) {
                         Account afterItem = value.get(0);
                         int i = accounts1.indexOf(afterItem);
-                        Span label = new Span(afterItem.getAccountType().getCode().getCaption());
+                        Span label = new Span(afterItem.getAccountType().getType().getCaption()+" > "+afterItem.getAccountType().getCode().getCaption());
                         label.setClassName(LumoUtility.FontWeight.BOLD);
                         VerticalLayout component = new VerticalLayout(label, new Hr());
                         component.setMargin(false);

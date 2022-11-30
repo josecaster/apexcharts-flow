@@ -10,12 +10,12 @@ import org.springframework.web.client.RestTemplate;
 import sr.we.shekelflowcore.entity.PaymentTransaction;
 import sr.we.shekelflowcore.entity.helper.PagingResult;
 import sr.we.shekelflowcore.entity.helper.adapter.LocalDateAdapter;
+import sr.we.shekelflowcore.entity.helper.adapter.LocalDateTimeAdapter;
 import sr.we.shekelflowcore.entity.helper.vo.PaymentTransactionVO;
 import sr.we.shekelflowcore.settings.Routes;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Controller
 public class PaymentTransactionService extends MyController {
@@ -27,7 +27,8 @@ public class PaymentTransactionService extends MyController {
 
         return encapsulate(() -> {
             ResponseEntity<String> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, String.class);
-            return transform(exchange,new TypeToken<PagingResult<PaymentTransaction>>(){}.getType());
+            return transform(exchange, new TypeToken<PagingResult<PaymentTransaction>>() {
+            }.getType());
         });
     }
 
@@ -36,7 +37,9 @@ public class PaymentTransactionService extends MyController {
 
         return encapsulate(() -> {
             String body = new GsonBuilder()
-                    .registerTypeAdapter(LocalDate.class, new LocalDateAdapter()).create().toJson(vo);
+                    .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
+                    .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter()).
+                    create().toJson(vo);
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl = configProperties.getRest() + Routes.PAYMENT_TRANSACTION_CREATE;
             HttpEntity<String> httpEntity = getAuthHttpEntity(body, accessToken);

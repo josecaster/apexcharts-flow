@@ -28,7 +28,6 @@ import sr.we.data.controller.UserAccessService;
 import sr.we.demo.about.AboutView;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.*;
-import sr.we.shekelflowcore.entity.Currency;
 import sr.we.shekelflowcore.entity.helper.PagingResult;
 import sr.we.shekelflowcore.entity.helper.vo.JournalsEntryVO;
 import sr.we.shekelflowcore.enums.ChartOfAccountTypes;
@@ -44,22 +43,25 @@ import sr.we.ui.views.MainLayout;
 import javax.annotation.security.RolesAllowed;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * A Designer generated component for the balance-sheet-view template.
+ * A Designer generated component for the profit-loss-view template.
  * <p>
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
-@Tag("balance-sheet-view")
-@JsModule("./src/views/reports/balance-sheet-view.ts")
-@BreadCrumb(titleKey = "sr.we.reports.balance.sheets", parentNavigationTarget = ReportsView.class)
-@Route(value = "balance-sheets", layout = MainLayout.class)
+@Tag("profit-loss-view")
+@JsModule("./src/views/reports/profit-loss-view.ts")
+@BreadCrumb(titleKey = "sr.we.reports.profit.loss", parentNavigationTarget = ReportsView.class)
+@Route(value = "profit-loss", layout = MainLayout.class)
 @RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
-public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver {
+public class ProfitLossView extends LitTemplate implements BeforeEnterObserver {
 
     protected final Label dateHeaderLbl;
     private final Tab summary;
@@ -73,12 +75,12 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
     protected Div tableLayout;
     @Id("report-tab")
     protected Tabs reportTab;
-    @Id("cash-and-bank")
-    protected H2 cashAndBank;
-    @Id("to-be-received")
-    protected H2 toBeReceived;
-    @Id("to-be-paid-out")
-    protected H2 toBePaidOut;
+    @Id("income-lbl")
+    protected H2 incomeLbl;
+    @Id("cgs-lbl")
+    protected H2 cgsLbl;
+    @Id("oe-lbl")
+    protected H2 oeLbl;
     @Id("total")
     protected H2 total;
     @Id("update-report-btn")
@@ -91,17 +93,17 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
     protected Select<Long> asOfDateSelect;
     protected String business;
 
-    protected TreeGrid<Item> treeGrid;
+    protected TreeGrid<BalanceSheetView.Item> treeGrid;
     @Id("currency-tabs")
     protected Tabs currencyTabs;
     private List<JournalsEntry> result;
-    private List<Item> last, first, second;
+    private List<BalanceSheetView.Item> last, first, second;
     private Map<Long, BigDecimal> fxMap;
 
     /**
      * Creates a new BalanceSheetView.
      */
-    public BalanceSheetView() {
+    public ProfitLossView() {
         // You can initialise any data required for the connected UI components here.
 
         reportTab.removeAll();
@@ -169,7 +171,7 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
     }
 
     public static String getLocation(String business) {
-        return MainLayout.getLocation(business) + "/balance-sheets";
+        return MainLayout.getLocation(business) + "/profit-loss";
     }
 
     @Override
@@ -223,49 +225,23 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
 
         result = list.getResult();
         if (treeGrid.getDataProvider() != null) {
-            treeGrid.setItems(new ArrayList<Item>(),this::getChildren);
+            treeGrid.setItems(new ArrayList<BalanceSheetView.Item>(), this::getChildren);
         }
         if (result != null && !result.isEmpty()) {
-            Map<ChartOfAccounts, List<JournalsEntry>> collect = result.stream().filter(f -> f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency())).collect(Collectors.groupingBy(f -> f.getAccount().getAccountType().getType()));
-            List<Item> items = collect.entrySet().stream().map(f -> {
+            Map<ChartOfAccounts, List<JournalsEntry>> collect = result.stream().filter(f -> f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()) && //
+                            (f.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.INC) == 0 || //
+                                    f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.CGS) == 0 || //
+                                    f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OE) == 0))//
+                    .collect(Collectors.groupingBy(f -> f.getAccount().getAccountType().getType()));
+            List<BalanceSheetView.Item> items = collect.entrySet().stream().map(f -> {
                 ChartOfAccounts key = f.getKey();
                 List<JournalsEntry> value = f.getValue();
                 BigDecimal reduce = value.stream().map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
-                return new Item("Total " + key.getCaption(), reduce, key);
+                return new BalanceSheetView.Item("Total " + key.getCaption(), reduce, key);
             }).toList();
             first.addAll(items);
             treeGrid.setItems(items, this::getChildren);
         }
-
-        BigDecimal currentAssets = result.stream().filter(f -> (f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.CAB) == 0 ||//
-                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.INV) == 0 ||//
-                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.PPE) == 0 ||//
-                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.DA) == 0 ||//
-                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.VPVC) == 0 ||//
-                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OSTA) == 0 ||//
-                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OLTA) == 0 //
-                ) && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
-                .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
-
-
-        BigDecimal otherAssets = result.stream().filter(f -> f.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.ASSETS) == 0 && !(
-
-                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.CAB) == 0 ||//
-                                f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.INV) == 0 ||//
-                                f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.PPE) == 0 ||//
-                                f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.DA) == 0 ||//
-                                f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.VPVC) == 0 ||//
-                                f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OSTA) == 0 ||//
-                                f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OLTA) == 0 //
-                )
-
-                        && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
-                .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal liabilities = result.stream().filter(f -> f.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.LCC) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
-                .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal eq = result.stream().filter(f -> f.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.EQ) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
-                .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal income = result.stream().filter(f -> f.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.INC) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
                 .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -277,13 +253,12 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
                 .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
 
 
-//        BigDecimal sum = currentAssets.add(otherAssets).subtract(liabilities);
-        BigDecimal sum = eq.add(income).subtract(cgs).subtract(oe);
+        BigDecimal sum = income.subtract(cgs).subtract(oe);
 
 
-        cashAndBank.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(currentAssets));
-        toBeReceived.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(otherAssets));
-        toBePaidOut.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(liabilities));
+        incomeLbl.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(income));
+        cgsLbl.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(cgs));
+        oeLbl.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(oe));
         total.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(sum));
     }
 
@@ -328,7 +303,7 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
         return "EURO";
     }
 
-    protected List<Item> getChildren(Item journalsEntry) {
+    protected List<BalanceSheetView.Item> getChildren(BalanceSheetView.Item journalsEntry) {
         boolean isSummary = reportTab.getSelectedTab().equals(summary);
         if (journalsEntry.getChartOfAccountTypes() == null && journalsEntry.getChartOfAccounts() == null && isSummary) {
             return new ArrayList<>();
@@ -347,22 +322,22 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
         if (journalsEntry.getChartOfAccounts() != null) {
             result = this.result.stream().filter(g -> g.getAccount().getAccountType().getType().compareTo(journalsEntry.getChartOfAccounts()) == 0).toList();
             Map<ChartOfAccountTypes, List<JournalsEntry>> collect = result.stream().filter(f -> f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency())).collect(Collectors.groupingBy(f -> f.getAccount().getAccountType().getCode()));
-            List<Item> items = collect.entrySet().stream().map(f -> {
+            List<BalanceSheetView.Item> items = collect.entrySet().stream().map(f -> {
                 ChartOfAccountTypes key = f.getKey();
                 List<JournalsEntry> value = f.getValue();
                 BigDecimal reduce = value.stream().map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
-                return new Item("Total " + key.getCaption(), reduce, key);
+                return new BalanceSheetView.Item("Total " + key.getCaption(), reduce, key);
             }).toList();
             second.addAll(items);
             return items;
         } else {
             result = this.result.stream().filter(g -> g.getAccount().getAccountType().getCode().compareTo(journalsEntry.getChartOfAccountTypes()) == 0).toList();
             Map<Account, List<JournalsEntry>> collect = result.stream()/*.filter(f -> f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))*/.collect(Collectors.groupingBy(JournalsEntry::getAccount));
-            List<Item> items = collect.entrySet().stream().map(f -> {
+            List<BalanceSheetView.Item> items = collect.entrySet().stream().map(f -> {
                 Account key = f.getKey();
                 List<JournalsEntry> value = f.getValue();
                 BigDecimal reduce = value.stream().map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
-                return new Item("Total " + key.getName(), reduce, value);
+                return new BalanceSheetView.Item("Total " + key.getName(), reduce, value);
             }).toList();
             last.addAll(items);
             return items;
@@ -436,4 +411,5 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
             this.values = values;
         }
     }
+
 }

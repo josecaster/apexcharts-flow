@@ -61,7 +61,12 @@ public class Highlight extends VerticalLayout {
 
                         String percentageSpanValue = prefix + percentage;
                         Span percentageSpan = new Span(percentageSpanValue);
-                        Span badge = new Span(i, percentageSpan);
+                        Span badge = new Span();
+                        if(percentage == 0){
+                            badge.add(percentageSpan);
+                        } else {
+                            badge.add(i, percentageSpan);
+                        }
                         badge.getElement().getThemeList().add(theme);
 
                         add(badge);

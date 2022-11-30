@@ -3,9 +3,7 @@ package sr.we.ui.views.invoice;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.details.DetailsVariant;
@@ -37,9 +35,8 @@ import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.ui.components.BreadCrumb;
 import sr.we.ui.components.NotYetClick;
 import sr.we.ui.components.TempDatePicker;
-import sr.we.ui.views.LineAwesomeIcon;
+import sr.we.ui.components.customer.CustomerButton;
 import sr.we.ui.views.ReRouteLayout;
-import sr.we.ui.views.finance.loanrequests.CustomerCmb;
 import sr.we.ui.views.pos.ProductOrService;
 
 import java.math.BigDecimal;
@@ -65,7 +62,7 @@ public class CreateInvoiceView extends LitTemplate {
 
     private final TextArea footerMessageFld;
     private final VerticalLayout customerLayout;
-    private final Button addCustomerLabelLayout;
+    private final CustomerButton customerButton;
     private final TextField invoiceNameFld;
     private final TextField invoiceSummaryFld;
     private final Label companyNameLbl;
@@ -96,17 +93,12 @@ public class CreateInvoiceView extends LitTemplate {
     protected TempDatePicker paymentDateFld;
     @Id("payment-due-fld")
     protected TempDatePicker paymentDueFld;
-    private TextField firstNameFld;
-    private TextField lastNameFld;
-    private TextField mobileNumberFld;
-    private EmailField emailFld;
     private ItemGrid itemsGrid;
 //    private Grid<Fee> feeGrid;
 //    private Map<String, Object> feeMap;
 
     private Business business2;
     private PosHeader posHeader;
-    private CustomerCmb existingCustomersCmb;
 
     private boolean activateListener = true;
     @Id("preview-btn")
@@ -121,13 +113,9 @@ public class CreateInvoiceView extends LitTemplate {
 
         previewBtn.addClickListener(new NotYetClick<>());
 
-        addCustomerLabelLayout = new Button();
-        addCustomerLabelLayout.setIcon(new LineAwesomeIcon("la la-plus"));
-        addCustomerLabelLayout.setText("Add a customer");
-        addCustomerLabelLayout.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        addCustomerLabelLayout.setClassName(LumoUtility.AlignItems.CENTER);
+        customerButton = new CustomerButton();
 
-        addCustomerLayout.add(addCustomerLabelLayout);
+        addCustomerLayout.add(customerButton);
 
         addCustomerLayout.setMinWidth("320px");
         addCustomerLayout.setMinHeight("160px");
@@ -135,46 +123,6 @@ public class CreateInvoiceView extends LitTemplate {
         customerLayout = new VerticalLayout();
         customerLayout.setWidthFull();
         addCustomerLayout.add(customerLayout);
-
-
-        ContextMenu contextMenu = new ContextMenu(addCustomerLabelLayout);
-        contextMenu.setOpenOnClick(true);
-        contextMenu.addItem("Create new customer", g -> {
-            customerLayout.removeAll();
-            lastNameFld = new TextField();
-            lastNameFld.setHelperText(getTranslation("sr.we.customer.name.info"));
-            lastNameFld.setRequired(true);
-            lastNameFld.setRequiredIndicatorVisible(true);
-            lastNameFld.setWidthFull();
-
-            firstNameFld = new TextField();
-            firstNameFld.setHelperText(getTranslation("sr.we.customer.first.name.info"));
-            firstNameFld.setWidthFull();
-            mobileNumberFld = new TextField();
-            emailFld = new EmailField();
-
-            firstNameFld.setPlaceholder(getTranslation("sr.we.customer.first.name"));
-            lastNameFld.setPlaceholder(getTranslation("sr.we.customer.name"));
-            mobileNumberFld.setPlaceholder("Mobile number");
-            emailFld.setPlaceholder("Email-address");
-
-            firstNameFld.setWidthFull();
-            lastNameFld.setWidthFull();
-            mobileNumberFld.setWidthFull();
-            emailFld.setWidthFull();
-
-            customerLayout.add(lastNameFld,firstNameFld, mobileNumberFld, emailFld);
-        });
-        contextMenu.addItem("Choose existing customer", g -> {
-            customerLayout.removeAll();
-            existingCustomersCmb = new CustomerCmb();
-            existingCustomersCmb.setWidthFull();
-            existingCustomersCmb.setPlaceholder("Choose existing customer");
-            existingCustomersCmb.load(business2.getId());
-            customerLayout.add(existingCustomersCmb);
-
-            existingCustomersCmb.addValueChangeListener(f -> setCustomer(f.getValue()));
-        });
 
         H5 headerSummary = new H5("Business address and contact details, title, summary, and logo");
         headerSummary.getElement().getStyle().set("margin", "5px");
@@ -251,28 +199,6 @@ public class CreateInvoiceView extends LitTemplate {
         });
     }
 
-    private void setCustomer(Customer value) {
-        if (value != null) {
-            customerLayout.removeAll();
-            customerLayout.add(new Label(//
-                    (StringUtils.isNotBlank(value.getFirstName()) ? (value.getFirstName() + " ,") : "") + //
-                            (StringUtils.isNotBlank(value.getName()) ? value.getName() : "")));//
-            CustomerContact primaryCustomerContacts = value.getPrimaryCustomerContacts();
-            if (primaryCustomerContacts != null) {
-                if (StringUtils.isNotBlank(primaryCustomerContacts.getMobile())) {
-                    customerLayout.add(new Label(primaryCustomerContacts.getMobile()));
-                }
-                if (StringUtils.isNotBlank(primaryCustomerContacts.getEmail())) {
-                    customerLayout.add(new Label(primaryCustomerContacts.getEmail()));
-                }
-            }
-            addCustomerLabelLayout.setIcon(new LineAwesomeIcon("la la-pencil"));
-            addCustomerLabelLayout.setText("Edit customer");
-        } else {
-            addCustomerLabelLayout.setIcon(new LineAwesomeIcon("la la-plus"));
-            addCustomerLabelLayout.setText("Add a customer");
-        }
-    }
 
     private void init() {
 //        final Map<String, Object> map;
@@ -455,12 +381,6 @@ public class CreateInvoiceView extends LitTemplate {
         } else {
             invoiceVO.setNew(true);
         }
-        if (firstNameFld != null) {
-            invoiceVO.setFirstName(firstNameFld.getValue());
-            invoiceVO.setName(lastNameFld.getValue());
-            invoiceVO.setMobileNumber(mobileNumberFld.getValue());
-            invoiceVO.setEmailAddress(emailFld.getValue());
-        }
         invoiceVO.setInvoiceTitle(invoiceNameFld.getValue());
         invoiceVO.setHeaderMessage(invoiceSummaryFld.getValue());
         invoiceVO.setPosHeader(posHeader == null ? null : posHeader.getId());
@@ -498,12 +418,7 @@ public class CreateInvoiceView extends LitTemplate {
 
 
     private Long getCustomerId() {
-        return existingCustomersCmb == null ? //
-                (invoice == null ? null : //
-                        (invoice.getCustomer() == null ? null : invoice.getCustomer().getId())//
-                ) : //
-                (existingCustomersCmb.getValue() == null ? null : //
-                        existingCustomersCmb.getValue().getId());
+        return customerButton.getCustomerId();
     }
 
     public void setInvoice(Invoice invoice) {
@@ -521,7 +436,7 @@ public class CreateInvoiceView extends LitTemplate {
         invoiceNameFld.setValue(StringUtils.isBlank(invoice.getInvoiceTitle()) ? "Invoice" : invoice.getInvoiceTitle());
         invoiceSummaryFld.setValue(StringUtils.isBlank(invoice.getHeaderMessage()) ? "" : invoice.getHeaderMessage());
         companyNameLbl.setText(this.invoice.getBusiness().getName());
-        setCustomer(invoice.getCustomer());
+        customerButton.setCustomer(invoice.getCustomer());
         itemsGrid.setTicket(posHeader, (invoice.getConvertedAmount() == null ? BigDecimal.ZERO : invoice.getConvertedAmount()), invoice.getExchangeRate(), invoice.getCurrencyTo(), invoice.getInvoiceDate());
 
     }
@@ -542,6 +457,7 @@ public class CreateInvoiceView extends LitTemplate {
     }
 
     public void setBusiness2(Business business2) {
+        customerButton.setBusiness(business2);
         activateListener = false;
         this.business2 = business2;
         itemsGrid.setBusiness(business2);

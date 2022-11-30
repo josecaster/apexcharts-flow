@@ -9,8 +9,8 @@ import '@vaadin/horizontal-layout/src/vaadin-horizontal-layout.js';
 import '@vaadin/tabs/src/vaadin-tabs.js';
 import '@vaadin/tabs/src/vaadin-tab.js';
 
-@customElement('balance-sheet-view')
-export class BalanceSheetView extends LitElement {
+@customElement('profit-loss-view')
+export class ProfitLossView extends LitElement {
   static get styles() {
     return css`
       :host {
@@ -20,8 +20,8 @@ export class BalanceSheetView extends LitElement {
       `;
   }
 
-  render() {
-    return html`
+ render() {
+     return html`
 <vaadin-vertical-layout theme="spacing" style="width: 100%; height: 100%; align-items: center;">
  <vaadin-vertical-layout theme="spacing-xl" style="max-width:1000px; align-items: center; align-self: center;">
   <vaadin-horizontal-layout theme="spacing" style="align-self: stretch;">
@@ -45,21 +45,24 @@ export class BalanceSheetView extends LitElement {
   </vaadin-vertical-layout>
   <vaadin-horizontal-layout theme="spacing" style="align-self: center; align-items: flex-end; justify-content: center;">
    <vaadin-vertical-layout style="align-self: flex-end; align-items: center; justify-content: center; font-weight:bold;">
-    <span>Current Assets</span>
-    <h2 style="margin: 0px;" id="cash-and-bank">$171,393.55</h2>
-   </vaadin-vertical-layout>
-   <h2 style="font-weight:bold; color:var(--lumo-base-color); align-self: flex-end; margin: 0px;">+</h2>
-   <vaadin-vertical-layout style="align-self: flex-end; align-items: center; justify-content: center; font-weight:bold;">
-    <span>To be received</span>
-    <h2 style="margin: 0px;" id="to-be-received">$267,715.40</h2>
+    <span>Income</span>
+    <h2 style="margin: 0px;" id="income-lbl">$171,393.55</h2>
    </vaadin-vertical-layout>
    <h2 style="font-weight:bold; color:var(--lumo-base-color); align-self: flex-end; margin: 0px;">-</h2>
    <vaadin-vertical-layout style="align-self: flex-end; align-items: center; justify-content: center; font-weight:bold;">
-    <span>To be paid out</span>
-    <h2 style="margin: 0px;" id="to-be-paid-out">$0.00</h2>
+    <span>Cost of Goods Sold </span>
+    <h2 style="margin: 0px;" id="cgs-lbl">$267,715.40</h2>
+   </vaadin-vertical-layout>
+   <h2 style="font-weight:bold; color:var(--lumo-base-color); align-self: flex-end; margin: 0px;">-</h2>
+   <vaadin-vertical-layout style="align-self: flex-end; align-items: center; justify-content: center; font-weight:bold;">
+    <span>Operating Expenses</span>
+    <h2 style="margin: 0px;" id="oe-lbl">$0.00</h2>
    </vaadin-vertical-layout>
    <h2 style="font-weight:bold; color:var(--lumo-base-color); align-self: flex-end; margin: 0px;">=</h2>
-   <h2 style="margin: 0px;color:var(--lumo-success-color);" id="total">$439,108.95</h2>
+   <vaadin-vertical-layout style="align-self: flex-end; align-items: center; justify-content: center; font-weight:bold;">
+    <span>Net Profit</span>
+    <h2 style="margin: 0px;color:var(--lumo-success-color);" id="total">$439,108.95</h2>
+   </vaadin-vertical-layout>
   </vaadin-horizontal-layout>
   <vaadin-horizontal-layout theme="spacing">
    <vaadin-tabs id="report-tab" orientation="horizontal" selected="0">
@@ -72,13 +75,13 @@ export class BalanceSheetView extends LitElement {
    </vaadin-tabs>
    <vaadin-tabs id="currency-tabs" orientation="horizontal" selected="0">
     <vaadin-tab selected>
-     USD
+      USD 
     </vaadin-tab>
     <vaadin-tab selected>
-     SRD
+      SRD 
     </vaadin-tab>
     <vaadin-tab selected>
-     Euro
+      Euro 
     </vaadin-tab>
    </vaadin-tabs>
   </vaadin-horizontal-layout>
@@ -86,7 +89,7 @@ export class BalanceSheetView extends LitElement {
  </vaadin-vertical-layout>
 </vaadin-vertical-layout>
 `;
-  }
+   }
 
   // Remove this method to render the contents of this view inside Shadow DOM
   createRenderRoot() {
