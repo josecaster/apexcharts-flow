@@ -228,7 +228,7 @@ FROM
     LEFT JOIN currency curfrom on i.currency_from_id_ = curfrom.id
     LEFT JOIN currency curto on i.currency_to_id_ = curto.id
 WHERE
-    i.id =  $P{INVOICE_ID_}]]>
+    i.id =  $P{INVOICE_ID_} and phd.service_id_ is not null]]>
 		</queryString>
 		<field name="INVOICE_ID" class="java.lang.Long">
 			<property name="com.jaspersoft.studio.field.name" value="ID"/>
@@ -698,7 +698,7 @@ WHERE
 		<property name="com.jaspersoft.studio.field.tree.path" value="currency"/>
 	</field>
 	<variable name="SumAmount" class="java.math.BigDecimal" resetType="Column" incrementType="Report" calculation="Sum">
-		<variableExpression><![CDATA[$F{INVOICE_AMOUNT}]]></variableExpression>
+		<variableExpression><![CDATA[$F{XF_AMOUNT}]]></variableExpression>
 	</variable>
 	<title>
 		<band height="213" splitType="Stretch">
