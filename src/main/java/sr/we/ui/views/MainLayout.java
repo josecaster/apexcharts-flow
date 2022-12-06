@@ -24,40 +24,26 @@ import org.apache.commons.lang3.StringUtils;
 import sr.we.ContextProvider;
 import sr.we.CustomErrorHandler;
 import sr.we.data.controller.BusinessService;
-import sr.we.data.controller.UserAccessService;
 import sr.we.data.controller.UserService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.entity.ThisUser;
 import sr.we.shekelflowcore.entity.UsersRoles;
 import sr.we.shekelflowcore.entity.helper.Token;
-import sr.we.shekelflowcore.security.PrivilegeModeAbstract;
-import sr.we.shekelflowcore.security.Privileges;
-import sr.we.shekelflowcore.security.privileges.*;
 import sr.we.ui.components.BreadCrumb;
 import sr.we.ui.components.MenuBuilder;
 import sr.we.ui.components.NaviMenu;
-import sr.we.ui.views.account.ChartOfAccountsView;
 import sr.we.ui.views.business.BusinessView;
-import sr.we.ui.views.currencyexchange.CurrencyExchangeView;
-import sr.we.ui.views.customers.CustomerView;
-import sr.we.ui.views.dashboard.DashboardView;
 import sr.we.ui.views.dashboard.NotOptimized;
-import sr.we.ui.views.finance.loanrequests.RequestsView;
-import sr.we.ui.views.finance.loans.LoanView;
-import sr.we.ui.views.finance.payments.PaymentsView;
-import sr.we.ui.views.finance.transactions.TransactionsView;
-import sr.we.ui.views.invoice.InvoiceView;
 import sr.we.ui.views.login.NotActiveDialog;
 import sr.we.ui.views.person.PersonView;
 import sr.we.ui.views.personform.PersonFormView;
-import sr.we.ui.views.pos.PosView;
-import sr.we.ui.views.pos.TicketsGridView;
-import sr.we.ui.views.reports.ReportsView;
-import sr.we.ui.views.services.ServiceView;
 
 import javax.annotation.security.RolesAllowed;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
@@ -107,6 +93,42 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
     public static String getLocation(String business) {
         return "n/a/" + business;
     }
+
+    public static boolean isMobileDevice() {
+        WebBrowser webBrowser = VaadinSession.getCurrent().getBrowser();
+        return webBrowser.isAndroid() || webBrowser.isIPhone() || webBrowser.isWindowsPhone();
+    }
+
+//    private Component createHeaderContent() {
+//        DrawerToggle toggle = new DrawerToggle();
+//        toggle.addClassNames("view-toggle");
+//        toggle.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
+//        toggle.getElement().setAttribute("aria-label", "Menu toggle");
+//
+//
+//        viewTitle.addClassNames("view-title");
+//
+//        roleSelect = new Select<>();
+//        roleSelect.setReadOnly(true);
+//        roleSelect.setItemLabelGenerator(Role::getDescription);
+//        roleSelect.addValueChangeListener(f -> {
+////            if(f.getValue() == null){
+////                return;
+////            }
+////            UserService userService = ContextProvider.getBean(UserService.class);
+////            userService.select(AuthenticatedUser.token(), Long.valueOf(businessId), f.getValue());
+//        });
+//        HorizontalLayout horizontalLayout = new HorizontalLayout(roleSelect);
+//        horizontalLayout.setPadding(false);
+//        horizontalLayout.setMargin(false);
+//        horizontalLayout.setWidthFull();
+//        horizontalLayout.setAlignItems(FlexComponent.Alignment.END);
+//        horizontalLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+//        Header header = new Header(toggle, viewTitle, horizontalLayout);
+//        header.addClassNames("view-header");
+//
+//        return header;
+//    }
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
@@ -203,43 +225,12 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
 
     }
 
-//    private Component createHeaderContent() {
-//        DrawerToggle toggle = new DrawerToggle();
-//        toggle.addClassNames("view-toggle");
-//        toggle.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
-//        toggle.getElement().setAttribute("aria-label", "Menu toggle");
-//
-//
-//        viewTitle.addClassNames("view-title");
-//
-//        roleSelect = new Select<>();
-//        roleSelect.setReadOnly(true);
-//        roleSelect.setItemLabelGenerator(Role::getDescription);
-//        roleSelect.addValueChangeListener(f -> {
-////            if(f.getValue() == null){
-////                return;
-////            }
-////            UserService userService = ContextProvider.getBean(UserService.class);
-////            userService.select(AuthenticatedUser.token(), Long.valueOf(businessId), f.getValue());
-//        });
-//        HorizontalLayout horizontalLayout = new HorizontalLayout(roleSelect);
-//        horizontalLayout.setPadding(false);
-//        horizontalLayout.setMargin(false);
-//        horizontalLayout.setWidthFull();
-//        horizontalLayout.setAlignItems(FlexComponent.Alignment.END);
-//        horizontalLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-//        Header header = new Header(toggle, viewTitle, horizontalLayout);
-//        header.addClassNames("view-header");
-//
-//        return header;
-//    }
-
     @Override
     public void setContent(Component content) {
-        if(isMobileDevice()) {
+        if (isMobileDevice()) {
             if (content != null) {
                 BreadCrumb annotation = content.getClass().getAnnotation(BreadCrumb.class);
-                if (annotation != null && !annotation.optimizedMobile()){
+                if (annotation != null && !annotation.optimizedMobile()) {
                     super.setContent(new NotOptimized());
                     return;
                 }
@@ -342,15 +333,6 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
         };
     }
 
-    private Nav initNaviItems() {
-
-        NaviMenu menu = new NaviMenu(businessId);
-        nav.add(menu);
-        menu.removeAll();
-        new MenuBuilder(businessId).buildMenu(menu);
-        return nav;
-    }
-
 //    @Override
 //    protected void afterNavigation() {
 //        super.afterNavigation();
@@ -359,6 +341,15 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
 //            dialog.close();
 //        }
 //    }
+
+    private Nav initNaviItems() {
+
+        NaviMenu menu = new NaviMenu(businessId);
+        nav.add(menu);
+        menu.removeAll();
+        new MenuBuilder(businessId).buildMenu(menu);
+        return nav;
+    }
 
     private Footer createFooter() {
         Footer layout = new Footer();
@@ -374,7 +365,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
 
             ContextMenu userMenu = new ContextMenu(layout);
             userMenu.setOpenOnClick(true);
-            userMenu.addItem("Logout", e -> authenticatedUser.logout());
+            userMenu.addItem("Logout", e -> AuthenticatedUser.logout());
 
             Span name = new Span(user.getUsername());
             name.addClassNames("font-medium", "text-s", "text-secondary");
@@ -473,10 +464,5 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
         }
 
 
-    }
-
-    public  static boolean isMobileDevice() {
-        WebBrowser webBrowser = VaadinSession.getCurrent().getBrowser();
-        return webBrowser.isAndroid() || webBrowser.isIPhone() || webBrowser.isWindowsPhone();
     }
 }

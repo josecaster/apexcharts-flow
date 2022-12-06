@@ -10,7 +10,6 @@ import sr.we.shekelflowcore.security.privileges.*;
 import sr.we.ui.views.account.ChartOfAccountsView;
 import sr.we.ui.views.currencyexchange.CurrencyExchangeView;
 import sr.we.ui.views.customers.CustomerView;
-import sr.we.ui.views.dashboard.DashboardView;
 import sr.we.ui.views.dashboard.MainDashboardView;
 import sr.we.ui.views.finance.loanrequests.RequestsView;
 import sr.we.ui.views.finance.loans.LoanView;
@@ -44,8 +43,8 @@ public class MenuBuilder {
 
         UI current = UI.getCurrent();
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(LoanReportPrivilege.class), Privileges.READ)) {
-            menu.addNaviItem(current.getTranslation("sr.we.dashboard"), "icons/menus/icons8_dashboard_48px.png", DashboardView.class);
-        } else if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(TransactionsPrivilege.class), Privileges.READ)){
+            menu.addNaviItem(current.getTranslation("sr.we.dashboard"), "icons/menus/icons8_dashboard_48px.png", MainDashboardView.class);
+        } else if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(TransactionsPrivilege.class), Privileges.READ)) {
             menu.addNaviItem(current.getTranslation("sr.we.dashboard"), "icons/menus/icons8_dashboard_48px.png", MainDashboardView.class);
         }
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(LoanPrivilege.class), Privileges.READ)) {
@@ -72,7 +71,7 @@ public class MenuBuilder {
             menu.addNaviItem(incomeParent, "Products & Services", "icons/menus/icons8_product_48px.png", ServiceView.class);
         }
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(POSPrivilege.class), Privileges.READ)) {
-            menu.addNaviItem(incomeParent,"Tickets", "icons/menus/icons8_receipt_48px.png", TicketsGridView.class);
+            menu.addNaviItem(incomeParent, "Tickets", "icons/menus/icons8_receipt_48px.png", TicketsGridView.class);
         }
 
         NaviItem journalsParent = menu.addNaviItem("Transactions", "icons/menus/icons8_transaction_48px_2.png", null);

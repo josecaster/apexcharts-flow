@@ -12,9 +12,7 @@ import sr.we.shekelflowcore.entity.ThisUser;
 import sr.we.shekelflowcore.entity.helper.Token;
 import sr.we.shekelflowcore.security.PrivilegeModeAbstract;
 import sr.we.shekelflowcore.security.Privileges;
-import sr.we.shekelflowcore.security.privileges.LoanReportPrivilege;
 import sr.we.shekelflowcore.security.privileges.TransactionsPrivilege;
-import sr.we.ui.views.dashboard.DashboardView;
 import sr.we.ui.views.dashboard.MainDashboardView;
 import sr.we.ui.views.login.NotActiveDialog;
 import sr.we.ui.views.person.PersonView;
@@ -97,13 +95,13 @@ public class ReRouteLayout extends VerticalLayout implements BeforeEnterObserver
         Business business = businessService.get(null, AuthenticatedUser.token());
         Optional<Business> max = businesses.stream().filter(f -> f.getCounter().compareTo(0L) != 0).max(Comparator.comparingLong(Business::getCounter));
         UserAccessService userAccessService = ContextProvider.getBean(UserAccessService.class);
-        if (userAccessService.hasAccess(AuthenticatedUser.token(), new LoanReportPrivilege(), Privileges.READ)) {
-            if (business != null) {
-                event.forwardTo(DashboardView.class, new RouteParameters(new RouteParam("business", business.getId().toString())));
-            } else {
-                event.forwardTo(DashboardView.class, new RouteParameters(new RouteParam("business", "0")));
-            }
-        }
+//        if (userAccessService.hasAccess(AuthenticatedUser.token(), new LoanReportPrivilege(), Privileges.READ)) {
+//            if (business != null) {
+//                event.forwardTo(MainDashboardView.class, new RouteParameters(new RouteParam("business", business.getId().toString())));
+//            } else {
+//                event.forwardTo(MainDashboardView.class, new RouteParameters(new RouteParam("business", "0")));
+//            }
+//        }
         if (userAccessService.hasAccess(AuthenticatedUser.token(), PrivilegeModeAbstract.getInstance(TransactionsPrivilege.class), Privileges.READ)) {
             if (business != null) {
                 event.forwardTo(MainDashboardView.class, new RouteParameters(new RouteParam("business", business.getId().toString())));

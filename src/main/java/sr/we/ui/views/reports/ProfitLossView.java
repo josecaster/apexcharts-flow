@@ -32,6 +32,7 @@ import sr.we.shekelflowcore.entity.helper.PagingResult;
 import sr.we.shekelflowcore.entity.helper.vo.JournalsEntryVO;
 import sr.we.shekelflowcore.enums.ChartOfAccountTypes;
 import sr.we.shekelflowcore.enums.ChartOfAccounts;
+import sr.we.shekelflowcore.enums.SystemAccounts;
 import sr.we.shekelflowcore.enums.TransactionType;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.AccountsPrivilege;
@@ -251,6 +252,11 @@ public class ProfitLossView extends LitTemplate implements BeforeEnterObserver {
 
         BigDecimal oe = result.stream().filter(f -> f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OE) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
                 .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal gofe = result.stream().filter(f -> f.getAccount().getSystemId() != null && f.getAccount().getSystemId().compareTo(SystemAccounts.GOFE.getId()) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
+                .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        income = income.subtract(gofe);
 
 
         BigDecimal sum = income.subtract(cgs).subtract(oe);

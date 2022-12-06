@@ -19,6 +19,7 @@ import sr.we.shekelflowcore.entity.CurrencyExchange;
 import sr.we.shekelflowcore.entity.PaymentTransaction;
 import sr.we.shekelflowcore.entity.helper.Executable;
 import sr.we.shekelflowcore.entity.helper.TransactionCategory;
+import sr.we.shekelflowcore.entity.helper.adapter.CurrencyExchangeBody;
 import sr.we.shekelflowcore.entity.helper.vo.PaymentTransactionVO;
 import sr.we.shekelflowcore.enums.Reference;
 import sr.we.shekelflowcore.enums.TransactionType;
@@ -180,7 +181,15 @@ public class TransactionForm extends FormLayout {
             }
             ExchangeRateService exchangeRateService = ContextProvider.getBean(ExchangeRateService.class);
             try {
-                BigDecimal exchange = exchangeRateService.exchange(currencyFrom.getValue().getCode(), g.getValue().getCode(), businessId, dateFld.getValue(), AuthenticatedUser.token());
+                CurrencyExchangeBody b = exchangeRateService.exchangeResult(currencyFrom.getValue().getCode(), g.getValue().getCode(), businessId, "b", dateFld.getValue(), AuthenticatedUser.token());
+                BigDecimal exchange = BigDecimal.ONE;//exchangeRateService.exchange(currencyFrom.getValue().getCode(), g.getValue().getCode(), businessId, dateFld.getValue(), AuthenticatedUser.token());
+//                if(b.getFrom().equalsIgnoreCase(currencyFrom.getValue().getCode())){
+//                    // keep
+//                    exchange = BigDecimal.ONE.divide(BigDecimal.valueOf(b.getRate()), 4, RoundingMode.HALF_UP);
+//                } else {
+                    exchange = BigDecimal.valueOf(b.getRate());
+//                }
+
                 exchangeRate.setValue(exchange);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -246,7 +255,7 @@ public class TransactionForm extends FormLayout {
                     }
                     amountFld.setValue(f.getValue());
                 } else if (exchangeRate.getValue() != null) {
-                    BigDecimal val = f.getValue().divide(exchangeRate.getValue(), 4, RoundingMode.HALF_UP);
+                    BigDecimal val = f.getValue().multiply(exchangeRate.getValue());
                     fromToCurrency = true;
                     amountFld.setValue(val);
                     convertedAmountLbl.setText(selectedCurrency.getCode() + " " + Constants.CURRENCY_FORMAT.format(currencyAmountFld.getValue()));

@@ -28,11 +28,11 @@ import sr.we.data.controller.UserAccessService;
 import sr.we.demo.about.AboutView;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.*;
-import sr.we.shekelflowcore.entity.Currency;
 import sr.we.shekelflowcore.entity.helper.PagingResult;
 import sr.we.shekelflowcore.entity.helper.vo.JournalsEntryVO;
 import sr.we.shekelflowcore.enums.ChartOfAccountTypes;
 import sr.we.shekelflowcore.enums.ChartOfAccounts;
+import sr.we.shekelflowcore.enums.SystemAccounts;
 import sr.we.shekelflowcore.enums.TransactionType;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.AccountsPrivilege;
@@ -44,7 +44,10 @@ import sr.we.ui.views.MainLayout;
 import javax.annotation.security.RolesAllowed;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -223,7 +226,7 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
 
         result = list.getResult();
         if (treeGrid.getDataProvider() != null) {
-            treeGrid.setItems(new ArrayList<Item>(),this::getChildren);
+            treeGrid.setItems(new ArrayList<Item>(), this::getChildren);
         }
         if (result != null && !result.isEmpty()) {
             Map<ChartOfAccounts, List<JournalsEntry>> collect = result.stream().filter(f -> f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency())).collect(Collectors.groupingBy(f -> f.getAccount().getAccountType().getType()));
@@ -276,12 +279,19 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
         BigDecimal oe = result.stream().filter(f -> f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OE) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
                 .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        BigDecimal gofe = result.stream().filter(f -> f.getAccount().getSystemId() != null && f.getAccount().getSystemId().compareTo(SystemAccounts.GOFE.getId()) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
+                .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal lofe = result.stream().filter(f -> f.getAccount().getSystemId() != null && f.getAccount().getSystemId().compareTo(SystemAccounts.LOFE.getId()) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
+                .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
+
 
 //        BigDecimal sum = currentAssets.add(otherAssets).subtract(liabilities);
-        BigDecimal sum = eq.add(income).subtract(cgs).subtract(oe);
+        BigDecimal subtract = eq.add(income).subtract(cgs).subtract(oe);
+        BigDecimal sum = subtract.subtract(gofe);
 
 
-        cashAndBank.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(currentAssets));
+        cashAndBank.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(currentAssets.subtract(gofe).add(lofe)));
         toBeReceived.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(otherAssets));
         toBePaidOut.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(liabilities));
         total.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(sum));
