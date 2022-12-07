@@ -60,18 +60,18 @@ public class LoanView extends LitTemplate implements AfterNavigationObserver, Ha
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
         grid.addComponentColumn(person -> createCard(person, business, true));
         grid.setSelectionMode(Grid.SelectionMode.SINGLE);
-        grid.addSelectionListener(get -> {
-            Optional<Loan> firstSelectedItem = get.getFirstSelectedItem();
-            if (firstSelectedItem.isPresent()) {
-                Loan loan = firstSelectedItem.get();
-//                QueryParameters queryParameters = QueryParameters.fromString("id=" + loan.getId());
-//                UI.getCurrent().navigate(LoansViewTabDashboard.getLocation(business, loan.getId().toString()), queryParameters);
-                UI.getCurrent().navigate(LTabDashboard.class, //
-                        new RouteParameters(//
-                                new RouteParam("business", business),//
-                                new RouteParam("loan", loan.getId().toString())));
-            }
-        });
+//        grid.addSelectionListener(get -> {
+//            Optional<Loan> firstSelectedItem = get.getFirstSelectedItem();
+//            if (firstSelectedItem.isPresent()) {
+//                Loan loan = firstSelectedItem.get();
+////                QueryParameters queryParameters = QueryParameters.fromString("id=" + loan.getId());
+////                UI.getCurrent().navigate(LoansViewTabDashboard.getLocation(business, loan.getId().toString()), queryParameters);
+//                UI.getCurrent().navigate(LTabDashboard.class, //
+//                        new RouteParameters(//
+//                                new RouteParam("business", business),//
+//                                new RouteParam("loan", loan.getId().toString())));
+//            }
+//        });
         loansGridLayout.add(grid);
 
         addLoanBtn.addClickListener(f -> {

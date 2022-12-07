@@ -6,6 +6,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.progressbar.ProgressBar;
 import sr.we.shekelflowcore.entity.helper.Executable;
 
 public class Highlight extends VerticalLayout {
@@ -24,7 +25,10 @@ public class Highlight extends VerticalLayout {
         valueSpan.addClassNames("font-semibold", "text-3xl");
 
 
-        add(h2, valueSpan);
+        ProgressBar progressBar = new ProgressBar();
+        progressBar.setWidthFull();
+        progressBar.setIndeterminate(true);
+        add(h2, valueSpan, progressBar);
 
 
         UI current = UI.getCurrent();
@@ -71,6 +75,7 @@ public class Highlight extends VerticalLayout {
 
                         add(badge);
                     }
+                    progressBar.setVisible(false);
                 });
             }
         }).start();

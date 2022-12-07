@@ -47,15 +47,19 @@ public class MenuBuilder {
         } else if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(TransactionsPrivilege.class), Privileges.READ)) {
             menu.addNaviItem(current.getTranslation("sr.we.dashboard"), "icons/menus/icons8_dashboard_48px.png", MainDashboardView.class);
         }
-        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(LoanPrivilege.class), Privileges.READ)) {
-            menu.addNaviItem(current.getTranslation("sr.we.loans"), "icons/menus/icons8_debt_48px.png", LoanView.class);
-        }
-        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(LoanRequestPrivilege.class), Privileges.READ)) {
-            menu.addNaviItem(current.getTranslation("sr.we.loan.requests"), "icons/menus/icons8_lend_48px.png", RequestsView.class);
-        }
+
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(CurrencyExchangePrivilege.class), Privileges.READ)) {
             menu.addNaviItem(current.getTranslation("sr.we.currency.exchange"), "icons/menus/icons8_currency_exchange_48px.png", CurrencyExchangeView.class);
         }
+
+        NaviItem financialServices = menu.addNaviItem("Financial Services", "icons/menus/icons8_bank_48px.png", null);
+        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(LoanPrivilege.class), Privileges.READ)) {
+            menu.addNaviItem(financialServices,current.getTranslation("sr.we.loans"), "icons/menus/icons8_debt_48px.png", LoanView.class);
+        }
+        if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(LoanRequestPrivilege.class), Privileges.READ)) {
+            menu.addNaviItem(financialServices,current.getTranslation("sr.we.loan.requests"), "icons/menus/icons8_lend_48px.png", RequestsView.class);
+        }
+
 
         NaviItem incomeParent = menu.addNaviItem("Income", "icons/menus/icons8_budget_48px.png", null);
         if (userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(CustomerPrivilege.class), Privileges.READ)) {

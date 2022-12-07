@@ -170,4 +170,16 @@ public class LoanRequestService extends MyController {
             return exchange.getBody();
         });
     }
+
+    public Long delete(String accessToken, LoanRequestVO vo) {
+        return encapsulate(() -> {
+            String body = new GsonBuilder()
+                    .registerTypeAdapter(LocalDate.class, new LocalDateAdapter()).create().toJson(vo);
+            RestTemplate restTemplate = new RestTemplate();
+            String fooResourceUrl = configProperties.getRest() + Routes.LOAN_REQUEST_DELETE;
+            HttpEntity<String> httpEntity = getAuthHttpEntity(body, accessToken);
+            ResponseEntity<Long> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.POST, httpEntity, Long.class);
+            return exchange.getBody();
+        });
+    }
 }

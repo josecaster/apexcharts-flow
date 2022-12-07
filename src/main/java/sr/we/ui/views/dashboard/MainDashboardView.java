@@ -26,6 +26,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -173,7 +174,7 @@ public class MainDashboardView extends Main implements BeforeEnterObserver {
 //        conf.getChart().setStyledMode(true);
         NoData noData = new NoData();
         noData.setText("No data present at the moment");
-        apexChartsBuilder = apexChartsBuilder.withChart(ChartBuilder.get().withType(Type.BAR).withHeight("400px").withZoom(ZoomBuilder.get().withEnabled(true).build()).build())//
+        apexChartsBuilder = apexChartsBuilder.withChart(ChartBuilder.get().withType(Type.LINE).withHeight("400px").withZoom(ZoomBuilder.get().withEnabled(true).build()).build())//
                 .withStroke(StrokeBuilder.get().withCurve(Curve.SMOOTH).build())//
 //                .withTitle(TitleSubtitleBuilder.get().withText("Chart").withAlign(Align.right).build())//
                 .withNoData(noData)//
@@ -220,7 +221,10 @@ public class MainDashboardView extends Main implements BeforeEnterObserver {
         }).start();
 
         // Add it all together
-        div = new Div();
+        ProgressBar progressBar = new ProgressBar();
+        progressBar.setWidthFull();
+        progressBar.setIndeterminate(true);
+        div = new Div(progressBar);
         div.setWidthFull();
         VerticalLayout viewEvents = new VerticalLayout(header, div);
         viewEvents.addClassName(LumoUtility.Padding.XSMALL);
@@ -254,7 +258,7 @@ public class MainDashboardView extends Main implements BeforeEnterObserver {
 
     private Number[] getData(List<JournalsEntry> result, DebCred debCred) {
 
-        Map<Month, List<JournalsEntry>> debit = result.stream().filter(f -> f.getDebCred().compareTo(debCred) == 0 && //
+        Map<Month, List<JournalsEntry>> debit = result.stream().filter(f -> f.getJournals().getLogDate().getYear() == 2022 && f.getDebCred().compareTo(debCred) == 0 && //
                         f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.CAB) == 0 && //
                         f.getCurrencyFrom().getCode().equalsIgnoreCase(business.getCurrency().getCode()))//
                 .collect(Collectors.groupingBy(f -> f.getJournals().getLogDate().getMonth()));
