@@ -67,11 +67,11 @@ public class ServiceComponents extends LitTemplate {
         gridLayout.add(serviceComponentsGrid);
 
         serviceComponentsGrid.setWidthFull();
-        serviceComponentsGrid.addColumn(CalculationComponentVO::getCode).setHeader("Code");
-        serviceComponentsGrid.addColumn(CalculationComponentVO::getName).setHeader("Name");
-        serviceComponentsGrid.addColumn(CalculationComponentVO::getFormula).setHeader("Formula");
-        serviceComponentsGrid.addColumn(CalculationComponentVO::getVisibleCustomer).setHeader("Visible customer");
-        serviceComponentsGrid.addColumn(CalculationComponentVO::getActive).setHeader("Active");
+        serviceComponentsGrid.addColumn(CalculationComponentVO::getCode).setHeader("Code").setResizable(true).setSortable(true);
+        serviceComponentsGrid.addColumn(CalculationComponentVO::getName).setHeader("Name").setResizable(true).setSortable(true);
+        serviceComponentsGrid.addColumn(CalculationComponentVO::getFormula).setHeader("Formula").setResizable(true).setSortable(true);
+        serviceComponentsGrid.addColumn(CalculationComponentVO::getVisibleCustomer).setHeader("Visible customer").setResizable(true).setSortable(true);
+        serviceComponentsGrid.addColumn(CalculationComponentVO::getActive).setHeader("Active").setResizable(true).setSortable(true);
 
 
         serviceComponentsGrid.addItemDoubleClickListener(f -> {

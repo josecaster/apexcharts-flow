@@ -34,7 +34,7 @@ public class BusinessView extends TableLayout implements AfterNavigationObserver
         this.grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_COMPACT, GridVariant.LUMO_NO_BORDER);
         add(grid);
         this.grid.removeAllColumns();
-        this.grid.addComponentColumn(business -> createCard(business));
+        this.grid.addComponentColumn(business -> createCard(business)).setResizable(true);
         this.grid.setSelectionMode(Grid.SelectionMode.SINGLE);
         this.grid.addSelectionListener(f -> {
             if (f.getFirstSelectedItem().isPresent()) {

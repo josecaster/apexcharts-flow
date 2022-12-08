@@ -68,7 +68,7 @@ public class ServiceView extends LitTemplate implements BeforeEnterObserver {
 
         grid = new Grid();
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
-        grid.addColumn(Items::getName).setHeader("Service name");
+        grid.addColumn(Items::getName).setHeader("Service name").setResizable(true).setSortable(true);
         grid.addComponentColumn(f -> {
             if (f.getActive()) {
                 Span active = new Span("Active");
@@ -81,8 +81,8 @@ public class ServiceView extends LitTemplate implements BeforeEnterObserver {
                 archive.getElement().getStyle().set("height", "fit-content");
                 return archive;
             }
-        }).setHeader("Status");
-        grid.addColumn(Items::getType).setHeader("Type");
+        }).setHeader("Status").setResizable(true);
+        grid.addColumn(Items::getType).setHeader("Type").setResizable(true).setSortable(true);
         grid.setAllRowsVisible(true);
         grid.addItemDoubleClickListener(f -> {
             Items service = f.getItem();

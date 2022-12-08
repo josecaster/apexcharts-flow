@@ -75,7 +75,7 @@ public class ItemGrid extends Grid<Item> {
                 }
             });
             return textField;
-        }).setHeader("Title").setFlexGrow(1);
+        }).setHeader("Title").setFlexGrow(1).setResizable(true);
         Column<Item> quantity = addComponentColumn(item -> {
             NumberField numberField = new NumberField();
             numberField.setValue((double) item.getCount());
@@ -92,15 +92,15 @@ public class ItemGrid extends Grid<Item> {
 //                feeGrid.getDataProvider().refreshAll();//TODO
             });
             return numberField;
-        }).setHeader("Quantity").setFlexGrow(0);
+        }).setHeader("Quantity").setFlexGrow(0).setResizable(true);
         Column<Item> price = addColumn(item -> {
             BigDecimal calcPrice = item.getPrice();
             return Constants.CURRENCY_FORMAT.format(calcPrice == null ? BigDecimal.ZERO : calcPrice);
-        }).setHeader("Price").setFlexGrow(0);
+        }).setHeader("Price").setFlexGrow(0).setResizable(true).setSortable(true);
         Column<Item> amount = addColumn(item -> {
             BigDecimal calcPrice = item.getResult();
             return Constants.CURRENCY_FORMAT.format(calcPrice == null ? BigDecimal.ZERO : calcPrice);
-        }).setHeader("Amount").setFlexGrow(0);
+        }).setHeader("Amount").setFlexGrow(0).setResizable(true).setSortable(true);
         addComponentColumn(item -> {
             LineAwesomeIcon lineAwesomeIcon = new LineAwesomeIcon("la la-times");
             lineAwesomeIcon.addClickListener(clickEvent -> {
@@ -113,7 +113,7 @@ public class ItemGrid extends Grid<Item> {
 //                feeGrid.getDataProvider().refreshAll();TODO
             });
             return lineAwesomeIcon;
-        }).setFlexGrow(0);
+        }).setFlexGrow(0).setResizable(true);
         addComponentColumn(d -> {
             LineAwesomeIcon lineAwesomeIcon = new LineAwesomeIcon("la la-exclamation-triangle");
             boolean visible = false;
@@ -144,7 +144,7 @@ public class ItemGrid extends Grid<Item> {
             lineAwesomeIcon.setVisible(visible);
             lineAwesomeIcon.addClickListener(f -> setDetailsVisible(d, !isDetailsVisible(d)));
             return lineAwesomeIcon;
-        }).setFlexGrow(0);
+        }).setFlexGrow(0).setResizable(true);
         setItemDetailsRenderer(new ComponentRenderer<>(this::getVariableLayout));
         setDetailsVisibleOnClick(false);
         itemList = new ArrayList<>();

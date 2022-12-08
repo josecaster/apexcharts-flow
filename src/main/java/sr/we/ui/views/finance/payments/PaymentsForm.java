@@ -49,11 +49,11 @@ public class PaymentsForm extends VerticalLayout {
 
 
 //        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
-        grid.addColumn(MappedSuperClass::getId).setHeader("ID#");
-        grid.addColumn(person -> person.getCustomer().getName()).setHeader("Name");
-        grid.addColumn(LoanRequest::getNextPaymentDate).setHeader("Next payment Date");
-        grid.addColumn(person -> Constants.CURRENCY_FORMAT.format(person.getNextPaymentAmount())).setHeader("Next payment amount");
-        grid.addColumn(person -> Constants.CURRENCY_FORMAT.format(person.getTransactionBalance())).setHeader("Balance");
+        grid.addColumn(MappedSuperClass::getId).setHeader("ID#").setSortable(true);
+        grid.addColumn(person -> person.getCustomer().getName()).setHeader("Name").setResizable(true).setSortable(true);
+        grid.addColumn(LoanRequest::getNextPaymentDate).setHeader("Next payment Date").setResizable(true).setSortable(true);
+        grid.addColumn(person -> Constants.CURRENCY_FORMAT.format(person.getNextPaymentAmount())).setHeader("Next payment amount").setResizable(true).setSortable(true);
+        grid.addColumn(person -> Constants.CURRENCY_FORMAT.format(person.getTransactionBalance())).setHeader("Balance").setResizable(true).setSortable(true);
         grid.addComponentColumn(f -> {
             if (f.isOverdue()) {
                 Span overdue = new Span("Overdue");
@@ -65,7 +65,7 @@ public class PaymentsForm extends VerticalLayout {
             pending.getElement().getThemeList().add(UIUtil.Badge.PILL+" contrast");
             pending.getElement().getStyle().set("height", "fit-content");
             return pending;
-        }).setHeader("State");
+        }).setHeader("State").setResizable(true);
         grid.setSelectionMode(Grid.SelectionMode.SINGLE);
         grid.addSelectionListener(get -> {
             transactionForm.setReferenceId(null);

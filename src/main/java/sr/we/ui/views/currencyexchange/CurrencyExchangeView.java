@@ -207,16 +207,16 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
         grid = new Grid<>();
         grid.addColumn(f -> {
             return getFrom(f) + "-" + getTo(f) + " fx " + Constants.CURRENCY_FORMAT.format(f.getAmountFrom());
-        }).setHeader("Buy");
+        }).setHeader("Buy").setResizable(true).setSortable(true);
         grid.addColumn(f -> {
             return getFrom(f) + "-" + getTo(f) + " fx  " + Constants.CURRENCY_FORMAT.format(f.getAmountTo());
-        }).setHeader("Sell");
+        }).setHeader("Sell").setResizable(true).setSortable(true);
         grid.addColumn(f -> {
             return Constants.SIMPLE_DATE_TIME_FORMAT_24H.format(DateUtil.convertToDateViaInstant(f.getStartDateTime()));
-        }).setHeader("Started");
+        }).setHeader("Started").setResizable(true).setSortable(true);
         grid.addColumn(f -> {
             return f.getEndDateTime() == null ? "Active" : (Constants.SIMPLE_DATE_TIME_FORMAT_24H.format(DateUtil.convertToDateViaInstant(f.getEndDateTime())));
-        }).setHeader("Live");
+        }).setHeader("Live").setResizable(true).setSortable(true);
         filter = new CurrencyExchangeVO();
         grid.setItems(CurrencyExchangeDataProvider.fetch(filter), CurrencyExchangeDataProvider.count(filter));
 

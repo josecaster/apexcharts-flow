@@ -86,7 +86,7 @@ public class LRPView extends VerticalLayout {
                 lineAwesomeIcon.getElement().getThemeList().add(UIUtil.Badge.PILL+" primary error");
                 return lineAwesomeIcon;
             }
-        }).setHeader("Record Payment");
+        }).setHeader("Record Payment").setResizable(true);
     }
 
     private void generatePLanning(Executable executable) {
@@ -136,7 +136,7 @@ public class LRPView extends VerticalLayout {
 //                progressBar.setValue(transactionsAmount.doubleValue());
                 return span;
             }
-        }).setHeader("Status");
+        }).setHeader("Status").setResizable(true);
 
         grid.addComponentColumn(new ValueProvider<LoanRequestPlanDetail, Div>() {
             @Override
@@ -155,28 +155,28 @@ public class LRPView extends VerticalLayout {
                 div.setHeightFull();
                 return div;
             }
-        }).setHeader("Progress");
+        }).setHeader("Progress").setResizable(true);
 
         grid.addColumn(new ValueProvider<LoanRequestPlanDetail, LocalDate>() {
             @Override
             public LocalDate apply(LoanRequestPlanDetail loanRequestPlanning) {
                 return loanRequestPlanning.getInitDate();
             }
-        }).setHeader("Payment date");
+        }).setHeader("Payment date").setResizable(true).setSortable(true);
 
         grid.addColumn(new ValueProvider<LoanRequestPlanDetail, String>() {
             @Override
             public String apply(LoanRequestPlanDetail loanRequestPlanning) {
                 return Constants.CURRENCY_FORMAT.format(loanRequestPlanning.getFactor());
             }
-        }).setHeader("Amount");
+        }).setHeader("Amount").setResizable(true).setSortable(true);
 
         grid.addColumn(new ValueProvider<LoanRequestPlanDetail, String>() {
             @Override
             public String apply(LoanRequestPlanDetail loanRequestPlanning) {
                 return Constants.CURRENCY_FORMAT.format(loanRequestPlanning.getCapital());
             }
-        }).setHeader("Running totals");
+        }).setHeader("Running totals").setResizable(true).setSortable(true);
 
 
 //        save.addClickListener(f -> {

@@ -90,12 +90,12 @@ public class AthenticationAuthorizationView extends Div implements BeforeEnterOb
         add(splitLayout);
 
         // Configure Grid
-        grid.addColumn("firstName").setAutoWidth(true);
-        grid.addColumn("lastName").setAutoWidth(true);
-        grid.addColumn("email").setAutoWidth(true);
-        grid.addColumn("phone").setAutoWidth(true);
-        grid.addColumn("dateOfBirth").setAutoWidth(true);
-        grid.addColumn("occupation").setAutoWidth(true);
+        grid.addColumn("firstName").setAutoWidth(true).setResizable(true).setSortable(true);
+        grid.addColumn("lastName").setAutoWidth(true).setResizable(true).setSortable(true);
+        grid.addColumn("email").setAutoWidth(true).setResizable(true).setSortable(true);
+        grid.addColumn("phone").setAutoWidth(true).setResizable(true).setSortable(true);
+        grid.addColumn("dateOfBirth").setAutoWidth(true).setResizable(true).setSortable(true);
+        grid.addColumn("occupation").setAutoWidth(true).setResizable(true).setSortable(true);
         LitRenderer<SamplePerson> importantRenderer = LitRenderer.<SamplePerson>of(
                 "<vaadin-icon icon='vaadin:${item.icon}' style='width: var(--lumo-icon-size-s); height: var(--lumo-icon-size-s); color: ${item.color};'></vaadin-icon>")
                 .withProperty("icon", important -> important.isImportant() ? "check" : "minus").withProperty("color",
@@ -103,7 +103,7 @@ public class AthenticationAuthorizationView extends Div implements BeforeEnterOb
                                 ? "var(--lumo-primary-text-color)"
                                 : "var(--lumo-disabled-text-color)");
 
-        grid.addColumn(importantRenderer).setHeader("Important").setAutoWidth(true);
+        grid.addColumn(importantRenderer).setHeader("Important").setAutoWidth(true).setResizable(true).setSortable(true);
 
         grid.setItems(query -> samplePersonService.list(
                 PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))

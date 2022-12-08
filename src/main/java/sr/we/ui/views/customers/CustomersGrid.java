@@ -49,15 +49,15 @@ public class CustomersGrid extends TableLayout{
 //                return customer.getPrimaryCustomerContacts().getMobile();
 //            }
 //        }).setHeader(getTranslation("sr.we.mobile"));
-        this.grid.addComponentColumn(customer -> createCard(customer));
-        this.grid.addColumn(Customer::getName).setHeader("Name");
-        this.grid.addColumn(Customer::getFirstName).setHeader("Firstname");
-        this.grid.addColumn(f -> f.getPrimaryBillingAddress() == null ? null : (f.getPrimaryBillingAddress().getCountry() == null ? null : f.getPrimaryBillingAddress().getCountry().getName())).setHeader("Country");
-        this.grid.addColumn(f -> f.getPrimaryBillingAddress() == null ? null : f.getPrimaryBillingAddress().getState()).setHeader("State");
-        this.grid.addColumn(f -> f.getPrimaryBillingAddress() == null ? null : f.getPrimaryBillingAddress().getAddress()).setHeader("Address");
-        this.grid.addColumn(f -> f.getPrimaryCustomerContacts() == null ? null : f.getPrimaryCustomerContacts().getEmail()).setHeader("Email");
-        this.grid.addColumn(f -> f.getPrimaryCustomerContacts() == null ? null : f.getPrimaryCustomerContacts().getMobile()).setHeader("Mobile number");
-        this.grid.addColumn(f -> f.getPrimaryCustomerContacts() == null ? null : f.getPrimaryCustomerContacts().getPhone()).setHeader("Phone number");
+        this.grid.addComponentColumn(customer -> createCard(customer)).setResizable(true);
+        this.grid.addColumn(Customer::getName).setHeader("Name").setResizable(true).setSortable(true);
+        this.grid.addColumn(Customer::getFirstName).setHeader("Firstname").setResizable(true).setSortable(true);
+        this.grid.addColumn(f -> f.getPrimaryBillingAddress() == null ? null : (f.getPrimaryBillingAddress().getCountry() == null ? null : f.getPrimaryBillingAddress().getCountry().getName())).setHeader("Country").setResizable(true).setSortable(true);
+        this.grid.addColumn(f -> f.getPrimaryBillingAddress() == null ? null : f.getPrimaryBillingAddress().getState()).setHeader("State").setResizable(true).setSortable(true);
+        this.grid.addColumn(f -> f.getPrimaryBillingAddress() == null ? null : f.getPrimaryBillingAddress().getAddress()).setHeader("Address").setResizable(true).setSortable(true);
+        this.grid.addColumn(f -> f.getPrimaryCustomerContacts() == null ? null : f.getPrimaryCustomerContacts().getEmail()).setHeader("Email").setResizable(true).setSortable(true);
+        this.grid.addColumn(f -> f.getPrimaryCustomerContacts() == null ? null : f.getPrimaryCustomerContacts().getMobile()).setHeader("Mobile number").setResizable(true).setSortable(true);
+        this.grid.addColumn(f -> f.getPrimaryCustomerContacts() == null ? null : f.getPrimaryCustomerContacts().getPhone()).setHeader("Phone number").setResizable(true).setSortable(true);
 //        this.grid.setSelectionMode(Grid.SelectionMode.SINGLE);
         this.grid.addItemDoubleClickListener(f -> {
             Customer loanRequest = f.getItem();

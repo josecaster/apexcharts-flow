@@ -116,10 +116,10 @@ public class AssetsForm extends LitTemplate {
         list = new ArrayList<>();
         grid.setItems(list);
         grid.getDataProvider().refreshAll();
-        grid.addColumn(LoanRequestAssetsVO::getLoanAssets).setHeader("Asset type").setFlexGrow(0);
-        grid.addColumn(f -> f.getCurrencyCode()).setHeader("Currency").setFlexGrow(0);
-        grid.addColumn(LoanRequestAssetsVO::getAmount).setHeader("Amount").setFlexGrow(0);
-        grid.addColumn(LoanRequestAssetsVO::getMemo).setHeader("Memo").setFlexGrow(1);
+        grid.addColumn(LoanRequestAssetsVO::getLoanAssets).setHeader("Asset type").setFlexGrow(0).setResizable(true).setSortable(true);
+        grid.addColumn(f -> f.getCurrencyCode()).setHeader("Currency").setFlexGrow(0).setResizable(true).setSortable(true);
+        grid.addColumn(LoanRequestAssetsVO::getAmount).setHeader("Amount").setFlexGrow(0).setResizable(true).setSortable(true);
+        grid.addColumn(LoanRequestAssetsVO::getMemo).setHeader("Memo").setFlexGrow(1).setResizable(true).setSortable(true);
         grid.setAllRowsVisible(true);
 
         addAssetsBtn.addClickListener(f -> {

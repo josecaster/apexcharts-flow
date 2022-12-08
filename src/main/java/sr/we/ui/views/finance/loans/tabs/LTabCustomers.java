@@ -44,7 +44,7 @@ public class LTabCustomers extends VerticalLayout implements AfterNavigationObse
         setSizeFull();
         grid.setHeight("100%");
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
-        grid.addComponentColumn(person -> createCard(person, business, true));
+        grid.addComponentColumn(person -> createCard(person, business, true)).setResizable(true);
         grid.setSelectionMode(Grid.SelectionMode.SINGLE);
         grid.addSelectionListener(get -> {
             Optional<Customer> firstSelectedItem = get.getFirstSelectedItem();

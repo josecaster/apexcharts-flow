@@ -99,12 +99,12 @@ public class InvoiceView extends LitTemplate implements BeforeEnterObserver, Aft
                 }
                 return invoiceViewStatusSpan;
             }
-        }).setHeader("Status");
-        Grid.Column<Invoice> dueColumn = grid.addColumn(Invoice::getPaymentDue).setHeader("Due");
-        Grid.Column<Invoice> dateColumn = grid.addColumn(Invoice::getInvoiceDate).setHeader("Date");
-        grid.addColumn(Invoice::getInvoiceNumber).setHeader("Number");
-        grid.addColumn(f -> f.getCustomer() == null ? "None" : (f.getCustomer().getName() + " " + f.getCustomer().getFirstName())).setHeader("Customer");
-        grid.addColumn(f -> (f.getCurrencyTo() == null ? "" : (f.getCurrencyTo().getCode() + " ")) + Constants.CURRENCY_FORMAT.format(f.getRest() == null ? BigDecimal.ZERO : f.getRest())).setHeader("Amount due");
+        }).setHeader("Status").setResizable(true);
+        Grid.Column<Invoice> dueColumn = grid.addColumn(Invoice::getPaymentDue).setHeader("Due").setResizable(true).setSortable(true);
+        Grid.Column<Invoice> dateColumn = grid.addColumn(Invoice::getInvoiceDate).setHeader("Date").setResizable(true).setSortable(true);
+        grid.addColumn(Invoice::getInvoiceNumber).setHeader("Number").setResizable(true).setSortable(true);
+        grid.addColumn(f -> f.getCustomer() == null ? "None" : (f.getCustomer().getName() + " " + f.getCustomer().getFirstName())).setHeader("Customer").setResizable(true).setSortable(true);
+        grid.addColumn(f -> (f.getCurrencyTo() == null ? "" : (f.getCurrencyTo().getCode() + " ")) + Constants.CURRENCY_FORMAT.format(f.getRest() == null ? BigDecimal.ZERO : f.getRest())).setHeader("Amount due").setResizable(true).setSortable(true);
         grid.addComponentColumn(new ValueProvider<Invoice, ArrowDownButton>() {
             @Override
             public ArrowDownButton apply(Invoice detail) {
@@ -136,7 +136,7 @@ public class InvoiceView extends LitTemplate implements BeforeEnterObserver, Aft
 //                lineAwesomeIcon.getElement().getThemeList().add("badge primary error");
                 return lineAwesomeIcon;
             }
-        }).setHeader("Actions");
+        }).setHeader("Actions").setResizable(true);
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
         grid.addItemDoubleClickListener(get -> {
             Invoice firstSelectedItem = get.getItem();

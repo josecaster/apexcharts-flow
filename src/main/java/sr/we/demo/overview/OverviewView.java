@@ -121,10 +121,10 @@ public class OverviewView /*extends Main*/ {
             status.getElement().setAttribute("title", "Status: " + statusText);
             status.getElement().getThemeList().add(getStatusTheme(serviceHealth));
             return status;
-        })).setHeader("").setFlexGrow(0).setAutoWidth(true);
-        grid.addColumn(ServiceHealth::getCity).setHeader("City").setFlexGrow(1);
-        grid.addColumn(ServiceHealth::getInput).setHeader("Input").setAutoWidth(true).setTextAlign(ColumnTextAlign.END);
-        grid.addColumn(ServiceHealth::getOutput).setHeader("Output").setAutoWidth(true)
+        })).setHeader("").setFlexGrow(0).setAutoWidth(true).setResizable(true).setSortable(true);
+        grid.addColumn(ServiceHealth::getCity).setHeader("City").setFlexGrow(1).setResizable(true).setSortable(true);
+        grid.addColumn(ServiceHealth::getInput).setHeader("Input").setAutoWidth(true).setTextAlign(ColumnTextAlign.END).setResizable(true).setSortable(true);
+        grid.addColumn(ServiceHealth::getOutput).setHeader("Output").setAutoWidth(true).setResizable(true).setSortable(true)
                 .setTextAlign(ColumnTextAlign.END);
 
         grid.setItems(new ServiceHealth(ServiceHealth.Status.EXCELLENT, "Münster", 324, 1540),

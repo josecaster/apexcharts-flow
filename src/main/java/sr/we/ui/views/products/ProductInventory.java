@@ -83,13 +83,13 @@ public class ProductInventory extends LitTemplate {
                 textField.setValue(f.getUniqueCode());
             }
             return textField;
-        }).setHeader("Unique code");
-        gridDetail.addColumn(ProductsInventoryDetailVO::getCustomerId).setHeader("Customer");
+        }).setHeader("Unique code").setResizable(true);
+        gridDetail.addColumn(ProductsInventoryDetailVO::getCustomerId).setHeader("Customer").setResizable(true).setSortable(true);
         inventoryDetailLayout.add(gridDetail);
         grid = new Grid<>();
         inventroyGridLayout.add(grid);
-        grid.addColumn(ProductsInventoryVO::getQuantity).setHeader("Quantity");
-        grid.addColumn(ProductsInventoryVO::getContinueSellingOutStock).setHeader("Continue");
+        grid.addColumn(ProductsInventoryVO::getQuantity).setHeader("Quantity").setResizable(true).setSortable(true);
+        grid.addColumn(ProductsInventoryVO::getContinueSellingOutStock).setHeader("Continue").setResizable(true).setSortable(true);
         grid.addComponentColumn(f -> {
             if (f.getDetailedStock()) {
                 Button detail = new Button("Detail");
@@ -122,7 +122,7 @@ public class ProductInventory extends LitTemplate {
 
             }
             return new Label("-");
-        }).setHeader("Detail");
+        }).setHeader("Detail").setResizable(true);
         gridDetail.addComponentColumn(d -> {
             if (d.getCustomerId() == null) {
                 Button remove = new Button("Remove");
@@ -137,7 +137,7 @@ public class ProductInventory extends LitTemplate {
                 return remove;
             }
             return new Label("-");
-        });
+        }).setResizable(true);
 
         quantityFld.addValueChangeListener(d -> {
             if (executable != null) {

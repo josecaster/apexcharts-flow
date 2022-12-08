@@ -80,13 +80,13 @@ public class InputLayout<T> extends LitTemplate {
             textField.setValue(f.getName());
             textField.setWidthFull();
             return textField;
-        }).setHeader("Name");
+        }).setHeader("Name").setResizable(true);
         name.getElement().getStyle().set("padding", "0px");
         fileGrid.addThemeVariants(GridVariant.LUMO_NO_ROW_BORDERS,GridVariant.LUMO_NO_ROW_BORDERS,GridVariant.LUMO_COMPACT);
         fileGrid.setSelectionMode(Grid.SelectionMode.MULTI);
         Column<LoanRequestAssetsFiles> loanRequestAssetsFilesColumn = fileGrid.addComponentColumn(f -> {
             return new Checkbox(f.getValid());
-        });
+        }).setResizable(true);
         loanRequestAssetsFilesColumn.setWidth("50px");
         loanRequestAssetsFilesColumn.setHeader("Valid");
         saveBtn.getElement().removeAllChildren();

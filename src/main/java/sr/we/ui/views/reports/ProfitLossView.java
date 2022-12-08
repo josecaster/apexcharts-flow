@@ -167,7 +167,7 @@ public class ProfitLossView extends LitTemplate implements BeforeEnterObserver {
             }
             horizontalLayout.add(span);
             return horizontalLayout;
-        }).setHeader(dateHeaderLbl).setTextAlign(ColumnTextAlign.END);
+        }).setHeader(dateHeaderLbl).setTextAlign(ColumnTextAlign.END).setResizable(true);
         tableLayout.add(treeGrid);
     }
 

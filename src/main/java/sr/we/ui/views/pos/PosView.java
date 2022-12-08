@@ -295,7 +295,7 @@ public class PosView extends LitTemplate implements BeforeEnterObserver {
         boardLayout.addClassName("dashboard-view");
         boardLayout.removeAll();
         boardLayout.add(grid);
-        grid.addComponentColumn(f -> rowBoard(f)).setFrozen(true).setHeader("Select an item");
+        grid.addComponentColumn(f -> rowBoard(f)).setFrozen(true).setHeader("Select an item").setResizable(true);
         filterCmb.setVisible(false);
         filterCmb.setItemLabelGenerator(l -> {
 //            if (l.getProduct() != null) {

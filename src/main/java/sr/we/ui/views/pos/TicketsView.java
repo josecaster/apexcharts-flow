@@ -65,13 +65,13 @@ public class TicketsView extends LitTemplate {
         grid = new Grid<>();
         ticketsGridLayout.add(grid);
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
-        grid.addColumn(PosHeader::getId).setHeader("ID");
+        grid.addColumn(PosHeader::getId).setHeader("ID").setSortable(true);
 //        grid.addColumn(f -> f.getPosStart() != null ? Constants.SIMPLE_DATE_FORMAT.format(DateUtil.convertToDateViaInstant(f.getPosStart().getTargetDate())) : null).setHeader("Date");
-        grid.addColumn(f -> f.getHeaderSeq() != null ? ("Ticket # " + f.getHeaderSeq()) : null).setHeader("Sequence");
-        grid.addColumn(f -> (f.getCurrencyFrom() != null ? f.getCurrencyFrom().getCode() : "") + (f.getPrice() != null ? Constants.CURRENCY_FORMAT.format(f.getPrice()) : "")).setHeader("Amount");
-        grid.addColumn(f -> (f.getCurrencyTo() != null ? f.getCurrencyTo().getCode() : "") + (f.getConvertedAmount() != null ? Constants.CURRENCY_FORMAT.format(f.getConvertedAmount()) : "")).setHeader("Converted Amount");
-        grid.addColumn(f -> f.getTransactionsAmount() != null ? Constants.CURRENCY_FORMAT.format(f.getTransactionsAmount()) : null).setHeader("Paid amount");
-        grid.addColumn(f -> f.getRest() != null ? Constants.CURRENCY_FORMAT.format(f.getRest()) : null).setHeader("Amount due");
+        grid.addColumn(f -> f.getHeaderSeq() != null ? ("Ticket # " + f.getHeaderSeq()) : null).setHeader("Sequence").setResizable(true).setSortable(true);
+        grid.addColumn(f -> (f.getCurrencyFrom() != null ? f.getCurrencyFrom().getCode() : "") + (f.getPrice() != null ? Constants.CURRENCY_FORMAT.format(f.getPrice()) : "")).setHeader("Amount").setResizable(true).setSortable(true);
+        grid.addColumn(f -> (f.getCurrencyTo() != null ? f.getCurrencyTo().getCode() : "") + (f.getConvertedAmount() != null ? Constants.CURRENCY_FORMAT.format(f.getConvertedAmount()) : "")).setHeader("Converted Amount").setResizable(true).setSortable(true);
+        grid.addColumn(f -> f.getTransactionsAmount() != null ? Constants.CURRENCY_FORMAT.format(f.getTransactionsAmount()) : null).setHeader("Paid amount").setResizable(true).setSortable(true);
+        grid.addColumn(f -> f.getRest() != null ? Constants.CURRENCY_FORMAT.format(f.getRest()) : null).setHeader("Amount due").setResizable(true).setSortable(true);
         grid.setDetailsVisibleOnClick(true);
         grid.setItemDetailsRenderer(new ComponentRenderer<>(this::getDetailLayout));
         grid.addComponentColumn(new ValueProvider<PosHeader, LineAwesomeIcon>() {
@@ -98,7 +98,7 @@ public class TicketsView extends LitTemplate {
                 lineAwesomeIcon.getElement().getThemeList().add(UIUtil.Badge.PILL+" primary error");
                 return lineAwesomeIcon;
             }
-        }).setHeader("Record Payment");
+        }).setHeader("Record Payment").setResizable(true);
 
     }
 

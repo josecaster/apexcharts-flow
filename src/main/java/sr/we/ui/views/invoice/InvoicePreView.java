@@ -196,16 +196,16 @@ public class InvoicePreView extends LitTemplate implements BeforeEnterObserver {
         itemGrid.setAllRowsVisible(true);
         itemGrid.setClassName("resonate");
         itemGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
-        itemGrid.addColumn(Item::getName).setHeader("Title").setFlexGrow(1);
-        itemGrid.addColumn(Item::getCount).setHeader("Quantity").setFlexGrow(0);
+        itemGrid.addColumn(Item::getName).setHeader("Title").setFlexGrow(1).setResizable(true).setSortable(true);
+        itemGrid.addColumn(Item::getCount).setHeader("Quantity").setFlexGrow(0).setResizable(true).setSortable(true);
         itemGrid.addColumn(item -> {
             BigDecimal calcPrice = item.getPrice();
             return Constants.CURRENCY_FORMAT.format(calcPrice == null ? BigDecimal.ZERO : calcPrice);
-        }).setHeader("Price").setFlexGrow(0);
+        }).setHeader("Price").setFlexGrow(0).setResizable(true).setSortable(true);
         itemGrid.addColumn(item -> {
             BigDecimal calcPrice = item.getResult();
             return Constants.CURRENCY_FORMAT.format(calcPrice == null ? BigDecimal.ZERO : calcPrice);
-        }).setHeader("Amount").setFlexGrow(0);
+        }).setHeader("Amount").setFlexGrow(0).setResizable(true).setSortable(true);
 
         itemList = new ArrayList<>();
         itemGrid.setItems(itemList);

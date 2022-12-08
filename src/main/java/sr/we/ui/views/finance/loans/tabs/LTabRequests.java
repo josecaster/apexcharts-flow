@@ -50,7 +50,7 @@ public class LTabRequests extends TableLayout implements AfterNavigationObserver
         addClassName("loans-view");
 
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
-        grid.addComponentColumn(person -> createCard(person, business, true));
+        grid.addComponentColumn(person -> createCard(person, business, true)).setResizable(true);
         grid.setSelectionMode(Grid.SelectionMode.SINGLE);
         grid.addSelectionListener(get -> {
             Optional<LoanRequest> firstSelectedItem = get.getFirstSelectedItem();

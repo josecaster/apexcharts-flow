@@ -95,10 +95,10 @@ public class AccountView extends LitTemplate {
         vo.setCurrency(0L);
 
         grid = new Grid<>();
-        grid.addColumn(Account::getAccountId);
-        grid.addColumn(Account::getName);
-        grid.addColumn(Account::getDescription);
-        grid.addComponentColumn(f -> new LineAwesomeIcon("la la-pencil"));
+        grid.addColumn(Account::getAccountId).setResizable(true).setSortable(true);
+        grid.addColumn(Account::getName).setResizable(true).setSortable(true);
+        grid.addColumn(Account::getDescription).setResizable(true).setSortable(true);
+        grid.addComponentColumn(f -> new LineAwesomeIcon("la la-pencil")).setResizable(true);
         grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT, GridVariant.LUMO_NO_BORDER);
         grid.setAllRowsVisible(true);
         refresh();

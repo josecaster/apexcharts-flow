@@ -128,7 +128,7 @@ public class JournalentryView extends LitTemplate {
                 grid.getDataProvider().refreshItem(f);
             });
             return description;
-        }).setHeader("Description");
+        }).setHeader("Description").setResizable(true);
         Grid.Column<JournalsEntryVO> accountColumn = grid.addComponentColumn(f -> {
             AccountSelect account = new AccountSelect(businessId, Reference.JOURNAL_ENTRY);
             account.setValue(f.getAccount());
@@ -145,7 +145,7 @@ public class JournalentryView extends LitTemplate {
                 }
             });
             return account;
-        }).setHeader("Account");
+        }).setHeader("Account").setResizable(true);
 
         Grid.Column<JournalsEntryVO> debitColumn = grid.addComponentColumn(f -> {
             BigDecimalField debit = new BigDecimalField();
@@ -172,7 +172,7 @@ public class JournalentryView extends LitTemplate {
                 }
             });
             return debit;
-        });
+        }).setResizable(true);
         debitColumn.setHeader("Debit");
         Grid.Column<JournalsEntryVO> arrowColumn = grid.addComponentColumn(f -> {
             Button arrow = new Button();
@@ -201,7 +201,7 @@ public class JournalentryView extends LitTemplate {
             arrow.setIcon(lineAwesomeIcon);
             arrow.setWidthFull();
             return arrow;
-        });
+        }).setResizable(true);
         Grid.Column<JournalsEntryVO> creditColumn = grid.addComponentColumn(f -> {
             BigDecimalField credit = new BigDecimalField();
             if (currency != null) {
@@ -227,7 +227,7 @@ public class JournalentryView extends LitTemplate {
             });
             credit.setWidthFull();
             return credit;
-        });
+        }).setResizable(true);
         creditColumn.setHeader("Credit");
 
 

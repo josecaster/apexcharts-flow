@@ -326,10 +326,10 @@ public class MainDashboardView extends Main implements BeforeEnterObserver {
             status.getElement().setAttribute("title", "Status: " + statusText);
             status.getElement().getThemeList().add(getStatusTheme(serviceHealth));
             return status;
-        })).setHeader("").setFlexGrow(0).setAutoWidth(true);
-        grid.addColumn(f -> f.getName() + "(" + f.getAccountNumber() + ")").setHeader("Account").setFlexGrow(1);
-        grid.addColumn(f -> Constants.CURRENCY_FORMAT.format(f.getIn())).setHeader("IN").setAutoWidth(true).setTextAlign(ColumnTextAlign.END);
-        grid.addColumn(f -> Constants.CURRENCY_FORMAT.format(f.getOut())).setHeader("OUT").setAutoWidth(true).setTextAlign(ColumnTextAlign.END);
+        })).setHeader("").setFlexGrow(0).setAutoWidth(true).setResizable(true).setSortable(true);
+        grid.addColumn(f -> f.getName() + "(" + f.getAccountNumber() + ")").setHeader("Account").setFlexGrow(1).setResizable(true).setSortable(true);
+        grid.addColumn(f -> Constants.CURRENCY_FORMAT.format(f.getIn())).setHeader("IN").setAutoWidth(true).setTextAlign(ColumnTextAlign.END).setResizable(true).setSortable(true);
+        grid.addColumn(f -> Constants.CURRENCY_FORMAT.format(f.getOut())).setHeader("OUT").setAutoWidth(true).setTextAlign(ColumnTextAlign.END).setResizable(true).setSortable(true);
 
 
         UI current = UI.getCurrent();

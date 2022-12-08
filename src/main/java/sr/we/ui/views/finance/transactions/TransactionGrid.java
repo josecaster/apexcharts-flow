@@ -39,12 +39,12 @@ public class TransactionGrid extends VerticalLayout {
         grid.setAllRowsVisible(true);
         grid.setClassName("resonate");
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
-        Grid.Column<PaymentTransaction> payment_date = grid.addColumn(f -> f.getPaymentDate() == null ? null : Constants.SIMPLE_DATE_FORMAT.format(DateUtil.convertToDateViaInstant(f.getPaymentDate()))).setHeader("Payment date");
-        Grid.Column<PaymentTransaction> payment_method = grid.addColumn(PaymentTransaction::getMemo).setHeader("Description");
-        Grid.Column<PaymentTransaction> account = grid.addColumn(f -> f.getAccount() == null ? null : f.getAccount().getName()).setHeader("Account");
-        Grid.Column<PaymentTransaction> reference = grid.addColumn(f -> f.getReference().getCaption() + " #" + f.getReferenceId()).setHeader("Reference");
-        grid.addColumn(f -> f.getCurrencyFrom().getCode()+" "+(f.getAmount() == null ? Constants.CURRENCY_FORMAT.format(BigDecimal.ZERO) : Constants.CURRENCY_FORMAT.format(f.getAmount()))).setHeader("Amount");
-        grid.addColumn(f -> f.getCurrencyTo().getCode()+" "+(f.getConvertedAmount() == null ? Constants.CURRENCY_FORMAT.format(BigDecimal.ZERO) : Constants.CURRENCY_FORMAT.format(f.getConvertedAmount()))).setHeader("Currency Amount");
+        Grid.Column<PaymentTransaction> payment_date = grid.addColumn(f -> f.getPaymentDate() == null ? null : Constants.SIMPLE_DATE_FORMAT.format(DateUtil.convertToDateViaInstant(f.getPaymentDate()))).setHeader("Payment date").setResizable(true).setSortable(true);
+        Grid.Column<PaymentTransaction> payment_method = grid.addColumn(PaymentTransaction::getMemo).setHeader("Description").setResizable(true).setSortable(true);
+        Grid.Column<PaymentTransaction> account = grid.addColumn(f -> f.getAccount() == null ? null : f.getAccount().getName()).setHeader("Account").setResizable(true).setSortable(true);
+        Grid.Column<PaymentTransaction> reference = grid.addColumn(f -> f.getReference().getCaption() + " #" + f.getReferenceId()).setHeader("Reference").setResizable(true).setSortable(true);
+        grid.addColumn(f -> f.getCurrencyFrom().getCode()+" "+(f.getAmount() == null ? Constants.CURRENCY_FORMAT.format(BigDecimal.ZERO) : Constants.CURRENCY_FORMAT.format(f.getAmount()))).setHeader("Amount").setResizable(true).setSortable(true);
+        grid.addColumn(f -> f.getCurrencyTo().getCode()+" "+(f.getConvertedAmount() == null ? Constants.CURRENCY_FORMAT.format(BigDecimal.ZERO) : Constants.CURRENCY_FORMAT.format(f.getConvertedAmount()))).setHeader("Currency Amount").setResizable(true).setSortable(true);
         HeaderRow.HeaderCell join = grid.prependHeaderRow().join(payment_date, payment_method, account, reference);
         Div transactionToolbar = new Div();
         transactionToolbar.setWidthFull();
@@ -103,7 +103,7 @@ public class TransactionGrid extends VerticalLayout {
 
             lineAwesomeIcon.addClassName(LumoUtility.FontSize.MEDIUM);
             return lineAwesomeIcon;
-        }).setHeader("Transaction");
+        }).setHeader("Transaction").setResizable(true);
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
         grid.addSelectionListener(get -> {
             paymentTransactions = get.getAllSelectedItems();

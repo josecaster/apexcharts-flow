@@ -58,7 +58,7 @@ public class LoanView extends LitTemplate implements AfterNavigationObserver, Ha
 
         grid.setAllRowsVisible(true);
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
-        grid.addComponentColumn(person -> createCard(person, business, true));
+        grid.addComponentColumn(person -> createCard(person, business, true)).setResizable(true);
         grid.setSelectionMode(Grid.SelectionMode.SINGLE);
 //        grid.addSelectionListener(get -> {
 //            Optional<Loan> firstSelectedItem = get.getFirstSelectedItem();

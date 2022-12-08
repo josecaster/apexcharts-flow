@@ -59,7 +59,7 @@ public class LRPGenerate extends VerticalLayout {
                 });
                 return lineAwesomeIcon;
             }
-        }).setHeader("Payment");
+        }).setHeader("Payment").setResizable(true);
     }
 
     private void generatePLanning(LoanRequest loanRequest, Executable executable) {
@@ -152,28 +152,28 @@ public class LRPGenerate extends VerticalLayout {
             public String apply(LoanRequestSchedulePlanDetail loanRequestPlanning) {
                 return loanRequestPlanning.getFreq().getCaption() + " " + loanRequestPlanning.getFreqAmount();
             }
-        }).setHeader("Frequency");
+        }).setHeader("Frequency").setResizable(true).setSortable(true);
 
         grid.addColumn(new ValueProvider<LoanRequestSchedulePlanDetail, LocalDate>() {
             @Override
             public LocalDate apply(LoanRequestSchedulePlanDetail loanRequestPlanning) {
                 return loanRequestPlanning.getInitDate();
             }
-        }).setHeader("Payment date");
+        }).setHeader("Payment date").setResizable(true).setSortable(true);
 
         grid.addColumn(new ValueProvider<LoanRequestSchedulePlanDetail, String>() {
             @Override
             public String apply(LoanRequestSchedulePlanDetail loanRequestPlanning) {
                 return Constants.CURRENCY_FORMAT.format(loanRequestPlanning.getFactor());
             }
-        }).setHeader("Amount");
+        }).setHeader("Amount").setResizable(true).setSortable(true);
 
         grid.addColumn(new ValueProvider<LoanRequestSchedulePlanDetail, String>() {
             @Override
             public String apply(LoanRequestSchedulePlanDetail loanRequestPlanning) {
                 return Constants.CURRENCY_FORMAT.format(loanRequestPlanning.getCapital());
             }
-        }).setHeader("Running totals");
+        }).setHeader("Running totals").setResizable(true).setSortable(true);
 
         LoanRequestService loanRequestService = ContextProvider.getBean(LoanRequestService.class);
         button.addClickListener(f -> {

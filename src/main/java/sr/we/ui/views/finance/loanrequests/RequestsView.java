@@ -73,13 +73,13 @@ public class RequestsView extends LitTemplate implements BeforeEnterObserver, Af
         addRequestBtn.addClickListener(f -> UI.getCurrent().navigate(AddRequestsView.class, new RouteParameters(new RouteParam("business", business))));
 
 //        grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
-        Grid.Column<LoanRequest> customer = grid.addColumn(f -> f.getCustomer().getName() + (StringUtils.isBlank(f.getCustomer().getFirstName()) ? "" : " " + f.getCustomer().getFirstName())).setHeader("Customer").setSortable(true);
-        Grid.Column<LoanRequest> loan_structure = grid.addColumn(f -> f.getLoan().getName()).setHeader("Loan Structure").setSortable(true);
-        Grid.Column<LoanRequest> date = grid.addColumn(f -> Constants.SIMPLE_DATE_FORMAT.format(DateUtil.convertToDateViaInstant(f.getEstimatedDate()))).setHeader("Date").setSortable(true);
-        grid.addColumn(f -> f.getCurrency().getCode()).setHeader("Currency").setSortable(true);
-        grid.addColumn(f -> Constants.CURRENCY_FORMAT.format(f.getAmount())).setHeader("Amount").setSortable(true);
-        grid.addColumn(f -> Constants.CURRENCY_FORMAT.format(f.getAmountDue())).setHeader("Amount due").setSortable(true);
-        grid.addComponentColumn(f -> createCard(f, business, false)).setHeader("Status");
+        Grid.Column<LoanRequest> customer = grid.addColumn(f -> f.getCustomer().getName() + (StringUtils.isBlank(f.getCustomer().getFirstName()) ? "" : " " + f.getCustomer().getFirstName())).setHeader("Customer").setSortable(true).setResizable(true).setSortable(true);
+        Grid.Column<LoanRequest> loan_structure = grid.addColumn(f -> f.getLoan().getName()).setHeader("Loan Structure").setSortable(true).setResizable(true).setSortable(true);
+        Grid.Column<LoanRequest> date = grid.addColumn(f -> Constants.SIMPLE_DATE_FORMAT.format(DateUtil.convertToDateViaInstant(f.getEstimatedDate()))).setHeader("Date").setSortable(true).setResizable(true).setSortable(true);
+        grid.addColumn(f -> f.getCurrency().getCode()).setHeader("Currency").setSortable(true).setResizable(true).setSortable(true);
+        grid.addColumn(f -> Constants.CURRENCY_FORMAT.format(f.getAmount())).setHeader("Amount").setSortable(true).setResizable(true).setSortable(true);
+        grid.addColumn(f -> Constants.CURRENCY_FORMAT.format(f.getAmountDue())).setHeader("Amount due").setSortable(true).setResizable(true).setSortable(true);
+        grid.addComponentColumn(f -> createCard(f, business, false)).setHeader("Status").setResizable(true);
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
         grid.addItemDoubleClickListener(get -> {
             LoanRequest loanRequest = get.getItem();
