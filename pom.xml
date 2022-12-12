@@ -388,6 +388,10 @@
                                     <tag>${project.version}</tag>
                                     <tag>latest</tag>
                                 </tags>
+                                <auth>
+                                    <username>admin</username>
+                                    <password>Caster!@#</password>
+                                </auth>
                             </to>
                             <allowInsecureRegistries>true</allowInsecureRegistries>
                         </configuration>
