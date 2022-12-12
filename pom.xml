@@ -44,6 +44,13 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
+        <repository>
+            <id>nexus</id>
+            <url>https://nexus.seaqns.com/repository/maven-public/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
     </repositories>
 
     <pluginRepositories>
@@ -70,6 +77,11 @@
     </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>org.vaadin.addons.componentfactory</groupId>
+            <artifactId>vcf-pdf-viewer</artifactId>
+            <version>2.5.2</version>
+        </dependency>
         <dependency>
             <groupId>org.vaadin.addons.yuri0x7c1.bslayout</groupId>
             <artifactId>bs-layout</artifactId>
