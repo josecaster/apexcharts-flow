@@ -371,6 +371,27 @@
                             <productionMode>true</productionMode>
                         </configuration>
                     </plugin>
+                    <plugin>
+                        <groupId>com.google.cloud.tools</groupId>
+                        <artifactId>jib-maven-plugin</artifactId>
+                        <version>3.2.1</version>
+                        <configuration>
+                            <container>
+                                <mainClass>sr.we.Application</mainClass>
+                            </container>
+                            <from>
+                                <image>eclipse-temurin:17-jre-alpine</image>
+                            </from>
+                            <to>
+                                <image>${project.artifactId}:${project.version}</image>
+                                <tags>
+                                    <tag>${project.version}</tag>
+                                    <tag>latest</tag>
+                                </tags>
+                            </to>
+                            <allowInsecureRegistries>true</allowInsecureRegistries>
+                        </configuration>
+                    </plugin>
                    <!-- <plugin>
                         <groupId>com.vaadin</groupId>
                         <artifactId>vaadin-maven-plugin</artifactId>
