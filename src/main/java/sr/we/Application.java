@@ -28,15 +28,9 @@ import org.springframework.context.annotation.ComponentScan;
 //@NpmPackage(value = "@fontsource/poppins", version = "4.5.0")
 @NpmPackage(value = "@fontsource/rubik", version = "4.5.11")
 @Theme(value = "shekelflow")
-@PWA(name = "ShekelFlow", shortName = "ShekelFlow", offlineResources = {})
 @Push
 @NpmPackage(value = "line-awesome", version = "1.3.0")
 @EnableConfigurationProperties(ConfigProperties.class)
-//@Inline(wrapping = Inline.Wrapping.AUTOMATIC,
-//        position = Inline.Position.APPEND,
-//        target = TargetElement.BODY,
-//        value = "splash-screen.html")
-//@EnableVaadin("sr.we.ui")
 @EnableAutoConfiguration
 @ComponentScan
 public class Application extends SpringBootServletInitializer implements AppShellConfigurator, VaadinServiceInitListener {
