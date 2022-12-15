@@ -130,7 +130,7 @@ public class AccountNewLayout extends StateListenerLayout {
 //        if (accountId.isEmpty()) {
 //            return false;
 //        }
-        if (accountType.equalsIgnoreCase(ChartOfAccountTypes.CAB.name()) || accountType.equalsIgnoreCase(ChartOfAccountTypes.MIT.name())) {
+        if (StringUtils.isBlank(accountType) || accountType.equalsIgnoreCase(ChartOfAccountTypes.CAB.name()) || accountType.equalsIgnoreCase(ChartOfAccountTypes.MIT.name())) {
             return !currencyFld.isEmpty();
         }
         return true;
