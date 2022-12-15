@@ -34,6 +34,7 @@ public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
 //            return true;
 //        }
         final String parameterValue = request.getParameter(ApplicationConstants.REQUEST_TYPE_PARAMETER);
+        System.out.println(parameterValue);
         return parameterValue != null && Stream.of(HandlerHelper.RequestType.values()).anyMatch(r -> r.getIdentifier().equals(parameterValue));
     }
 
@@ -104,6 +105,7 @@ public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
                 // web application manifest
                 "/manifest.webmanifest",
                 "/sw.js",
+                "/error",
                 "/offline.html",
                 "/offline-stub.html",
                 "/my-lumo.html",
