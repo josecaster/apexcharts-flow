@@ -23,12 +23,18 @@ public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
     public static final String LOGOUT_URL = "/";
 
     static boolean isFrameworkInternalRequest(HttpServletRequest request) {
-        StringBuilder requestURL = new StringBuilder(request.getRequestURL().toString());
-        String s = requestURL.toString();
-        if (s.endsWith("sw-runtime-resources-precache.js") || s.endsWith("@fontsource/poppins")) {
-            return true;
-        }
+//        String s = "";
+//        try{
+//            StringBuilder requestURL = new StringBuilder(request.getRequestURL().toString());
+//            s = requestURL.toString();
+//        } catch (UnsupportedOperationException e){
+//
+//        }
+//        if (s.endsWith("sw-runtime-resources-precache.js") || s.endsWith("@fontsource/poppins")) {
+//            return true;
+//        }
         final String parameterValue = request.getParameter(ApplicationConstants.REQUEST_TYPE_PARAMETER);
+        System.out.println(parameterValue);
         return parameterValue != null && Stream.of(HandlerHelper.RequestType.values()).anyMatch(r -> r.getIdentifier().equals(parameterValue));
     }
 
@@ -99,6 +105,7 @@ public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
                 // web application manifest
                 "/manifest.webmanifest",
                 "/sw.js",
+                "/error",
                 "/offline.html",
                 "/offline-stub.html",
                 "/my-lumo.html",
