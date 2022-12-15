@@ -8,8 +8,10 @@ import org.apache.commons.lang3.StringUtils;
 import sr.we.ContextProvider;
 import sr.we.data.controller.AccountService;
 import sr.we.security.AuthenticatedUser;
+import sr.we.shekelflowcore.entity.Account;
 import sr.we.shekelflowcore.entity.helper.Executable;
 import sr.we.shekelflowcore.entity.helper.vo.AccountVO;
+import sr.we.shekelflowcore.enums.ChartOfAccountTypes;
 import sr.we.ui.components.general.BankSelect;
 import sr.we.ui.components.general.BusinessCurrencySelect;
 import sr.we.ui.views.ReRouteLayout;
@@ -71,7 +73,7 @@ public class AccountNewLayout extends StateListenerLayout {
         nameFld.setRequiredIndicatorVisible(true);
 
 
-        currencyFld.setRequiredIndicatorVisible(true);
+
 
         state(nameFld, accountId, currencyFld, bankSelect);
 
@@ -82,8 +84,10 @@ public class AccountNewLayout extends StateListenerLayout {
     protected void onSave() {
 
         AccountVO accountVO = new AccountVO();
+        accountVO.setId(account == null ? null : account.getId());
+        accountVO.setNew(accountVO.getId() == null);
         accountVO.setName(nameFld.getValue());
-        accountVO.setCurrency(currencyFld.getValue().getId());
+        accountVO.setCurrency(currencyFld.getValue() == null ? null : currencyFld.getValue().getId());
         accountVO.setAccountId(accountId.getValue());
         accountVO.setAccountTypeCode(accountType);
         accountVO.setBusiness(Long.valueOf(business));
@@ -91,7 +95,7 @@ public class AccountNewLayout extends StateListenerLayout {
 //        accountVO.setBank(bankSelect.getValue() == null ? null : bankSelect.getValue().getId());
 
         AccountService bean = ContextProvider.getBean(AccountService.class);
-        bean.create(AuthenticatedUser.token(), accountVO);
+        bean.createOrEdit(AuthenticatedUser.token(), accountVO);
         redirectToParent();
     }
 
@@ -126,7 +130,10 @@ public class AccountNewLayout extends StateListenerLayout {
 //        if (accountId.isEmpty()) {
 //            return false;
 //        }
-        return !currencyFld.isEmpty();
+        if (accountType.equalsIgnoreCase(ChartOfAccountTypes.CAB.name()) || accountType.equalsIgnoreCase(ChartOfAccountTypes.MIT.name())) {
+            return !currencyFld.isEmpty();
+        }
+        return true;
     }
 
     public void setBusiness(String business) {
@@ -138,6 +145,22 @@ public class AccountNewLayout extends StateListenerLayout {
 
     public void setAccountTypeCode(String accountType) {
         this.accountType = accountType;
+        if (accountType.equalsIgnoreCase(ChartOfAccountTypes.CAB.name()) || accountType.equalsIgnoreCase(ChartOfAccountTypes.MIT.name())) {
+            currencyFld.setRequiredIndicatorVisible(true);
+        } else {
+            currencyFld.setRequiredIndicatorVisible(false);
+        }
+    }
+
+    private Account account;
+    public void setValue(Account account) {
+        this.account = account;
+        nameFld.setValue(account.getName());
+        accountId.setValue(StringUtils.isBlank(account.getAccountId()) ? "" : account.getAccountId());
+        currencyFld.setValue(account.getCurrency());
+        bankSelect.setValue(account.getBank());
+        descriptionFld.setValue(StringUtils.isBlank(account.getDescription()) ? "" : account.getDescription());
+        accountType = account.getAccountType().getCode().name();
     }
 
     //    public void setLoanRequest(LoanRequest loanRequest) {

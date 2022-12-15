@@ -45,8 +45,8 @@ import java.util.Optional;
 public class ChartOfAccountsView extends LitTemplate implements BeforeEnterObserver {
 
     private final List<ChartOfAccountTypes> list;
-    @Id("add-new-accounts-btn")
-    private Button addNewAccountsBtn;
+//    @Id("add-new-accounts-btn")
+//    private Button addNewAccountsBtn;
     //    @Id("assets-tab")
     private final Tab assetsTab;
     //    @Id("lcc-tab")

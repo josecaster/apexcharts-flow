@@ -4,6 +4,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.Grid;
@@ -15,12 +16,16 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.template.Id;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import sr.we.ContextProvider;
+import sr.we.CustomNotificationHandler;
 import sr.we.data.controller.AccountService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Account;
 import sr.we.shekelflowcore.entity.helper.vo.AccountVO;
 import sr.we.shekelflowcore.enums.ChartOfAccountTypes;
+import sr.we.shekelflowcore.enums.SystemAccounts;
+import sr.we.shekelflowcore.exception.PrimaryThrowable;
 import sr.we.ui.components.MyDialog;
 import sr.we.ui.views.LineAwesomeIcon;
 
@@ -37,7 +42,8 @@ import java.util.List;
 public class AccountView extends LitTemplate {
 
     private final ContextMenu infoMenu;
-    private final AccountNewLayout loanRequestStateView;
+    private final AccountNewLayout accountCreateEditView;
+    private final MyDialog dialog;
     @Id("account-type")
     private H3 accountType;
     @Id("account-type-desc")
@@ -49,6 +55,7 @@ public class AccountView extends LitTemplate {
     private Grid<Account> grid;
     private AccountVO vo;
     private ChartOfAccountTypes accountCodes;
+    private String token;
 
     /**
      * Creates a new AccountView.
@@ -59,14 +66,14 @@ public class AccountView extends LitTemplate {
         infoMenu.setOpenOnClick(true);
 //        recordsLayout.removeAll();
 
-        loanRequestStateView = new AccountNewLayout();
-        MyDialog dialog = new MyDialog(new Hr(), loanRequestStateView);
+        accountCreateEditView = new AccountNewLayout();
+        dialog = new MyDialog(new Hr(), accountCreateEditView);
         dialog.setHeaderTitle("Add account");
         Button closeButton = new Button(new Icon("lumo", "cross"), (e) -> {
             dialog.close();
             refresh();
         });
-        loanRequestStateView.setBuild(() -> {
+        accountCreateEditView.setBuild(() -> {
             dialog.close();
             refresh();
             return null;
@@ -79,13 +86,13 @@ public class AccountView extends LitTemplate {
 
         addAccountBtn.addClickListener(f -> {
 
-            loanRequestStateView.setAccountTypeCode(accountCodes.name());
+            accountCreateEditView.setAccountTypeCode(accountCodes.name());
             dialog.open();
         });
     }
 
     public void build(ChartOfAccountTypes accountCodes, Long businessId) {
-        loanRequestStateView.setBusiness(businessId.toString());
+        accountCreateEditView.setBusiness(businessId.toString());
         this.accountCodes = accountCodes;
         accountType.setText(accountCodes.getCaption());
         infoMenu.add("Description comes here");
@@ -98,7 +105,43 @@ public class AccountView extends LitTemplate {
         grid.addColumn(Account::getAccountId).setResizable(true).setSortable(true);
         grid.addColumn(Account::getName).setResizable(true).setSortable(true);
         grid.addColumn(Account::getDescription).setResizable(true).setSortable(true);
-        grid.addComponentColumn(f -> new LineAwesomeIcon("la la-pencil")).setResizable(true);
+        grid.addComponentColumn(f -> {
+            LineAwesomeIcon lineAwesomeIcon = new LineAwesomeIcon("la la-pencil");
+            if (!SystemAccounts.isSystemAccount(f.getSystemId())) {
+                lineAwesomeIcon.addClassName(LumoUtility.TextColor.PRIMARY);
+                lineAwesomeIcon.addClickListener(g -> {
+                    accountCreateEditView.setValue(f);
+                    dialog.open();
+                });
+            } else {
+                lineAwesomeIcon.icon("la la-lock");
+            }
+            return lineAwesomeIcon;
+        }).setResizable(true);
+        grid.addComponentColumn(f -> {
+            LineAwesomeIcon lineAwesomeIcon = new LineAwesomeIcon("la la-times");
+            if (!SystemAccounts.isSystemAccount(f.getSystemId())) {
+                lineAwesomeIcon.addClassName(LumoUtility.TextColor.ERROR);
+                lineAwesomeIcon.addClickListener(g -> {
+                    ConfirmDialog confirmDialog = new ConfirmDialog("Delete", "Do you wish to delete this account [" + f.getName() + "]?", "Yes", l -> {
+                        AccountService accountService = ContextProvider.getBean(AccountService.class);
+                        AccountVO vo1 = new AccountVO();
+                        vo1.setId(f.getId());
+                        Long count = accountService.delete(token, vo1);
+                        CustomNotificationHandler.notify_(new PrimaryThrowable(count + " item deleted"));
+                        refresh();
+                    });
+                    confirmDialog.setConfirmButtonTheme(LumoUtility.Background.ERROR);
+                    confirmDialog.setCancelable(true);
+
+                    confirmDialog.open();
+
+                });
+            } else {
+                lineAwesomeIcon.icon("la la-lock");
+            }
+            return lineAwesomeIcon;
+        }).setResizable(true);
         grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT, GridVariant.LUMO_NO_BORDER);
         grid.setAllRowsVisible(true);
         refresh();
@@ -107,7 +150,7 @@ public class AccountView extends LitTemplate {
     private void refresh() {
         UI current = UI.getCurrent();
 
-        String token = AuthenticatedUser.token();
+        token = AuthenticatedUser.token();
         new Thread(new Runnable() {
             @Override
             public void run() {

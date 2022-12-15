@@ -15,13 +15,13 @@ public class LineAwesomeIcon extends Span {
     }
 
     public LineAwesomeIcon(String lineawesomeClassnames) {
-        addClassNames("menu-item-icon");
         icon(lineawesomeClassnames);
+        addClassNames("menu-item-icon");
     }
 
     public void icon(String lineawesomeClassnames) {
         if (!lineawesomeClassnames.isEmpty()) {
-            addClassNames(lineawesomeClassnames);
+            setClassName(lineawesomeClassnames);
         }
     }
 }
