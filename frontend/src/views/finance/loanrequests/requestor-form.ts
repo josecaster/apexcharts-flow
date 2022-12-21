@@ -26,7 +26,7 @@ export class RequestorForm extends LitElement {
 
   render() {
       return html`
-<vaadin-vertical-layout theme="spacing" style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin: var(--lumo-space-s); margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m);">
+<vaadin-vertical-layout theme="spacing" style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin: var(--lumo-space-s); margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m);" class="shadow-s">
  <h5 style="margin: var(--lumo-space-xs);">Profile</h5>
  <vaadin-avatar id="avatar-fld"></vaadin-avatar>
  <vaadin-form-layout style="flex-shrink: 1; padding: var(--lumo-space-xs);">
@@ -42,7 +42,7 @@ export class RequestorForm extends LitElement {
   <vaadin-number-field id="duration-fld" type="number" required label="Duration"></vaadin-number-field>
   <vaadin-number-field type="number" id="amount-fld" required label="Loan amount" invalid></vaadin-number-field>
   <vaadin-checkbox id="intrest-first-chk" style="font-weight:bold; margin-top: var(--lumo-space-l);">
-   I want to pay interest first and principle later
+    I want to pay interest first and principle later 
   </vaadin-checkbox>
  </vaadin-form-layout>
 </vaadin-vertical-layout>

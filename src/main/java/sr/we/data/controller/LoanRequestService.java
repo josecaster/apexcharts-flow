@@ -142,6 +142,20 @@ public class LoanRequestService extends MyController {
         LoanRequestVO vo = new LoanRequestVO();
         vo.setId(loanRequestId);
         vo.setStatus(status);
+        return getLoanRequest(accessToken, vo);
+
+    }
+
+    public LoanRequest procesNextStep(String accessToken, Long loanRequestId,BigDecimal exchangeRate, LoanRequest.Status status) {
+        LoanRequestVO vo = new LoanRequestVO();
+        vo.setId(loanRequestId);
+        vo.setStatus(status);
+        vo.setExchangeRate(exchangeRate);
+        return getLoanRequest(accessToken, vo);
+
+    }
+
+    private LoanRequest getLoanRequest(String accessToken, LoanRequestVO vo) {
         String body = new GsonBuilder().create().toJson(vo);
         RestTemplate restTemplate = new RestTemplate();
         String fooResourceUrl
@@ -152,7 +166,6 @@ public class LoanRequestService extends MyController {
             ResponseEntity<LoanRequest> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.POST, httpEntity, LoanRequest.class);
             return exchange.getBody();
         });
-
     }
 
     public LoanRequest procesPrevStep(String accessToken, Long loanRequestId, LoanRequest.Status status) {

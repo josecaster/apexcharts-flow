@@ -154,6 +154,8 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
                 if (!unknown.isEmpty()) {
                     JournalsEntry journalsEntry = unknown.get(0);
                     BigDecimal reduce = unknown.stream().map(getJournalsEntryBigDecimalFunction1()).reduce(BigDecimal.ZERO, BigDecimal::add);
+                    System.out.println("-------------");
+                    BigDecimal srd = unknown.stream().map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
                     BigDecimal reduce1 = known.stream().map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
                     Span span = new Span("(" + journalsEntry.getCurrencyTo().getCode() + " " + Constants.CURRENCY_FORMAT.format(reduce) + "&" + getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(reduce1) + ")");
                     horizontalLayout.add(span);
@@ -298,8 +300,12 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
     }
 
     private Function<JournalsEntry, BigDecimal> getJournalsEntryBigDecimalFunction1() {
-        return g -> g.getAccount().getAccountType().getType().getPlusMin(g.getDebCred()).compareTo(TransactionType.WITHDRAWAL) == 0//
-                ? g.getConvertedAmount().multiply(BigDecimal.valueOf(-1)) : g.getConvertedAmount();
+        return g -> {
+            BigDecimal bigDecimal = g.getAccount().getAccountType().getType().getPlusMin(g.getDebCred()).compareTo(TransactionType.WITHDRAWAL) == 0//
+                    ? g.getConvertedAmount().multiply(BigDecimal.valueOf(-1)) : g.getConvertedAmount();
+            System.out.println(g.getId()+","+bigDecimal);
+            return bigDecimal;
+        };
     }
 
     private Function<JournalsEntry, BigDecimal> getJournalsEntryBigDecimalFunction() {
@@ -325,6 +331,7 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
 //            }
             BigDecimal bigDecimal = g.getAccount().getAccountType().getType().getPlusMin(g.getDebCred()).compareTo(TransactionType.WITHDRAWAL) == 0//
                     ? g.getAmount().multiply(BigDecimal.valueOf(-1)) : g.getAmount();
+            System.out.println(g.getId()+","+bigDecimal);
             return bigDecimal;
         };
     }
