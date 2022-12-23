@@ -278,7 +278,11 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
         BigDecimal cgs = result.stream().filter(f -> f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.CGS) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
                 .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal oe = result.stream().filter(f -> f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OE) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
+        BigDecimal oe = result.stream().filter(f -> (f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OE) == 0
+                        || f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.PE) == 0
+                        ||f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.UE) == 0
+                )
+                        && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
                 .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal gofe = result.stream().filter(f -> f.getAccount().getSystemId() != null && f.getAccount().getSystemId().compareTo(SystemAccounts.GOFE.getId()) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
@@ -289,11 +293,13 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
 
 
 //        BigDecimal sum = currentAssets.add(otherAssets).subtract(liabilities);
-        BigDecimal subtract = eq.add(income).subtract(cgs).subtract(oe);
-        BigDecimal sum = subtract.subtract(gofe);
+//        BigDecimal subtract = eq.add(income).subtract(cgs).subtract(oe);
+        BigDecimal curAssets = currentAssets.subtract(gofe).add(lofe);
+        BigDecimal assets = curAssets.add(otherAssets);
+        BigDecimal sum = assets.subtract(liabilities);
 
 
-        cashAndBank.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(currentAssets.subtract(gofe).add(lofe)));
+        cashAndBank.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(curAssets));
         toBeReceived.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(otherAssets));
         toBePaidOut.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(liabilities));
         total.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(sum));
