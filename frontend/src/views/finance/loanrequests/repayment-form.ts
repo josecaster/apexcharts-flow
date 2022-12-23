@@ -19,12 +19,12 @@ export class RepaymentForm extends LitElement {
 
   render() {
       return html`
-<vaadin-vertical-layout theme="spacing" style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m);">
+<vaadin-vertical-layout theme="spacing" style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m);" class="shadow-s">
  <div style="align-self: stretch;">
   <vaadin-horizontal-layout theme="spacing" style="align-self: stretch;">
    <h5 style="margin: var(--lumo-space-xs); flex-grow: 1; align-self: center;">Payment schedule</h5>
    <vaadin-button id="generate-payment-btn" style="align-self: center;" tabindex="0" theme="primary">
-    Generate payment plan
+     Generate payment plan 
    </vaadin-button>
   </vaadin-horizontal-layout>
   <label>Generate a payment plan for the requester and you will get the ability to record payments on top of the generated schedule</label>

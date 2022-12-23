@@ -4,6 +4,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
@@ -12,6 +13,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.template.Id;
+import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.dom.ThemeList;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.RouteParam;
@@ -118,21 +120,51 @@ public class AddRequests extends LitTemplate {
             setLoanRequest(loanRequest);
         });
         loanRequestApproveBtn.addClickListener(f -> {
-            LoanRequestService loanRequestService = ContextProvider.getBean(LoanRequestService.class);
-            loanRequest = loanRequestService.procesNextStep(AuthenticatedUser.token(), loanRequest.getId(), LoanRequest.Status.APPROVED);
-            setLoanRequest(loanRequest);
+            ConfirmDialog confirmDialog = new ConfirmDialog();
+            confirmDialog.setHeader("Approve Loan request?");
+            confirmDialog.add("Are you sure that you want to approve this loan request");
+            confirmDialog.setCancelable(true);
+            BigDecimalField bigDecimalField = new BigDecimalField();
+            bigDecimalField.setPlaceholder("Exchange rate");
+            bigDecimalField.setHelperText("Please provide a base exchange rate");
+            bigDecimalField.setWidthFull();
+            bigDecimalField.setRequiredIndicatorVisible(true);
+            boolean exchangeRate = loanRequest.getCurrency().getId().compareTo(loanRequest.getBusiness().getCurrency().getId()) != 0;
+            if (exchangeRate) {
+                confirmDialog.add(bigDecimalField);
+            }
+            confirmDialog.addConfirmListener(g -> {
+                LoanRequestService loanRequestService = ContextProvider.getBean(LoanRequestService.class);
+                loanRequest = loanRequestService.procesNextStep(AuthenticatedUser.token(), loanRequest.getId(),bigDecimalField.getValue(), LoanRequest.Status.APPROVED);
+                setLoanRequest(loanRequest);
+            });
+            confirmDialog.open();
         });
 
         loanRequestCancelBtn.addClickListener(f -> {
-            LoanRequestService loanRequestService = ContextProvider.getBean(LoanRequestService.class);
-            loanRequest = loanRequestService.procesNextStep(AuthenticatedUser.token(), loanRequest.getId(), LoanRequest.Status.CANCEL);
-            setLoanRequest(loanRequest);
+            ConfirmDialog confirmDialog = new ConfirmDialog();
+            confirmDialog.setHeader("Cancel Loan request?");
+            confirmDialog.setText("Are you sure that you want to cancel this loan request");
+            confirmDialog.setCancelable(true);
+            confirmDialog.addConfirmListener(g -> {
+                LoanRequestService loanRequestService = ContextProvider.getBean(LoanRequestService.class);
+                loanRequest = loanRequestService.procesNextStep(AuthenticatedUser.token(), loanRequest.getId(), LoanRequest.Status.CANCEL);
+                setLoanRequest(loanRequest);
+            });
+            confirmDialog.open();
         });
 
         loanRequestArchiveBtn.addClickListener(f -> {
-            LoanRequestService loanRequestService = ContextProvider.getBean(LoanRequestService.class);
-            loanRequest = loanRequestService.procesNextStep(AuthenticatedUser.token(), loanRequest.getId(), LoanRequest.Status.ARCHIVE);
-            setLoanRequest(loanRequest);
+            ConfirmDialog confirmDialog = new ConfirmDialog();
+            confirmDialog.setHeader("Archive Loan request?");
+            confirmDialog.setText("Are you sure that you want to archive this loan request");
+            confirmDialog.setCancelable(true);
+            confirmDialog.addConfirmListener(g -> {
+                LoanRequestService loanRequestService = ContextProvider.getBean(LoanRequestService.class);
+                loanRequest = loanRequestService.procesNextStep(AuthenticatedUser.token(), loanRequest.getId(), LoanRequest.Status.ARCHIVE);
+                setLoanRequest(loanRequest);
+            });
+            confirmDialog.open();
         });
         contractLayout.setVisible(false);
         generateContractBtn.setVisible(false);

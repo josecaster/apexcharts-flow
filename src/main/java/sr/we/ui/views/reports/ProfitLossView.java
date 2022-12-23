@@ -250,7 +250,11 @@ public class ProfitLossView extends LitTemplate implements BeforeEnterObserver {
         BigDecimal cgs = result.stream().filter(f -> f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.CGS) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
                 .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal oe = result.stream().filter(f -> f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OE) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
+        BigDecimal oe = result.stream().filter(f -> (f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OE) == 0
+                        || f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.PE) == 0
+                ||f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.UE) == 0
+                )
+                        && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
                 .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal gofe = result.stream().filter(f -> f.getAccount().getSystemId() != null && f.getAccount().getSystemId().compareTo(SystemAccounts.GOFE.getId()) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//

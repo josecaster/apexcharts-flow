@@ -26,7 +26,7 @@ export class AssetsForm extends LitElement {
 
   render() {
         return html`
-<vaadin-vertical-layout theme="spacing" style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m); height: 100%;">
+<vaadin-vertical-layout theme="spacing" style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m); height: 100%;" class="shadow-s">
  <vaadin-horizontal-layout theme="spacing" style="align-self: stretch;">
   <h5 style="margin: var(--lumo-space-xs); flex-grow: 1; align-self: center;">Assets</h5>
   <vaadin-button id="approve-assets-btn" style="align-self: center;" tabindex="0" hidden>

@@ -61,7 +61,7 @@ export class AddRequests extends LitElement {
     Approve 
   </vaadin-button>
   <vaadin-button style="flex-grow: 0; flex-shrink: 1;" tabindex="0" id="loan-request-done-btn" theme="primary success">
-   Done
+    Done 
   </vaadin-button>
  </vaadin-horizontal-layout>
 </vaadin-vertical-layout>

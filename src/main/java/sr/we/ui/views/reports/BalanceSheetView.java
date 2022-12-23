@@ -154,6 +154,8 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
                 if (!unknown.isEmpty()) {
                     JournalsEntry journalsEntry = unknown.get(0);
                     BigDecimal reduce = unknown.stream().map(getJournalsEntryBigDecimalFunction1()).reduce(BigDecimal.ZERO, BigDecimal::add);
+                    System.out.println("-------------");
+                    BigDecimal srd = unknown.stream().map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
                     BigDecimal reduce1 = known.stream().map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
                     Span span = new Span("(" + journalsEntry.getCurrencyTo().getCode() + " " + Constants.CURRENCY_FORMAT.format(reduce) + "&" + getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(reduce1) + ")");
                     horizontalLayout.add(span);
@@ -276,7 +278,11 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
         BigDecimal cgs = result.stream().filter(f -> f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.CGS) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
                 .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal oe = result.stream().filter(f -> f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OE) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
+        BigDecimal oe = result.stream().filter(f -> (f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OE) == 0
+                        || f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.PE) == 0
+                        ||f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.UE) == 0
+                )
+                        && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
                 .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal gofe = result.stream().filter(f -> f.getAccount().getSystemId() != null && f.getAccount().getSystemId().compareTo(SystemAccounts.GOFE.getId()) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
@@ -287,19 +293,25 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
 
 
 //        BigDecimal sum = currentAssets.add(otherAssets).subtract(liabilities);
-        BigDecimal subtract = eq.add(income).subtract(cgs).subtract(oe);
-        BigDecimal sum = subtract.subtract(gofe);
+//        BigDecimal subtract = eq.add(income).subtract(cgs).subtract(oe);
+        BigDecimal curAssets = currentAssets.subtract(gofe).add(lofe);
+        BigDecimal assets = curAssets.add(otherAssets);
+        BigDecimal sum = assets.subtract(liabilities);
 
 
-        cashAndBank.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(currentAssets.subtract(gofe).add(lofe)));
+        cashAndBank.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(curAssets));
         toBeReceived.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(otherAssets));
         toBePaidOut.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(liabilities));
         total.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(sum));
     }
 
     private Function<JournalsEntry, BigDecimal> getJournalsEntryBigDecimalFunction1() {
-        return g -> g.getAccount().getAccountType().getType().getPlusMin(g.getDebCred()).compareTo(TransactionType.WITHDRAWAL) == 0//
-                ? g.getConvertedAmount().multiply(BigDecimal.valueOf(-1)) : g.getConvertedAmount();
+        return g -> {
+            BigDecimal bigDecimal = g.getAccount().getAccountType().getType().getPlusMin(g.getDebCred()).compareTo(TransactionType.WITHDRAWAL) == 0//
+                    ? g.getConvertedAmount().multiply(BigDecimal.valueOf(-1)) : g.getConvertedAmount();
+            System.out.println(g.getId()+","+bigDecimal);
+            return bigDecimal;
+        };
     }
 
     private Function<JournalsEntry, BigDecimal> getJournalsEntryBigDecimalFunction() {
@@ -325,6 +337,7 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
 //            }
             BigDecimal bigDecimal = g.getAccount().getAccountType().getType().getPlusMin(g.getDebCred()).compareTo(TransactionType.WITHDRAWAL) == 0//
                     ? g.getAmount().multiply(BigDecimal.valueOf(-1)) : g.getAmount();
+            System.out.println(g.getId()+","+bigDecimal);
             return bigDecimal;
         };
     }
