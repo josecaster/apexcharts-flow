@@ -401,9 +401,9 @@ public class MainDashboardView extends Main implements BeforeEnterObserver, Befo
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
 
-//        if(executorService.isShutdown()){
-//            executorService = Executors.newFixedThreadPool(5);
-//        }
+        if(executorService.isShutdown()){
+            executorService = Executors.newFixedThreadPool(5);
+        }
 
         UserAccessService userAccesService = ContextProvider.getBean(UserAccessService.class);
         boolean hasAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new TransactionsPrivilege(), Privileges.READ);
