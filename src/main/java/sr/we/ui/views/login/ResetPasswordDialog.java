@@ -15,6 +15,7 @@ import sr.we.ui.components.EmailAddress;
 import sr.we.ui.components.MyDialog;
 
 import java.util.List;
+import java.util.concurrent.Executors;
 
 public class ResetPasswordDialog extends Button {
 
@@ -57,15 +58,15 @@ public class ResetPasswordDialog extends Button {
             progressBar.setVisible(true);
             String token = AuthenticatedUser.token();
             UI current = UI.getCurrent();
-            new Thread(() -> {
+            Executors.newSingleThreadExecutor().execute(() -> {
                 UserService bean = ContextProvider.getBean(UserService.class);
                 bean.publishReset(emailField.getValue());
 
                 current.access(() -> {
                     CustomNotificationHandler.notify_(new PrimaryThrowable("You will receive an email with further instructions"));
                 });
-            }).start();
-            new Thread(() -> {
+            });
+            Executors.newSingleThreadExecutor().execute(() -> {
                 try {
                     Thread.sleep(59000);
                 } catch (InterruptedException e1) {
@@ -77,7 +78,7 @@ public class ResetPasswordDialog extends Button {
                     e.getSource().setEnabled(true);
                     progressBar.setVisible(false);
                 });
-            }).start();
+            });
 
         });
         Button cancelButton = new Button("Cancel", e -> dialog.close());

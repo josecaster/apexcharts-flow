@@ -27,6 +27,7 @@ import sr.we.ui.components.general.GenderSelect;
 import sr.we.ui.views.settings.SettingsLayout;
 
 import javax.annotation.security.RolesAllowed;
+import java.util.concurrent.Executors;
 
 @PageTitle("General")
 @Route(value = "general-info", layout = SettingsLayout.class)
@@ -165,7 +166,7 @@ public class GeneralView extends StateListenerLayout implements BeforeEnterObser
     public void beforeEnter(BeforeEnterEvent event) {
         String token = AuthenticatedUser.token();
         UI current = UI.getCurrent();
-        new Thread(() -> {
+        Executors.newSingleThreadExecutor().execute(() -> {
             PersonService businessService = ContextProvider.getBean(PersonService.class);
             person = businessService.me(token);
             current.access(() -> {
@@ -180,6 +181,6 @@ public class GeneralView extends StateListenerLayout implements BeforeEnterObser
                 if (person.getGender() != null)
                     genderSelect.setValue(person.getGender());
             });
-        }).start();
+        });
     }
 }

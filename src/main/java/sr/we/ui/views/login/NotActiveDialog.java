@@ -18,6 +18,7 @@ import sr.we.shekelflowcore.exception.SecurityException;
 import sr.we.ui.components.MyDialog;
 
 import java.util.Optional;
+import java.util.concurrent.Executors;
 
 public class NotActiveDialog {
 
@@ -70,7 +71,7 @@ public class NotActiveDialog {
             UI current = current1;
 
             resend_verification_email.addClickListener(f -> {
-                new Thread(new Runnable() {
+                Executors.newSingleThreadExecutor().execute(new Runnable() {
                     @Override
                     public void run() {
                         current.access(() -> {
@@ -78,14 +79,14 @@ public class NotActiveDialog {
                             progressBar.setVisible(true);
                         });
                     }
-                }).start();
+                });
                 dialog.close();
                 UserService userService = ContextProvider.getBean(UserService.class);
                 String token = AuthenticatedUser.token();
                 userService.publishVerify(token);
 
 
-                new Thread(new Runnable() {
+                Executors.newSingleThreadExecutor().execute(new Runnable() {
                     @Override
                     public void run() {
                         try {
@@ -115,7 +116,7 @@ public class NotActiveDialog {
                         });
 
                     }
-                }).start();
+                });
 
             });
 

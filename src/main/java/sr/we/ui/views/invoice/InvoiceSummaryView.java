@@ -71,6 +71,7 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.time.format.TextStyle;
 import java.util.*;
+import java.util.concurrent.Executors;
 
 import static sr.we.ContextProvider.getBean;
 
@@ -218,7 +219,7 @@ public class InvoiceSummaryView extends LitTemplate implements BeforeEnterObserv
                 String token = AuthenticatedUser.token();
                 InvoiceService invoiceService = ContextProvider.getBean(InvoiceService.class);
                 UI current = UI.getCurrent();
-                new Thread(new Runnable() {
+                Executors.newSingleThreadExecutor().execute(new Runnable() {
                     @Override
                     public void run() {
                         vo.setReferenceId(invoice.getId());
@@ -230,7 +231,7 @@ public class InvoiceSummaryView extends LitTemplate implements BeforeEnterObserv
                             }
                         });
                     }
-                }).start();
+                });
                 return null;
             });
             String subj = "Invoice #" + invoice.getInvoiceNumber() + " From " + invoice.getBusiness().getName();

@@ -16,6 +16,7 @@ import sr.we.shekelflowcore.entity.helper.adapter.CalculationResult;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
 
 
 public class ServiceFormulaTest extends Dialog {
@@ -51,7 +52,7 @@ public class ServiceFormulaTest extends Dialog {
 
         String token = AuthenticatedUser.token();
 
-        new Thread(new Runnable() {
+        Executors.newSingleThreadExecutor().execute(new Runnable() {
             @Override
             public void run() {
                 CalculationService calculationService = ContextProvider.getBean(CalculationService.class);
@@ -78,7 +79,7 @@ public class ServiceFormulaTest extends Dialog {
                     }
                 });
             }
-        }).start();
+        });
 
 
     }

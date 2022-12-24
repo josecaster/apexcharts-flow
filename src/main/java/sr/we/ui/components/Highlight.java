@@ -9,6 +9,9 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import sr.we.shekelflowcore.entity.helper.Executable;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class Highlight extends VerticalLayout {
 
     private Executable<String> value;
@@ -32,7 +35,7 @@ public class Highlight extends VerticalLayout {
 
 
         UI current = UI.getCurrent();
-        new Thread(new Runnable() {
+        Executors.newSingleThreadExecutor().execute(new Runnable() {
             @Override
             public void run() {
                 String build = value.build();
@@ -40,8 +43,9 @@ public class Highlight extends VerticalLayout {
                     valueSpan.setText(build);
                 });
             }
-        }).start();
-        new Thread(new Runnable() {
+        });
+
+        Executors.newSingleThreadExecutor().execute(new Runnable() {
             @Override
             public void run() {
 
@@ -78,7 +82,7 @@ public class Highlight extends VerticalLayout {
                     progressBar.setVisible(false);
                 });
             }
-        }).start();
+        });
 
 
         addClassName("p-l");

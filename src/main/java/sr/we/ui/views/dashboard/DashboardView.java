@@ -56,6 +56,7 @@ import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executors;
 
 @BreadCrumb(titleKey = "sr.we.dashboard",optimizedMobile = true)
 @Route(value = "dashboard", layout = MainLayout.class)
@@ -183,7 +184,7 @@ public class DashboardView extends Main implements BeforeEnterObserver {
 
         UI current = UI.getCurrent();
         String token = AuthenticatedUser.token();
-        new Thread(new Runnable() {
+        Executors.newSingleThreadExecutor().execute(new Runnable() {
             @Override
             public void run() {
 
@@ -214,7 +215,7 @@ public class DashboardView extends Main implements BeforeEnterObserver {
                     div.add(apexChartsBuilder.build());
                 });
             }
-        }).start();
+        });
 
 
 //        conf.addSeries(new ListSeries("Berlin", 189, 191, 191, 196, 201, 203, 209, 212, 229, 242, 244, 247));
@@ -257,7 +258,7 @@ public class DashboardView extends Main implements BeforeEnterObserver {
 
         UI current = UI.getCurrent();
         String token = AuthenticatedUser.token();
-        new Thread(new Runnable() {
+        Executors.newSingleThreadExecutor().execute(new Runnable() {
             @Override
             public void run() {
 
@@ -268,7 +269,7 @@ public class DashboardView extends Main implements BeforeEnterObserver {
                     grid.setItems(accounts);
                 });
             }
-        }).start();
+        });
 
 
         // Add it all together
