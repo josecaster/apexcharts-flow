@@ -30,6 +30,7 @@ import sr.we.ui.components.MyDialog;
 import sr.we.ui.views.LineAwesomeIcon;
 
 import java.util.List;
+import java.util.concurrent.Executors;
 
 /**
  * A Designer generated component for the account-view template.
@@ -151,7 +152,7 @@ public class AccountView extends LitTemplate {
         UI current = UI.getCurrent();
 
         token = AuthenticatedUser.token();
-        new Thread(new Runnable() {
+        Executors.newSingleThreadExecutor().execute(new Runnable() {
             @Override
             public void run() {
                 AccountService accountService = ContextProvider.getBean(AccountService.class);
@@ -169,7 +170,7 @@ public class AccountView extends LitTemplate {
                 });
 
             }
-        }).start();
+        });
     }
 
 }

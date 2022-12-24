@@ -25,6 +25,7 @@ import sr.we.ui.views.finance.loans.tabs.request.planning.LRPView;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
@@ -87,7 +88,7 @@ public class RepaymentForm extends LitTemplate {
         UI current = UI.getCurrent();
         String token = AuthenticatedUser.token();
 
-        new Thread(new Runnable() {
+        Executors.newSingleThreadExecutor().execute(new Runnable() {
             @Override
             public void run() {
 
@@ -136,7 +137,7 @@ public class RepaymentForm extends LitTemplate {
                     }
                 });
             }
-        }).start();
+        });
 
         generatePaymentBtn.setVisible(false);
         if (loanRequest.getStatus().compareTo(LoanRequest.Status.APPROVED) == 0) {

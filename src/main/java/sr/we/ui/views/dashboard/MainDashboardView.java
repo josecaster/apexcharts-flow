@@ -62,9 +62,11 @@ import javax.annotation.security.RolesAllowed;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.Year;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -78,6 +80,7 @@ public class MainDashboardView extends Main implements BeforeEnterObserver {
     private ApexChartsBuilder apexChartsBuilder;
     private Div div;
     private Business business;
+    private Select<Year> year;
 
     public MainDashboardView() {
         addClassName("dashboard-view");
@@ -160,10 +163,28 @@ public class MainDashboardView extends Main implements BeforeEnterObserver {
 
     public Component createViewEvents() {
         // Header
-        Select year = new Select();
-        year.setItems("2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022");
-        year.setValue("2022");
+        year = new Select();
+        Year now = Year.now();
+        year.setItems(now.minusYears(5), now.minusYears(4), now.minusYears(3), now.minusYears(2), now.minusYears(1), now);
+        year.setValue(now);
         year.setWidth("100px");
+        year.addValueChangeListener(f -> {
+            UI current = UI.getCurrent();
+            String token = AuthenticatedUser.token();
+            Executors.newSingleThreadExecutor().execute(new Runnable() {
+                @Override
+                public void run() {
+                    current.access(() -> {
+                        ProgressBar progressBar = new ProgressBar();
+                        progressBar.setWidthFull();
+                        progressBar.setIndeterminate(true);
+                        MainDashboardView.this.div.removeAll();
+                        MainDashboardView.this.div.add(progressBar);
+                    });
+                }
+            });
+            refreshChart(current, token);
+        });
 
         HorizontalLayout header = createHeader("Cash Flow", "Cash coming in and going out of your business.");
         header.add(year);
@@ -194,31 +215,7 @@ public class MainDashboardView extends Main implements BeforeEnterObserver {
 
         UI current = UI.getCurrent();
         String token = AuthenticatedUser.token();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                List<JournalsEntry> result = journalList(token);
-
-
-                current.access(() -> {
-                    Series<Number>[] listSeries = new Series[2];
-
-                    Series<Number> flowin = new Series<>();
-                    flowin.setName("Cash-in");
-                    flowin.setData(getData(result, DebCred.DEB));
-                    listSeries[0] = flowin;
-
-                    Series<Number> flowout = new Series<>();
-                    flowout.setName("Cash-out");
-                    flowout.setData(getData(result, DebCred.CRED));
-                    listSeries[1] = flowout;
-                    apexChartsBuilder = apexChartsBuilder.withSeries(listSeries);
-                    div.removeAll();
-                    div.add(apexChartsBuilder.build());
-                });
-            }
-        }).start();
+        refreshChart(current, token);
 
         // Add it all together
         ProgressBar progressBar = new ProgressBar();
@@ -234,11 +231,50 @@ public class MainDashboardView extends Main implements BeforeEnterObserver {
         return viewEvents;
     }
 
-    private List<JournalsEntry> journalList(String token) {
+    private void refreshChart(UI current, String token) {
+        Executors.newSingleThreadExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+
+                List<JournalsEntry> result = journalList(token, true);
+                Number[] data = getData(result, DebCred.DEB);
+                Number[] data1 = getData(result, DebCred.CRED);
+
+                Series<Number>[] listSeries = new Series[2];
+
+                Series<Number> flowin = new Series<>();
+                flowin.setName("Cash-in");
+                flowin.setData(data);
+                listSeries[0] = flowin;
+
+                Series<Number> flowout = new Series<>();
+                flowout.setName("Cash-out");
+                flowout.setData(data1);
+                listSeries[1] = flowout;
+
+                current.access(() -> {
+                    apexChartsBuilder = apexChartsBuilder.withSeries(listSeries);
+                    div.removeAll();
+                    div.add(apexChartsBuilder.build());
+                });
+            }
+        });
+    }
+
+    private List<JournalsEntry> journalList(String token, boolean useYear) {
         JournalEntryService journalEntryService = ContextProvider.getBean(JournalEntryService.class);
         JournalsEntryVO vo = new JournalsEntryVO();
         vo.setBusinessId(businessId);
-        vo.setAsOfDate(LocalDate.now());
+        if (useYear) {
+            vo.setStartDate(year.getValue().atMonth(Month.JANUARY).atDay(1));
+            if (year.getValue().compareTo(Year.now()) == 0) {
+                vo.setAsOfDate(LocalDate.now());
+            } else {
+                vo.setAsOfDate(year.getValue().atMonth(Month.DECEMBER).atEndOfMonth());
+            }
+        } else {
+            vo.setAsOfDate(LocalDate.now());
+        }
         PagingResult<JournalsEntry> list = journalEntryService.list(vo, token);
 
         List<JournalsEntry> result = list.getResult();
@@ -258,7 +294,7 @@ public class MainDashboardView extends Main implements BeforeEnterObserver {
 
     private Number[] getData(List<JournalsEntry> result, DebCred debCred) {
 
-        Map<Month, List<JournalsEntry>> debit = result.stream().filter(f -> f.getJournals().getLogDate().getYear() == 2022 && f.getDebCred().compareTo(debCred) == 0 && //
+        Map<Month, List<JournalsEntry>> debit = result.stream().filter(f -> f.getDebCred().compareTo(debCred) == 0 && //
                         f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.CAB) == 0 && //
                         f.getCurrencyFrom().getCode().equalsIgnoreCase(business.getCurrency().getCode()))//
                 .collect(Collectors.groupingBy(f -> f.getJournals().getLogDate().getMonth()));
@@ -378,57 +414,59 @@ public class MainDashboardView extends Main implements BeforeEnterObserver {
 
 
             String format = Constants.CURRENCY_FORMAT.format(BigDecimal.ZERO);
+            Highlight outstanding_payments = new Highlight("Outstanding payments", () -> {
+                List<JournalsEntry> result = journalList(token, false);
+                BigDecimal otherAssets = result.stream().filter(f -> f.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.ASSETS) == 0 && !(
+
+                                f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.CAB) == 0 ||//
+                                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.INV) == 0 ||//
+                                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.PPE) == 0 ||//
+                                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.DA) == 0 ||//
+                                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.VPVC) == 0 ||//
+                                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OSTA) == 0 ||//
+                                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OLTA) == 0 //
+                        )
+
+                                && f.getCurrencyFrom().getCode().equalsIgnoreCase(business.getCurrency().getCode()))//
+                        .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
+                return Constants.CURRENCY_FORMAT.format(otherAssets == null ? BigDecimal.ZERO : otherAssets);
+            }, () -> {
+                List<JournalsEntry> result = journalList(token, false);
+                List<JournalsEntry> result2 = journalList(token, LocalDate.now().minusMonths(1));
+                BigDecimal reduce = result.stream().filter(f -> f.getAccount().getSystemId() != null && f.getAccount().getSystemId().compareTo(SystemAccounts.AR.getId()) == 0 && //
+                                f.getCurrencyFrom().getCode().equalsIgnoreCase(business.getCurrency().getCode()))//
+                        .map(f -> f.getAmount() == null ? BigDecimal.ZERO : f.getDebCred().compareTo(DebCred.DEB) == 0 ? f.getAmount() : f.getAmount().multiply(BigDecimal.valueOf(-1L))).reduce(BigDecimal.ZERO, BigDecimal::add);
+                reduce = reduce == null ? BigDecimal.ZERO : reduce;
+                BigDecimal reduce2 = result2.stream().filter(f -> f.getAccount().getSystemId() != null && f.getAccount().getSystemId().compareTo(SystemAccounts.AR.getId()) == 0 && //
+                                f.getCurrencyFrom().getCode().equalsIgnoreCase(business.getCurrency().getCode()))//
+                        .map(f -> f.getAmount() == null ? BigDecimal.ZERO : f.getDebCred().compareTo(DebCred.DEB) == 0 ? f.getAmount() : f.getAmount().multiply(BigDecimal.valueOf(-1L))).reduce(BigDecimal.ZERO, BigDecimal::add);
+                reduce2 = reduce2 == null ? BigDecimal.ZERO : reduce2;
+                reduce = reduce2.subtract(reduce);
+                return reduce == null ? 0d : reduce.doubleValue();
+
+            });
+            Highlight outstanding_bills = new Highlight("Outstanding Bills", () -> {
+                List<JournalsEntry> result = journalList(token, false);
+                BigDecimal liabilities = result.stream().filter(f -> f.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.LCC) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(business.getCurrency().getCode()))//
+                        .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
+                return Constants.CURRENCY_FORMAT.format(liabilities == null ? BigDecimal.ZERO : liabilities);
+            }, () -> {
+                List<JournalsEntry> result = journalList(token, false);
+                List<JournalsEntry> result2 = journalList(token, LocalDate.now().minusMonths(1));
+                BigDecimal reduce = result.stream().filter(f -> f.getAccount().getSystemId() != null && f.getAccount().getSystemId().compareTo(SystemAccounts.AP.getId()) == 0 && //
+                                f.getCurrencyFrom().getCode().equalsIgnoreCase(business.getCurrency().getCode()))//
+                        .map(f -> f.getAmount() == null ? BigDecimal.ZERO : f.getDebCred().compareTo(DebCred.DEB) == 0 ? f.getAmount() : f.getAmount().multiply(BigDecimal.valueOf(-1L))).reduce(BigDecimal.ZERO, BigDecimal::add);
+                reduce = reduce == null ? BigDecimal.ZERO : reduce;
+                BigDecimal reduce2 = result2.stream().filter(f -> f.getAccount().getSystemId() != null && f.getAccount().getSystemId().compareTo(SystemAccounts.AP.getId()) == 0 && //
+                                f.getCurrencyFrom().getCode().equalsIgnoreCase(business.getCurrency().getCode()))//
+                        .map(f -> f.getAmount() == null ? BigDecimal.ZERO : f.getDebCred().compareTo(DebCred.DEB) == 0 ? f.getAmount() : f.getAmount().multiply(BigDecimal.valueOf(-1L))).reduce(BigDecimal.ZERO, BigDecimal::add);
+                reduce2 = reduce2 == null ? BigDecimal.ZERO : reduce2;
+                reduce = reduce2.subtract(reduce);
+                return reduce == null ? 0d : reduce.doubleValue();
+            });
             board.withRows(new BsRow().withColumns(//
-                            new BsColumn(new Highlight("Outstanding payments", () -> {
-                                List<JournalsEntry> result = journalList(token);
-                                BigDecimal otherAssets = result.stream().filter(f -> f.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.ASSETS) == 0 && !(
-
-                                                f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.CAB) == 0 ||//
-                                                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.INV) == 0 ||//
-                                                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.PPE) == 0 ||//
-                                                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.DA) == 0 ||//
-                                                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.VPVC) == 0 ||//
-                                                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OSTA) == 0 ||//
-                                                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OLTA) == 0 //
-                                        )
-
-                                                && f.getCurrencyFrom().getCode().equalsIgnoreCase(business.getCurrency().getCode()))//
-                                        .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
-                                return Constants.CURRENCY_FORMAT.format(otherAssets == null ? BigDecimal.ZERO : otherAssets);
-                            }, () -> {
-                                List<JournalsEntry> result = journalList(token);
-                                List<JournalsEntry> result2 = journalList(token, LocalDate.now().minusMonths(1));
-                                BigDecimal reduce = result.stream().filter(f -> f.getAccount().getSystemId() != null && f.getAccount().getSystemId().compareTo(SystemAccounts.AR.getId()) == 0 && //
-                                                f.getCurrencyFrom().getCode().equalsIgnoreCase(business.getCurrency().getCode()))//
-                                        .map(f -> f.getAmount() == null ? BigDecimal.ZERO : f.getDebCred().compareTo(DebCred.DEB) == 0 ? f.getAmount() : f.getAmount().multiply(BigDecimal.valueOf(-1L))).reduce(BigDecimal.ZERO, BigDecimal::add);
-                                reduce = reduce == null ? BigDecimal.ZERO : reduce;
-                                BigDecimal reduce2 = result2.stream().filter(f -> f.getAccount().getSystemId() != null && f.getAccount().getSystemId().compareTo(SystemAccounts.AR.getId()) == 0 && //
-                                                f.getCurrencyFrom().getCode().equalsIgnoreCase(business.getCurrency().getCode()))//
-                                        .map(f -> f.getAmount() == null ? BigDecimal.ZERO : f.getDebCred().compareTo(DebCred.DEB) == 0 ? f.getAmount() : f.getAmount().multiply(BigDecimal.valueOf(-1L))).reduce(BigDecimal.ZERO, BigDecimal::add);
-                                reduce2 = reduce2 == null ? BigDecimal.ZERO : reduce2;
-                                reduce = reduce2.subtract(reduce);
-                                return reduce == null ? 0d : reduce.doubleValue();
-
-                            })).withSize(BsColumn.Size.XS), //
-                            new BsColumn(new Highlight("Outstanding Bills", () -> {
-                                List<JournalsEntry> result = journalList(token);
-                                BigDecimal liabilities = result.stream().filter(f -> f.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.LCC) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(business.getCurrency().getCode()))//
-                                        .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
-                                return Constants.CURRENCY_FORMAT.format(liabilities == null ? BigDecimal.ZERO : liabilities);
-                            }, () -> {
-                                List<JournalsEntry> result = journalList(token);
-                                List<JournalsEntry> result2 = journalList(token, LocalDate.now().minusMonths(1));
-                                BigDecimal reduce = result.stream().filter(f -> f.getAccount().getSystemId() != null && f.getAccount().getSystemId().compareTo(SystemAccounts.AP.getId()) == 0 && //
-                                                f.getCurrencyFrom().getCode().equalsIgnoreCase(business.getCurrency().getCode()))//
-                                        .map(f -> f.getAmount() == null ? BigDecimal.ZERO : f.getDebCred().compareTo(DebCred.DEB) == 0 ? f.getAmount() : f.getAmount().multiply(BigDecimal.valueOf(-1L))).reduce(BigDecimal.ZERO, BigDecimal::add);
-                                reduce = reduce == null ? BigDecimal.ZERO : reduce;
-                                BigDecimal reduce2 = result2.stream().filter(f -> f.getAccount().getSystemId() != null && f.getAccount().getSystemId().compareTo(SystemAccounts.AP.getId()) == 0 && //
-                                                f.getCurrencyFrom().getCode().equalsIgnoreCase(business.getCurrency().getCode()))//
-                                        .map(f -> f.getAmount() == null ? BigDecimal.ZERO : f.getDebCred().compareTo(DebCred.DEB) == 0 ? f.getAmount() : f.getAmount().multiply(BigDecimal.valueOf(-1L))).reduce(BigDecimal.ZERO, BigDecimal::add);
-                                reduce2 = reduce2 == null ? BigDecimal.ZERO : reduce2;
-                                reduce = reduce2.subtract(reduce);
-                                return reduce == null ? 0d : reduce.doubleValue();
-                            })).withSize(BsColumn.Size.XS), //
+                            new BsColumn(outstanding_payments).withSize(BsColumn.Size.XS), //
+                            new BsColumn(outstanding_bills).withSize(BsColumn.Size.XS), //
                             new BsColumn(new Highlight("Next Payments ", () -> /*"54.6k"*/format, () -> /*-112.45*/0d)).withSize(BsColumn.Size.XS), //
                             new BsColumn(new Highlight("Transactions YTD", () -> /*"54.6k"*/format, () -> /*-112.45*/0d)).withSize(BsColumn.Size.XS)),
                     //

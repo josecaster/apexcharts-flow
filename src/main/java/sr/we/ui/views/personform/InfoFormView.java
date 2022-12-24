@@ -26,6 +26,7 @@ import sr.we.ui.components.EmailAddress;
 import sr.we.ui.views.settings.SettingsLayout;
 
 import javax.annotation.security.RolesAllowed;
+import java.util.concurrent.Executors;
 
 @PageTitle("Info Form")
 @Route(value = "info-form", layout = SettingsLayout.class)
@@ -159,7 +160,7 @@ public class InfoFormView extends StateListenerLayout implements BeforeEnterObse
     public void beforeEnter(BeforeEnterEvent event) {
         String token = AuthenticatedUser.token();
         UI current = UI.getCurrent();
-        new Thread(() -> {
+        Executors.newSingleThreadExecutor().execute(() -> {
             PersonFormService businessService = ContextProvider.getBean(PersonFormService.class);
             personForm = businessService.me(token);
             current.access(() -> {
@@ -177,6 +178,6 @@ public class InfoFormView extends StateListenerLayout implements BeforeEnterObse
                 if (StringUtils.isNotBlank(personForm.getOccupation()))//
                     occupation.setValue(personForm.getOccupation());
             });
-        }).start();
+        });
     }
 }

@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
 
 /**
  * A Designer generated component for the add-requests template.
@@ -279,7 +280,7 @@ public class AddRequests extends LitTemplate {
     private void board() {
         UI current = UI.getCurrent();
         String token = AuthenticatedUser.token();
-        new Thread(() -> {
+        Executors.newSingleThreadExecutor().execute(() -> {
 
             LoanRequestService loanRequestService = ContextProvider.getBean(LoanRequestService.class);
             loanRequest = loanRequestService.get(loanRequest.getId(), token);
@@ -301,7 +302,7 @@ public class AddRequests extends LitTemplate {
                 Highlight balance = new Highlight("Balance", () -> loanRequest.getBalance() == null ? Constants.CURRENCY_FORMAT.format(0) : Constants.CURRENCY_FORMAT.format(loanRequest.getBalance()), () -> loanRequest.getTransactionBalance() == null ? null : loanRequest.getTransactionBalance().doubleValue());
                 board.withRows(new BsRow().withColumns(new BsColumn(principal).withSize(BsColumn.Size.XS), new BsColumn(initial_frequency).withSize(BsColumn.Size.XS), new BsColumn(intrest).withSize(BsColumn.Size.XS), new BsColumn(balance).withSize(BsColumn.Size.XS)));
             });
-        }).start();
+        });
 
     }
 

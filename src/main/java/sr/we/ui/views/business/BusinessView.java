@@ -18,6 +18,7 @@ import sr.we.ui.views.settings.SettingsLayout;
 
 import javax.annotation.security.RolesAllowed;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 @Route(value = "my-businesses", layout = SettingsLayout.class)
 @RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
@@ -92,7 +93,7 @@ public class BusinessView extends TableLayout implements AfterNavigationObserver
     public void beforeEnter(BeforeEnterEvent event) {
         String token = AuthenticatedUser.token();
         UI current = UI.getCurrent();
-        new Thread(new Runnable() {
+        Executors.newSingleThreadExecutor().execute(new Runnable() {
             @Override
             public void run() {
                 BusinessService businessService = ContextProvider.getBean(BusinessService.class);
@@ -102,7 +103,7 @@ public class BusinessView extends TableLayout implements AfterNavigationObserver
                     grid.getDataProvider().refreshAll();
                 });
             }
-        }).start();
+        });
     }
 
     @Override

@@ -23,6 +23,7 @@ import sr.we.ui.views.MainLayout;
 import javax.annotation.security.RolesAllowed;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executors;
 
 /**
  * A Designer generated component for the customer-view template.
@@ -63,7 +64,7 @@ public class CustomerView extends LitTemplate implements BeforeEnterObserver {
         if (business.isPresent()) {
             businessString = business.get();
             UI current = UI.getCurrent();
-            new Thread(new Runnable() {
+            Executors.newSingleThreadExecutor().execute(new Runnable() {
                 @Override
                 public void run() {
                     CustomerService CustomerService = ContextProvider.getBean(CustomerService.class);
@@ -77,7 +78,7 @@ public class CustomerView extends LitTemplate implements BeforeEnterObserver {
                         customersGrid.setItems(Customer);
                     });
                 }
-            }).start();
+            });
             UserAccessService userAccessService = ContextProvider.getBean(UserAccessService.class);
             boolean hasAccess = userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(CustomerPrivilege.class), Privileges.INSERT);
             addCustomerBtn.setVisible(hasAccess);

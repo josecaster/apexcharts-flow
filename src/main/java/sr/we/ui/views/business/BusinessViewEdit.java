@@ -30,6 +30,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executors;
 
 @Route(value = "edit-business", layout = SettingsLayout.class)
 @RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
@@ -178,7 +179,7 @@ public class BusinessViewEdit extends StateListenerLayout implements HasDynamicT
         }
         String token = AuthenticatedUser.token();
         UI current = UI.getCurrent();
-        new Thread(() -> {
+        Executors.newSingleThreadExecutor().execute(() -> {
             BusinessService businessService = ContextProvider.getBean(BusinessService.class);
             business = businessService.get(Long.valueOf(id.get()), token);
             current.access(() -> {
@@ -198,7 +199,7 @@ public class BusinessViewEdit extends StateListenerLayout implements HasDynamicT
                     image.setSrc(streamResource);
                 }
             });
-        }).start();
+        });
 
 
 //        vo.setBusinessType(typeOfBusiness.getValue().getId());
