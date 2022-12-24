@@ -44,11 +44,14 @@ import sr.we.ui.views.MainLayout;
 import javax.annotation.security.RolesAllowed;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Month;
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -91,10 +94,10 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
     @Id("as-of-date-picker")
     protected DatePicker asOfDatePicker;
     @Id("as-of-date-select")
-    protected Select<Long> asOfDateSelect;
+    protected Select<Year> year;
     protected String business;
 
-    protected TreeGrid<Item> treeGrid;
+    protected TreeGrid<Item> currentAssetsGrid, toBeReceivedGrid, toBePaidOutGrid, prevGrid;
     @Id("currency-tabs")
     protected Tabs currencyTabs;
     private List<JournalsEntry> result;
@@ -121,7 +124,9 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
 
         dateHeaderLbl = new Label();
 
-        asOfDateSelect.setItems(2022L);
+        Year now = Year.now();
+        year.setItems(now.minusYears(5), now.minusYears(4), now.minusYears(3), now.minusYears(2), now.minusYears(1), now);
+
         asOfDatePicker.addValueChangeListener(f -> {
             if (f.getValue() == null) {
                 asOfDatePicker.setValue(LocalDate.now());
@@ -132,10 +137,21 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
         asOfDatePicker.setValue(LocalDate.now());
         reportTypeSelect.setItems(List.of(JournalsEntryVO.ReportType.values()));
 
-        asOfDateSelect.setValue(2022L);
+        year.setValue(now);
+        year.addValueChangeListener(f -> {
+            refresh();
+        });
         reportTypeSelect.setValue(JournalsEntryVO.ReportType.ALL);
-        treeGrid = new TreeGrid<>();
-        treeGrid.addComponentHierarchyColumn(person -> {
+        currentAssetsGrid = treeGrid();
+//        toBeReceivedGrid = treeGrid();
+//        toBePaidOutGrid = treeGrid();
+//        prevGrid = treeGrid();
+        tableLayout.add(currentAssetsGrid/*, toBeReceivedGrid, toBePaidOutGrid, prevGrid*/);
+    }
+
+    private TreeGrid treeGrid() {
+        TreeGrid<Item> currentAssetsGrid = new TreeGrid<>();
+        currentAssetsGrid.addComponentHierarchyColumn(person -> {
             Span span = new Span(person.caption);
             if (person.getChartOfAccounts() != null) {
                 span.addClassNames(LumoUtility.FontWeight.BOLD, LumoUtility.TextColor.PRIMARY);
@@ -145,7 +161,7 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
             return span;
         }).setHeader("Accounts");
 
-        treeGrid.addComponentColumn(person -> {
+        currentAssetsGrid.addComponentColumn(person -> {
             HorizontalLayout horizontalLayout = new HorizontalLayout();
             List<JournalsEntry> values = person.getValues();
             if (values != null) {
@@ -154,7 +170,7 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
                 if (!unknown.isEmpty()) {
                     JournalsEntry journalsEntry = unknown.get(0);
                     BigDecimal reduce = unknown.stream().map(getJournalsEntryBigDecimalFunction1()).reduce(BigDecimal.ZERO, BigDecimal::add);
-                    System.out.println("-------------");
+//                    System.out.println("-------------");
                     BigDecimal srd = unknown.stream().map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
                     BigDecimal reduce1 = known.stream().map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
                     Span span = new Span("(" + journalsEntry.getCurrencyTo().getCode() + " " + Constants.CURRENCY_FORMAT.format(reduce) + "&" + getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(reduce1) + ")");
@@ -170,7 +186,7 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
             horizontalLayout.add(span);
             return horizontalLayout;
         }).setHeader(dateHeaderLbl).setTextAlign(ColumnTextAlign.END).setResizable(true);
-        tableLayout.add(treeGrid);
+        return currentAssetsGrid;
     }
 
     public static String getLocation(String business) {
@@ -206,9 +222,9 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
         reportTab.addSelectedChangeListener(f -> {
             refresh();
             if (f.getSelectedTab().equals(details)) {
-                if (first != null && !first.isEmpty()) treeGrid.expand(first);
-                if (second != null && !second.isEmpty()) treeGrid.expand(second);
-                if (last != null && !last.isEmpty()) treeGrid.expand(last);
+                if (first != null && !first.isEmpty()) currentAssetsGrid.expand(first);
+                if (second != null && !second.isEmpty()) currentAssetsGrid.expand(second);
+                if (last != null && !last.isEmpty()) currentAssetsGrid.expand(last);
             }
         });
         updateReportBtn.addClickListener(f -> {
@@ -223,15 +239,20 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
         JournalEntryService journalEntryService = ContextProvider.getBean(JournalEntryService.class);
         JournalsEntryVO vo = new JournalsEntryVO();
         vo.setBusinessId(Long.valueOf(business));
-        vo.setAsOfDate(asOfDatePicker.getValue());
+            vo.setStartDate(year.getValue().atMonth(Month.JANUARY).atDay(1));
+            if (year.getValue().compareTo(Year.now()) == 0) {
+                vo.setAsOfDate(asOfDatePicker.getValue());
+            } else {
+                vo.setAsOfDate(year.getValue().atMonth(Month.DECEMBER).atEndOfMonth());
+            }
         PagingResult<JournalsEntry> list = journalEntryService.list(vo, AuthenticatedUser.token());
 
         result = list.getResult();
-        if (treeGrid.getDataProvider() != null) {
-            treeGrid.setItems(new ArrayList<Item>(), this::getChildren);
+        if (currentAssetsGrid.getDataProvider() != null) {
+            currentAssetsGrid.setItems(new ArrayList<Item>(), this::getChildren);
         }
         if (result != null && !result.isEmpty()) {
-            Map<ChartOfAccounts, List<JournalsEntry>> collect = result.stream().filter(f -> f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency())).collect(Collectors.groupingBy(f -> f.getAccount().getAccountType().getType()));
+            Map<ChartOfAccounts, List<JournalsEntry>> collect = result.stream()./*filter(currentAssetsFilter()).*/filter(f -> f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency())).collect(Collectors.groupingBy(f -> f.getAccount().getAccountType().getType()));
             List<Item> items = collect.entrySet().stream().map(f -> {
                 ChartOfAccounts key = f.getKey();
                 List<JournalsEntry> value = f.getValue();
@@ -239,17 +260,10 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
                 return new Item("Total " + key.getCaption(), reduce, key);
             }).toList();
             first.addAll(items);
-            treeGrid.setItems(items, this::getChildren);
+            currentAssetsGrid.setItems(items, this::getChildren);
         }
 
-        BigDecimal currentAssets = result.stream().filter(f -> (f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.CAB) == 0 ||//
-                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.INV) == 0 ||//
-                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.PPE) == 0 ||//
-                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.DA) == 0 ||//
-                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.VPVC) == 0 ||//
-                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OSTA) == 0 ||//
-                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OLTA) == 0 //
-                ) && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
+        BigDecimal currentAssets = result.stream().filter(currentAssetsFilter())//
                 .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
 
 
@@ -269,21 +283,21 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
         BigDecimal liabilities = result.stream().filter(f -> f.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.LCC) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
                 .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal eq = result.stream().filter(f -> f.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.EQ) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
-                .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
+//        BigDecimal eq = result.stream().filter(f -> f.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.EQ) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
+//                .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
+//
+//        BigDecimal income = result.stream().filter(f -> f.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.INC) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
+//                .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
+//
+//        BigDecimal cgs = result.stream().filter(f -> f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.CGS) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
+//                .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal income = result.stream().filter(f -> f.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.INC) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
-                .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal cgs = result.stream().filter(f -> f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.CGS) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
-                .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal oe = result.stream().filter(f -> (f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OE) == 0
-                        || f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.PE) == 0
-                        ||f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.UE) == 0
-                )
-                        && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
-                .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
+//        BigDecimal oe = result.stream().filter(f -> (f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OE) == 0
+//                        || f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.PE) == 0
+//                        ||f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.UE) == 0
+//                )
+//                        && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
+//                .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal gofe = result.stream().filter(f -> f.getAccount().getSystemId() != null && f.getAccount().getSystemId().compareTo(SystemAccounts.GOFE.getId()) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
                 .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -305,11 +319,22 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
         total.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(sum));
     }
 
+    private Predicate<JournalsEntry> currentAssetsFilter() {
+        return f -> (f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.CAB) == 0 ||//
+                f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.INV) == 0 ||//
+                f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.PPE) == 0 ||//
+                f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.DA) == 0 ||//
+                f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.VPVC) == 0 ||//
+                f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OSTA) == 0 ||//
+                f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OLTA) == 0 //
+        ) && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency());
+    }
+
     private Function<JournalsEntry, BigDecimal> getJournalsEntryBigDecimalFunction1() {
         return g -> {
             BigDecimal bigDecimal = g.getAccount().getAccountType().getType().getPlusMin(g.getDebCred()).compareTo(TransactionType.WITHDRAWAL) == 0//
                     ? g.getConvertedAmount().multiply(BigDecimal.valueOf(-1)) : g.getConvertedAmount();
-            System.out.println(g.getId()+","+bigDecimal);
+//            System.out.println(g.getId()+","+bigDecimal);
             return bigDecimal;
         };
     }
@@ -337,7 +362,7 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
 //            }
             BigDecimal bigDecimal = g.getAccount().getAccountType().getType().getPlusMin(g.getDebCred()).compareTo(TransactionType.WITHDRAWAL) == 0//
                     ? g.getAmount().multiply(BigDecimal.valueOf(-1)) : g.getAmount();
-            System.out.println(g.getId()+","+bigDecimal);
+//            System.out.println(g.getId()+","+bigDecimal);
             return bigDecimal;
         };
     }

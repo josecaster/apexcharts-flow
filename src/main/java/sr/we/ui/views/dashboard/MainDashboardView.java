@@ -15,6 +15,7 @@ import com.github.appreciated.apexcharts.config.stroke.Curve;
 import com.github.appreciated.apexcharts.config.xaxis.Title;
 import com.github.appreciated.apexcharts.helper.Series;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
@@ -29,9 +30,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.*;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.vaadin.addons.yuri0x7c1.bslayout.BsColumn;
 import org.vaadin.addons.yuri0x7c1.bslayout.BsLayout;
@@ -66,14 +65,16 @@ import java.time.Year;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @BreadCrumb(titleKey = "sr.we.dashboard", optimizedMobile = true)
 @Route(value = "main-dashboard", layout = MainLayout.class)
 @RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
-public class MainDashboardView extends Main implements BeforeEnterObserver {
+public class MainDashboardView extends Main implements BeforeEnterObserver, BeforeLeaveObserver {
 
     private final BsLayout board;
     private Long businessId;
@@ -81,8 +82,11 @@ public class MainDashboardView extends Main implements BeforeEnterObserver {
     private Div div;
     private Business business;
     private Select<Year> year;
+    private Future<?> submit, submit1,submit2,submit3;
+    private ExecutorService executorService;
 
     public MainDashboardView() {
+        executorService = Executors.newFixedThreadPool(5);
         addClassName("dashboard-view");
 
 
@@ -91,10 +95,10 @@ public class MainDashboardView extends Main implements BeforeEnterObserver {
         add(board);
     }
 
-    public static Component createHighlight(String title, String value, Double percentage) {
-
-        return new Highlight(title, () -> value, () -> percentage);
-    }
+//    public static Component createHighlight(String title, String value, Double percentage) {
+//
+//        return new Highlight(title, () -> value, () -> percentage, executorService);
+//    }
 
     public static Component createResponseTimes() {
         HorizontalLayout header = createHeader("Profit And Loss", "Income and expenses only (includes unpaid invoices and bills).");
@@ -171,10 +175,10 @@ public class MainDashboardView extends Main implements BeforeEnterObserver {
         year.addValueChangeListener(f -> {
             UI current = UI.getCurrent();
             String token = AuthenticatedUser.token();
-            Executors.newSingleThreadExecutor().execute(new Runnable() {
+            submit3 = executorService.submit(new Runnable() {
                 @Override
                 public void run() {
-                    current.access(() -> {
+                    submit = current.access(() -> {
                         ProgressBar progressBar = new ProgressBar();
                         progressBar.setWidthFull();
                         progressBar.setIndeterminate(true);
@@ -198,7 +202,7 @@ public class MainDashboardView extends Main implements BeforeEnterObserver {
         apexChartsBuilder = apexChartsBuilder.withChart(ChartBuilder.get().withType(Type.LINE).withHeight("400px").withZoom(ZoomBuilder.get().withEnabled(true).build()).build())//
                 .withStroke(StrokeBuilder.get().withCurve(Curve.SMOOTH).build())//
 //                .withTitle(TitleSubtitleBuilder.get().withText("Chart").withAlign(Align.right).build())//
-                .withNoData(noData)//
+                .withNoData(noData)//e
                 .withGrid(GridBuilder.get().withRow(RowBuilder.get().withColors("#f3f3f3", "transparent").withOpacity(0.5).build()).build());//
 
         XAxisBuilder xAxis = XAxisBuilder.get();
@@ -232,7 +236,8 @@ public class MainDashboardView extends Main implements BeforeEnterObserver {
     }
 
     private void refreshChart(UI current, String token) {
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
+
+        submit3 = executorService.submit(new Runnable() {
             @Override
             public void run() {
 
@@ -252,7 +257,7 @@ public class MainDashboardView extends Main implements BeforeEnterObserver {
                 flowout.setData(data1);
                 listSeries[1] = flowout;
 
-                current.access(() -> {
+                submit1 = current.access(() -> {
                     apexChartsBuilder = apexChartsBuilder.withSeries(listSeries);
                     div.removeAll();
                     div.add(apexChartsBuilder.build());
@@ -395,6 +400,11 @@ public class MainDashboardView extends Main implements BeforeEnterObserver {
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
+
+//        if(executorService.isShutdown()){
+//            executorService = Executors.newFixedThreadPool(5);
+//        }
+
         UserAccessService userAccesService = ContextProvider.getBean(UserAccessService.class);
         boolean hasAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new TransactionsPrivilege(), Privileges.READ);
         if (!hasAccess) {
@@ -444,7 +454,7 @@ public class MainDashboardView extends Main implements BeforeEnterObserver {
                 reduce = reduce2.subtract(reduce);
                 return reduce == null ? 0d : reduce.doubleValue();
 
-            });
+            }, executorService);
             Highlight outstanding_bills = new Highlight("Outstanding Bills", () -> {
                 List<JournalsEntry> result = journalList(token, false);
                 BigDecimal liabilities = result.stream().filter(f -> f.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.LCC) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(business.getCurrency().getCode()))//
@@ -463,12 +473,12 @@ public class MainDashboardView extends Main implements BeforeEnterObserver {
                 reduce2 = reduce2 == null ? BigDecimal.ZERO : reduce2;
                 reduce = reduce2.subtract(reduce);
                 return reduce == null ? 0d : reduce.doubleValue();
-            });
+            }, executorService);
             board.withRows(new BsRow().withColumns(//
                             new BsColumn(outstanding_payments).withSize(BsColumn.Size.XS), //
                             new BsColumn(outstanding_bills).withSize(BsColumn.Size.XS), //
-                            new BsColumn(new Highlight("Next Payments ", () -> /*"54.6k"*/format, () -> /*-112.45*/0d)).withSize(BsColumn.Size.XS), //
-                            new BsColumn(new Highlight("Transactions YTD", () -> /*"54.6k"*/format, () -> /*-112.45*/0d)).withSize(BsColumn.Size.XS)),
+                            new BsColumn(new Highlight("Next Payments ", () -> /*"54.6k"*/format, () -> /*-112.45*/0d, executorService)).withSize(BsColumn.Size.XS), //
+                            new BsColumn(new Highlight("Transactions YTD", () -> /*"54.6k"*/format, () -> /*-112.45*/0d, executorService)).withSize(BsColumn.Size.XS)),
                     //
                     new BsRow().withColumns(//
                             new BsColumn(createViewEvents()).withSize(BsColumn.Size.XS)), //
@@ -476,5 +486,37 @@ public class MainDashboardView extends Main implements BeforeEnterObserver {
                             new BsColumn(createServiceHealth()).withSize(BsColumn.Size.XS), //
                             new BsColumn(createResponseTimes()).withSize(BsColumn.Size.XS)));//
         }
+    }
+
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        shut();
+        if(!executorService.isShutdown()) {
+            executorService.shutdownNow();
+        }
+        super.onDetach(detachEvent);
+
+    }
+
+    private void shut() {
+        if (submit != null) {
+            submit.cancel(true);
+        }
+        if (submit1 != null) {
+            submit1.cancel(true);
+        }
+        if (submit2 != null) {
+            submit2.cancel(true);
+        }
+        if (submit3 != null) {
+            submit3.cancel(true);
+        }
+
+    }
+
+    @Override
+    public void beforeLeave(BeforeLeaveEvent beforeLeaveEvent) {
+        shut();
     }
 }

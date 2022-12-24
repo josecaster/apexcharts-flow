@@ -1,5 +1,6 @@
 package sr.we.ui.components;
 
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
@@ -10,15 +11,15 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import sr.we.shekelflowcore.entity.helper.Executable;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class Highlight extends VerticalLayout {
 
+    private Future<?> submit,submit1,submit2,submit3;
     private Executable<String> value;
     private Executable<Double> percentage;
 
-    public Highlight(String title, Executable<String> value, Executable<Double> procent) {
-
+    public Highlight(String title, Executable<String> value, Executable<Double> procent, ExecutorService executorService) {
 
 
         H2 h2 = new H2(title);
@@ -35,22 +36,22 @@ public class Highlight extends VerticalLayout {
 
 
         UI current = UI.getCurrent();
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
+        submit2 = executorService.submit(new Runnable() {
             @Override
             public void run() {
                 String build = value.build();
-                current.access(() -> {
+                submit = current.access(() -> {
                     valueSpan.setText(build);
                 });
             }
         });
 
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
+        submit3 = executorService.submit(new Runnable() {
             @Override
             public void run() {
 
                 Double percentage = procent.build();
-                current.access(() -> {
+                submit1 = current.access(() -> {
                     VaadinIcon icon = VaadinIcon.ARROW_UP;
                     Icon i = icon.create();
                     i.addClassNames("box-border", "p-xs");
@@ -70,7 +71,7 @@ public class Highlight extends VerticalLayout {
                         String percentageSpanValue = prefix + percentage;
                         Span percentageSpan = new Span(percentageSpanValue);
                         Span badge = new Span();
-                        if(percentage == 0){
+                        if (percentage == 0) {
                             badge.add(percentageSpan);
                         } else {
                             badge.add(i, percentageSpan);
@@ -90,5 +91,22 @@ public class Highlight extends VerticalLayout {
         setSpacing(false);
         setJustifyContentMode(JustifyContentMode.CENTER);
         setAlignItems(Alignment.CENTER);
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        if (submit != null) {
+            submit.cancel(true);
+        }
+        if (submit1 != null) {
+            submit1.cancel(true);
+        }
+        if (submit2 != null) {
+            submit2.cancel(true);
+        }
+        if (submit3 != null) {
+            submit3.cancel(true);
+        }
+        super.onDetach(detachEvent);
     }
 }
