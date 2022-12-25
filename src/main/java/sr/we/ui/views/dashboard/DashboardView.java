@@ -79,7 +79,7 @@ public class DashboardView extends Main implements BeforeEnterObserver {
 
     public static Component createHighlight(String title, String value, Double percentage) {
 
-        return new Highlight(title, () -> value, () -> percentage);
+        return new Highlight(title, () -> value, () -> percentage, Executors.newSingleThreadExecutor());
     }
 
     public static Component createResponseTimes() {
@@ -297,10 +297,10 @@ public class DashboardView extends Main implements BeforeEnterObserver {
         }
         DashboardService dashboardService = ContextProvider.getBean(DashboardService.class);
         if (business != null) {
-            board.withRows(new BsRow().withColumns(new BsColumn(new Highlight("Active Loan Requests", () -> dashboardService.getActiveLoanRequests(token, businessId).getValue(), () -> dashboardService.getActiveLoanRequests(token, businessId).getPercentage())).withSize(BsColumn.Size.XS), //
-                    new BsColumn(new Highlight("Overdue", () -> /*"54.6k"*/dashboardService.getOverdue(token, businessId).getValue(), () -> /*-112.45*/dashboardService.getOverdue(token, businessId).getPercentage())).withSize(BsColumn.Size.XS), //
-                    new BsColumn(new Highlight("Next Payments ", () -> /*"54.6k"*/dashboardService.getMonthsPayments(token, businessId).getValue(), () -> /*-112.45*/dashboardService.getMonthsPayments(token, businessId).getPercentage())).withSize(BsColumn.Size.XS), //
-                    new BsColumn(new Highlight("Transactions YTD", () -> /*"54.6k"*/dashboardService.getProfits(token, businessId).getValue(), () -> /*-112.45*/dashboardService.getProfits(token, businessId).getPercentage())).withSize(BsColumn.Size.XS)), new BsRow().withColumns(new BsColumn(createViewEvents()).withSize(BsColumn.Size.XS)), new BsRow().withColumns(new BsColumn(createServiceHealth()).withSize(BsColumn.Size.XS), new BsColumn(createResponseTimes()).withSize(BsColumn.Size.XS)));
+            board.withRows(new BsRow().withColumns(new BsColumn(new Highlight("Active Loan Requests", () -> dashboardService.getActiveLoanRequests(token, businessId).getValue(), () -> dashboardService.getActiveLoanRequests(token, businessId).getPercentage(), Executors.newSingleThreadExecutor())).withSize(BsColumn.Size.XS), //
+                    new BsColumn(new Highlight("Overdue", () -> /*"54.6k"*/dashboardService.getOverdue(token, businessId).getValue(), () -> /*-112.45*/dashboardService.getOverdue(token, businessId).getPercentage(), Executors.newSingleThreadExecutor())).withSize(BsColumn.Size.XS), //
+                    new BsColumn(new Highlight("Next Payments ", () -> /*"54.6k"*/dashboardService.getMonthsPayments(token, businessId).getValue(), () -> /*-112.45*/dashboardService.getMonthsPayments(token, businessId).getPercentage(), Executors.newSingleThreadExecutor())).withSize(BsColumn.Size.XS), //
+                    new BsColumn(new Highlight("Transactions YTD", () -> /*"54.6k"*/dashboardService.getProfits(token, businessId).getValue(), () -> /*-112.45*/dashboardService.getProfits(token, businessId).getPercentage(), Executors.newSingleThreadExecutor())).withSize(BsColumn.Size.XS)), new BsRow().withColumns(new BsColumn(createViewEvents()).withSize(BsColumn.Size.XS)), new BsRow().withColumns(new BsColumn(createServiceHealth()).withSize(BsColumn.Size.XS), new BsColumn(createResponseTimes()).withSize(BsColumn.Size.XS)));
         }
     }
 }

@@ -295,11 +295,11 @@ public class AddRequests extends LitTemplate {
                     reduce = loanRequestPlans.stream().map(LoanRequestPlan::getFreqAmount).reduce(0L, Long::sum);
                 }
 
-                Highlight principal = new Highlight("Principal", () -> Constants.CURRENCY_FORMAT.format(loanRequest.getAmount()), () -> null);
+                Highlight principal = new Highlight("Principal", () -> Constants.CURRENCY_FORMAT.format(loanRequest.getAmount()), () -> null, Executors.newSingleThreadExecutor());
                 long finalReduce = reduce;
-                Highlight initial_frequency = new Highlight("Initial Frequency", () -> loanRequest.getFreq().getCaption() + " " + loanRequest.getFreqVal().doubleValue(), () -> (double) finalReduce);
-                Highlight intrest = new Highlight("Intrest", () -> loanRequest.getIntrest() == null ? Constants.CURRENCY_FORMAT.format(0) : Constants.CURRENCY_FORMAT.format(loanRequest.getIntrest()), () -> null);
-                Highlight balance = new Highlight("Balance", () -> loanRequest.getBalance() == null ? Constants.CURRENCY_FORMAT.format(0) : Constants.CURRENCY_FORMAT.format(loanRequest.getBalance()), () -> loanRequest.getTransactionBalance() == null ? null : loanRequest.getTransactionBalance().doubleValue());
+                Highlight initial_frequency = new Highlight("Initial Frequency", () -> loanRequest.getFreq().getCaption() + " " + loanRequest.getFreqVal().doubleValue(), () -> (double) finalReduce, Executors.newSingleThreadExecutor());
+                Highlight intrest = new Highlight("Intrest", () -> loanRequest.getIntrest() == null ? Constants.CURRENCY_FORMAT.format(0) : Constants.CURRENCY_FORMAT.format(loanRequest.getIntrest()), () -> null, Executors.newSingleThreadExecutor());
+                Highlight balance = new Highlight("Balance", () -> loanRequest.getBalance() == null ? Constants.CURRENCY_FORMAT.format(0) : Constants.CURRENCY_FORMAT.format(loanRequest.getBalance()), () -> loanRequest.getTransactionBalance() == null ? null : loanRequest.getTransactionBalance().doubleValue(), Executors.newSingleThreadExecutor());
                 board.withRows(new BsRow().withColumns(new BsColumn(principal).withSize(BsColumn.Size.XS), new BsColumn(initial_frequency).withSize(BsColumn.Size.XS), new BsColumn(intrest).withSize(BsColumn.Size.XS), new BsColumn(balance).withSize(BsColumn.Size.XS)));
             });
         });

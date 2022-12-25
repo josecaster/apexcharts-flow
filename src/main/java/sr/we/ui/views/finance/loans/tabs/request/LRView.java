@@ -53,6 +53,7 @@ import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import static sr.we.ContextProvider.getBean;
@@ -316,11 +317,11 @@ public class LRView extends VerticalLayout implements BeforeEnterObserver {
             reduce = loanRequestPlans.stream().map(f -> f.getFreqAmount()).reduce(0l, (subtotal, element) -> subtotal + element);
         }
 
-        Highlight principal = new Highlight("Principal", () -> Constants.CURRENCY_FORMAT.format(loanRequest.getAmount()), () -> null);
+        Highlight principal = new Highlight("Principal", () -> Constants.CURRENCY_FORMAT.format(loanRequest.getAmount()), () -> null, Executors.newSingleThreadExecutor());
         Long finalReduce = reduce;
-        Highlight initial_frequency = new Highlight("Initial Frequency", () -> loanRequest.getFreq().getCaption() + " " + loanRequest.getFreqVal().doubleValue(), () -> finalReduce.doubleValue());
-        Highlight intrest = new Highlight("Intrest", () -> loanRequest.getIntrest() == null ? Constants.CURRENCY_FORMAT.format(0) : Constants.CURRENCY_FORMAT.format(loanRequest.getIntrest()), () -> null);
-        Highlight balance = new Highlight("Balance", () -> loanRequest.getBalance() == null ? Constants.CURRENCY_FORMAT.format(0) : Constants.CURRENCY_FORMAT.format(loanRequest.getBalance()), () -> loanRequest.getTransactionBalance() == null ? null : loanRequest.getTransactionBalance().doubleValue());
+        Highlight initial_frequency = new Highlight("Initial Frequency", () -> loanRequest.getFreq().getCaption() + " " + loanRequest.getFreqVal().doubleValue(), () -> finalReduce.doubleValue(), Executors.newSingleThreadExecutor());
+        Highlight intrest = new Highlight("Intrest", () -> loanRequest.getIntrest() == null ? Constants.CURRENCY_FORMAT.format(0) : Constants.CURRENCY_FORMAT.format(loanRequest.getIntrest()), () -> null, Executors.newSingleThreadExecutor());
+        Highlight balance = new Highlight("Balance", () -> loanRequest.getBalance() == null ? Constants.CURRENCY_FORMAT.format(0) : Constants.CURRENCY_FORMAT.format(loanRequest.getBalance()), () -> loanRequest.getTransactionBalance() == null ? null : loanRequest.getTransactionBalance().doubleValue(), Executors.newSingleThreadExecutor());
         board.withRows(new BsRow().withColumns(new BsColumn(principal).withSize(BsColumn.Size.XS), new BsColumn(initial_frequency).withSize(BsColumn.Size.XS), new BsColumn(intrest).withSize(BsColumn.Size.XS), new BsColumn(balance).withSize(BsColumn.Size.XS)));
 
 
@@ -534,10 +535,10 @@ public class LRView extends VerticalLayout implements BeforeEnterObserver {
 
 //        div.add(new Paragraph("It’s a place where you can grow your own UI 🤗"));
         BsLayout board = new BsLayout();
-        board.withRows(new BsRow().withColumns(new BsColumn(new Highlight("Open loan requests", () -> "3", () -> 80.0)), //
-                new BsColumn(new Highlight("Closed loans", () -> "2", () -> 100.0)), //
-                new BsColumn(new Highlight("Approved loans", () -> "3", () -> 80.0)), //
-                new BsColumn(new Highlight("Declined loans", () -> "0", () -> 0.0))));
+        board.withRows(new BsRow().withColumns(new BsColumn(new Highlight("Open loan requests", () -> "3", () -> 80.0, Executors.newSingleThreadExecutor())), //
+                new BsColumn(new Highlight("Closed loans", () -> "2", () -> 100.0, Executors.newSingleThreadExecutor())), //
+                new BsColumn(new Highlight("Approved loans", () -> "3", () -> 80.0, Executors.newSingleThreadExecutor())), //
+                new BsColumn(new Highlight("Declined loans", () -> "0", () -> 0.0, Executors.newSingleThreadExecutor()))));
         div.add(board);
 
 

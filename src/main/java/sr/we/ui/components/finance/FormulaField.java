@@ -92,7 +92,6 @@ public class FormulaField extends Composite<VerticalLayout> implements HasLabel,
         child.setMargin(false);
 
         int componentCount = parent.getComponentCount();
-        System.out.println(componentCount);
         parent.add(child);
 //        form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 2), new FormLayout.ResponsiveStep("500", 3));
 
