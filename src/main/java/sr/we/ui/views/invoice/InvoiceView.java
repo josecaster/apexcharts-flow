@@ -1,5 +1,6 @@
 package sr.we.ui.views.invoice;
 
+import com.flowingcode.vaadin.addons.gridexporter.GridExporter;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -14,37 +15,33 @@ import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.template.Id;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import sr.we.ContextProvider;
 import sr.we.CustomNotificationHandler;
 import sr.we.data.controller.InvoiceService;
-import sr.we.data.controller.PaymentTransactionService;
 import sr.we.data.controller.UserAccessService;
 import sr.we.demo.about.AboutView;
 import sr.we.security.AuthenticatedUser;
+import sr.we.shekelflowcore.entity.Customer;
 import sr.we.shekelflowcore.entity.Invoice;
 import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.entity.helper.MappedSuperClass;
 import sr.we.shekelflowcore.entity.helper.vo.InvoiceVO;
-import sr.we.shekelflowcore.entity.helper.vo.PaymentTransactionVO;
 import sr.we.shekelflowcore.exception.PrimaryThrowable;
 import sr.we.shekelflowcore.security.PrivilegeModeAbstract;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.InvoicesPrivilege;
 import sr.we.shekelflowcore.settings.util.Constants;
-import sr.we.ui.components.ArrowDownButton;
-import sr.we.ui.components.BreadCrumb;
-import sr.we.ui.components.NotYetChange;
-import sr.we.ui.components.UIUtil;
+import sr.we.ui.components.*;
 import sr.we.ui.components.buttons.DeleteButton;
 import sr.we.ui.views.LineAwesomeIcon;
 import sr.we.ui.views.MainLayout;
 
 import javax.annotation.security.RolesAllowed;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -68,7 +65,8 @@ public class InvoiceView extends LitTemplate implements BeforeEnterObserver, Aft
     private Button addInvoiceBtn;
     private final Grid<Invoice> grid = new Grid<>();
     @Id("filter-field")
-    private TextField filterField;
+    private MySearchField filterField;
+    private InvoiceVO filter;
 
     /**
      * Creates a new InvoiceView.
@@ -78,6 +76,7 @@ public class InvoiceView extends LitTemplate implements BeforeEnterObserver, Aft
         addInvoiceBtn.addClickListener(f -> UI.getCurrent().navigate(AddInvoiceView.class, new RouteParameters(new RouteParam("business", business))));
         filterField.addValueChangeListener(new NotYetChange<>());
 
+        grid.addSortListener(f -> GridUtil.onComponentEvent(f,filter));
         Grid.Column<Invoice> statusColumn = grid.addComponentColumn(new ValueProvider<Invoice, LineAwesomeIcon>() {
             @Override
             public LineAwesomeIcon apply(Invoice invoice) {
@@ -99,13 +98,21 @@ public class InvoiceView extends LitTemplate implements BeforeEnterObserver, Aft
                 }
                 return invoiceViewStatusSpan;
             }
-        }).setHeader("Status").setResizable(true);
+        }).setHeader("Status").setSortable(true).setResizable(true);
         Grid.Column<Invoice> dueColumn = grid.addColumn(Invoice::getPaymentDue).setHeader("Due").setResizable(true).setSortable(true);
         Grid.Column<Invoice> dateColumn = grid.addColumn(Invoice::getInvoiceDate).setHeader("Date").setResizable(true).setSortable(true);
-        grid.addColumn(Invoice::getInvoiceNumber).setHeader("Number").setResizable(true).setSortable(true);
-        grid.addColumn(f -> f.getCustomer() == null ? "None" : (f.getCustomer().getName() + " " + f.getCustomer().getFirstName())).setHeader("Customer").setResizable(true).setSortable(true);
-        grid.addColumn(f -> (f.getCurrencyTo() == null ? "" : (f.getCurrencyTo().getCode() + " ")) + Constants.CURRENCY_FORMAT.format(f.getRest() == null ? BigDecimal.ZERO : f.getRest())).setHeader("Amount due").setResizable(true).setSortable(true);
-        grid.addComponentColumn(new ValueProvider<Invoice, ArrowDownButton>() {
+        Grid.Column<Invoice> number = grid.addColumn(Invoice::getInvoiceNumber).setHeader("Number").setResizable(true).setSortable(true);
+        Grid.Column<Invoice> customer = grid.addColumn(f -> f.getCustomer() == null ? "None" : (f.getCustomer().getName() + " " + f.getCustomer().getFirstName())).setHeader("Customer").setResizable(true).setSortable(true);
+        Grid.Column<Invoice> amount_due = grid.addColumn(f -> (f.getCurrencyTo() == null ? "" : (f.getCurrencyTo().getCode() + " ")) + Constants.CURRENCY_FORMAT.format(f.getRest() == null ? BigDecimal.ZERO : f.getRest())).setHeader("Amount due").setResizable(true)/*.setSortable(true)*/;
+
+        statusColumn.setId("i.status");
+        dueColumn.setId("i.paymentDue");
+        dateColumn.setId("i.invoiceDate");
+        number.setId("i.invoiceNumber");
+        customer.setId("i.customer.name");
+//        amount_due.setId("");
+
+        Grid.Column<Invoice> actions = grid.addComponentColumn(new ValueProvider<Invoice, ArrowDownButton>() {
             @Override
             public ArrowDownButton apply(Invoice detail) {
 //                if (detail.isFullyPayed()) {
@@ -137,6 +144,23 @@ public class InvoiceView extends LitTemplate implements BeforeEnterObserver, Aft
                 return lineAwesomeIcon;
             }
         }).setHeader("Actions").setResizable(true);
+        GridExporter<Invoice> exporter = GridExporter.createFor(grid);
+        GridUtil.exportButtons(exporter, grid);
+        exporter.setExportColumn(actions,false);
+        exporter.setExportValue(statusColumn, invoice -> {
+            if (invoice.isFullyPayed()) {
+                return invoice.getStatus().getDisplay() + " : Paid";
+            } else {
+
+                if (invoice.getPaymentDue().isBefore(LocalDate.now())) {
+                    return invoice.getStatus().getDisplay() + " : Overdue";
+                } else {
+                    return invoice.getStatus().getDisplay() + " : Pending";
+                }
+            }
+        });
+        exporter.setTitle("Invoices");
+        exporter.setFileName("Invoices_" + new SimpleDateFormat("yyyyddMM").format(Calendar.getInstance().getTime()));
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
         grid.addItemDoubleClickListener(get -> {
             Invoice firstSelectedItem = get.getItem();
@@ -161,7 +185,8 @@ public class InvoiceView extends LitTemplate implements BeforeEnterObserver, Aft
         component.setAlignItems(FlexComponent.Alignment.CENTER);
         join.setComponent(component);
         invoiceGridLayout.add(grid);
-        grid.setAllRowsVisible(true);
+        invoiceGridLayout.setHeightFull();
+        grid.setHeightFull();
 
 
         grid.addSelectionListener(g -> {
@@ -215,6 +240,7 @@ public class InvoiceView extends LitTemplate implements BeforeEnterObserver, Aft
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
+        filter = new InvoiceVO();
         UserAccessService userAccessService = ContextProvider.getBean(UserAccessService.class);
         String token = AuthenticatedUser.token();
         boolean hasAccess = userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(InvoicesPrivilege.class), Privileges.READ);
@@ -223,6 +249,9 @@ public class InvoiceView extends LitTemplate implements BeforeEnterObserver, Aft
         }
         Optional<String> business1 = event.getRouteParameters().get("business");
         business1.ifPresent(s -> business = s);
+        filter.setBusiness(Long.valueOf(business));
+        filter.setToken(AuthenticatedUser.token());
+        grid.setItems(InvoiceDataProvider.fetch(filter), InvoiceDataProvider.count(filter));
     }
 
     @Override
@@ -232,10 +261,11 @@ public class InvoiceView extends LitTemplate implements BeforeEnterObserver, Aft
     }
 
     private void refresh() {
-        InvoiceService loanService = ContextProvider.getBean(InvoiceService.class);
-        InvoiceVO invoiceVO = new InvoiceVO();
-        invoiceVO.setBusiness(Long.valueOf(business));
-        List<Invoice> list = loanService.list(AuthenticatedUser.token(), invoiceVO).getResult();
-        grid.setItems(list);
+//        InvoiceService loanService = ContextProvider.getBean(InvoiceService.class);
+//        InvoiceVO invoiceVO = new InvoiceVO();
+//        invoiceVO.setBusiness(Long.valueOf(business));
+//        List<Invoice> list = loanService.list(AuthenticatedUser.token(), invoiceVO).getResult();
+//        grid.setItems(list);
+        grid.getDataProvider().refreshAll();
     }
 }

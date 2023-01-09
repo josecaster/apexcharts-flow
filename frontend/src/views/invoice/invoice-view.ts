@@ -5,9 +5,9 @@ import '@vaadin/vertical-layout/src/vaadin-vertical-layout.js';
 import '@vaadin/tabs/src/vaadin-tabs.js';
 import '@vaadin/button/src/vaadin-button.js';
 import '@vaadin/text-field/src/vaadin-text-field.js';
-import '@polymer/iron-icon/iron-icon.js';
 import '@vaadin/vaadin-lumo-styles/utility';
 import '@vaadin/tabs/src/vaadin-tab.js';
+import '../components/my-search-field';
 
 @customElement('invoice-view')
 export class InvoiceView extends LitElement {
@@ -28,10 +28,8 @@ export class InvoiceView extends LitElement {
     Create an invoice 
   </vaadin-button>
  </vaadin-horizontal-layout>
- <vaadin-vertical-layout theme="spacing" style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin: var(--lumo-space-s); margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m); align-self: stretch;" class="shadow-s">
-  <vaadin-text-field placeholder="Filter requests" id="filter-field" style="align-self: stretch;" type="text">
-   <iron-icon icon="lumo:search" slot="prefix"></iron-icon>
-  </vaadin-text-field>
+ <vaadin-vertical-layout theme="spacing" style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin: var(--lumo-space-s); margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m); align-self: stretch; height: 100%;" class="shadow-s">
+  <my-search-field placeholder="Filter requests" id="filter-field" style="align-self: stretch;" type="text"></my-search-field>
   <vaadin-tabs style="align-self: center;" orientation="horizontal" selected="0">
    <vaadin-tab>
      All invoices 
@@ -43,7 +41,7 @@ export class InvoiceView extends LitElement {
      Paid 
    </vaadin-tab>
   </vaadin-tabs>
-  <div id="invoice-grid-layout" style="align-self: stretch;"></div>
+  <div id="invoice-grid-layout" style="align-self: stretch; height: 100%;"></div>
  </vaadin-vertical-layout>
 </vaadin-vertical-layout>
 `;

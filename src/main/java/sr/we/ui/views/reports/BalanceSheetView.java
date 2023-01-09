@@ -11,6 +11,7 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.littemplate.LitTemplate;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.tabs.Tab;
@@ -21,6 +22,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import org.apache.commons.lang3.StringUtils;
 import sr.we.ContextProvider;
 import sr.we.data.controller.BusinessService;
 import sr.we.data.controller.JournalEntryService;
@@ -139,7 +141,10 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
 
         year.setValue(now);
         year.addValueChangeListener(f -> {
-            refresh();
+//            refresh();
+            LocalDate localDate = year.getValue().atMonth(Month.DECEMBER).atEndOfMonth();
+            asOfDatePicker.setValue(localDate);
+//            dateHeaderLbl.setText(Constants.SIMPLE_DATE_FORMAT.format(DateUtil.convertToDateViaInstant(localDate)));
         });
         reportTypeSelect.setValue(JournalsEntryVO.ReportType.ALL);
         currentAssetsGrid = treeGrid();
@@ -147,6 +152,10 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
 //        toBePaidOutGrid = treeGrid();
 //        prevGrid = treeGrid();
         tableLayout.add(currentAssetsGrid/*, toBeReceivedGrid, toBePaidOutGrid, prevGrid*/);
+    }
+
+    public static String getLocation(String business) {
+        return MainLayout.getLocation(business) + "/balance-sheets";
     }
 
     private TreeGrid treeGrid() {
@@ -174,23 +183,25 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
                     BigDecimal srd = unknown.stream().map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
                     BigDecimal reduce1 = known.stream().map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
                     Span span = new Span("(" + journalsEntry.getCurrencyTo().getCode() + " " + Constants.CURRENCY_FORMAT.format(reduce) + "&" + getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(reduce1) + ")");
-                    horizontalLayout.add(span);
+                    if(journalsEntry.getAccount().getCurrency() != null){
+                        horizontalLayout.add(span);
+                    }
                 }
             }
-            Span span = new Span(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(person.getAmount()));
+            Span span = new Span();
+            span.add(getSelectedCurrency()+" ");
+            span.add(Constants.CURRENCY_FORMAT.format(person.getAmount()));
             if (person.getChartOfAccounts() != null) {
                 span.addClassNames(LumoUtility.FontWeight.BOLD, LumoUtility.TextColor.PRIMARY);
             } else if (person.getChartOfAccountTypes() != null) {
                 span.addClassNames(LumoUtility.FontWeight.BOLD, LumoUtility.TextColor.SECONDARY);
             }
             horizontalLayout.add(span);
+            horizontalLayout.setAlignItems(FlexComponent.Alignment.END);
+            horizontalLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
             return horizontalLayout;
         }).setHeader(dateHeaderLbl).setTextAlign(ColumnTextAlign.END).setResizable(true);
         return currentAssetsGrid;
-    }
-
-    public static String getLocation(String business) {
-        return MainLayout.getLocation(business) + "/balance-sheets";
     }
 
     @Override
@@ -239,12 +250,12 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
         JournalEntryService journalEntryService = ContextProvider.getBean(JournalEntryService.class);
         JournalsEntryVO vo = new JournalsEntryVO();
         vo.setBusinessId(Long.valueOf(business));
-            vo.setStartDate(year.getValue().atMonth(Month.JANUARY).atDay(1));
-            if (year.getValue().compareTo(Year.now()) == 0) {
-                vo.setAsOfDate(asOfDatePicker.getValue());
-            } else {
-                vo.setAsOfDate(year.getValue().atMonth(Month.DECEMBER).atEndOfMonth());
-            }
+        vo.setStartDate(null);
+        if (year.getValue().compareTo(Year.now()) == 0) {
+            vo.setAsOfDate(asOfDatePicker.getValue());
+        } else {
+            vo.setAsOfDate(year.getValue().atMonth(Month.DECEMBER).atEndOfMonth());
+        }
         PagingResult<JournalsEntry> list = journalEntryService.list(vo, AuthenticatedUser.token());
 
         result = list.getResult();
@@ -252,75 +263,125 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
             currentAssetsGrid.setItems(new ArrayList<Item>(), this::getChildren);
         }
         if (result != null && !result.isEmpty()) {
-            Map<ChartOfAccounts, List<JournalsEntry>> collect = result.stream()./*filter(currentAssetsFilter()).*/filter(f -> f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency())).collect(Collectors.groupingBy(f -> f.getAccount().getAccountType().getType()));
-            List<Item> items = collect.entrySet().stream().map(f -> {
-                ChartOfAccounts key = f.getKey();
-                List<JournalsEntry> value = f.getValue();
-                BigDecimal reduce = value.stream().map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
-                return new Item("Total " + key.getCaption(), reduce, key);
-            }).toList();
+            List<Item> items = result.stream().filter(currentAssetsFilter()).collect(Collectors.groupingBy(f -> f.getAccount().getAccountType().getType())).entrySet().stream().map(map("Current Assets")).toList();
             first.addAll(items);
-            currentAssetsGrid.setItems(items, this::getChildren);
+//            List<Item> lofe = result.stream().filter(lofeFilter()).collect(Collectors.groupingBy(f -> f.getAccount().getAccountType().getType())).entrySet().stream().map(map(null)).toList();
+//            first.addAll(lofe);
+//            List<Item> gofe = result.stream().filter(gofeFilter()).collect(Collectors.groupingBy(f -> f.getAccount().getAccountType().getType())).entrySet().stream().map(map(null)).toList();
+//            first.addAll(gofe);
+            List<Item> otherAssets = result.stream().filter(otherAssetsFilter()).collect(Collectors.groupingBy(f -> f.getAccount().getAccountType().getType())).entrySet().stream().map(map("To be received")).toList();
+            first.addAll(otherAssets);
+            List<Item> paidOut = result.stream().filter(liabilitiesFilter()).collect(Collectors.groupingBy(f -> f.getAccount().getAccountType().getType())).entrySet().stream().map(map("To be paid out")).toList();
+            first.addAll(paidOut);
+            List<Item> eq = result.stream().filter(eqFilter()).collect(Collectors.groupingBy(f -> f.getAccount().getAccountType().getType())).entrySet().stream().map(map("Equity")).toList();
+            first.addAll(eq);
         }
+
+//        vo.setAsOfDate(year.getValue().atMonth(Month.JANUARY).atDay(1).minusDays(1));
+//        vo.setStartDate(null);
+//        list = journalEntryService.list(vo, AuthenticatedUser.token());
+//        List<JournalsEntry> result1 = list.getResult();
+        Map<Integer, List<JournalsEntry>> collect = result.stream().collect(Collectors.groupingBy(f -> f.getJournals().getLogDate().getYear()));
+        collect.entrySet().stream().forEachOrdered(f -> {
+            BigDecimal income = f.getValue().stream().filter(ProfitLossView.incomeFilter())//
+                    .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            BigDecimal cgs = f.getValue().stream().filter(ProfitLossView.cgsFilter())//
+                    .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            BigDecimal oe = f.getValue().stream().filter(ProfitLossView.expensesFilter())//
+                    .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            BigDecimal sum = income.subtract(cgs).subtract(oe);
+            first.add(new Item("Retained Earnings "+f.getKey(), sum, f.getValue()));
+        });
+
+
+        currentAssetsGrid.setItems(first, this::getChildren);
 
         BigDecimal currentAssets = result.stream().filter(currentAssetsFilter())//
                 .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-
-        BigDecimal otherAssets = result.stream().filter(f -> f.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.ASSETS) == 0 && !(
-
-                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.CAB) == 0 ||//
-                                f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.INV) == 0 ||//
-                                f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.PPE) == 0 ||//
-                                f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.DA) == 0 ||//
-                                f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.VPVC) == 0 ||//
-                                f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OSTA) == 0 ||//
-                                f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OLTA) == 0 //
-                )
-
-                        && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
-                .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal liabilities = result.stream().filter(f -> f.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.LCC) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
+        BigDecimal gofe = result.stream().filter(gofeFilter())//
                 .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-//        BigDecimal eq = result.stream().filter(f -> f.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.EQ) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
-//                .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
-//
-//        BigDecimal income = result.stream().filter(f -> f.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.INC) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
-//                .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
-//
-//        BigDecimal cgs = result.stream().filter(f -> f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.CGS) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
-//                .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
-
-//        BigDecimal oe = result.stream().filter(f -> (f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OE) == 0
-//                        || f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.PE) == 0
-//                        ||f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.UE) == 0
-//                )
-//                        && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
-//                .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal gofe = result.stream().filter(f -> f.getAccount().getSystemId() != null && f.getAccount().getSystemId().compareTo(SystemAccounts.GOFE.getId()) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
+        BigDecimal lofe = result.stream().filter(lofeFilter())//
                 .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal lofe = result.stream().filter(f -> f.getAccount().getSystemId() != null && f.getAccount().getSystemId().compareTo(SystemAccounts.LOFE.getId()) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))//
+
+        BigDecimal otherAssets = result.stream().filter(otherAssetsFilter())//
+                .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal liabilities = result.stream().filter(liabilitiesFilter())//
                 .map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
 
 
 //        BigDecimal sum = currentAssets.add(otherAssets).subtract(liabilities);
 //        BigDecimal subtract = eq.add(income).subtract(cgs).subtract(oe);
-        BigDecimal curAssets = currentAssets.subtract(gofe).add(lofe);
-        BigDecimal assets = curAssets.add(otherAssets);
+//         otherAssets = otherAssets.subtract(gofe).add(lofe);
+        BigDecimal assets = currentAssets.add(otherAssets);
         BigDecimal sum = assets.subtract(liabilities);
 
 
-        cashAndBank.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(curAssets));
+        cashAndBank.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(currentAssets));
         toBeReceived.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(otherAssets));
         toBePaidOut.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(liabilities));
         total.setText(getSelectedCurrency() + " " + Constants.CURRENCY_FORMAT.format(sum));
     }
 
+    private Function<Map.Entry<ChartOfAccounts, List<JournalsEntry>>, Item> map(String caption) {
+        return f -> {
+            ChartOfAccounts key = f.getKey();
+            List<JournalsEntry> value = f.getValue();
+            BigDecimal reduce = value.stream().map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
+            return new Item("Total " + (StringUtils.isBlank(caption) ? key.getCaption() : caption), reduce, key, value);
+        };
+    }
+
+    private Predicate<JournalsEntry> otherAssetsFilter() {
+        return f -> f.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.ASSETS) == 0 && !(
+
+                f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.CAB) == 0 ||//
+                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.INV) == 0 ||//
+                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.PPE) == 0 ||//
+                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.DA) == 0 ||//
+                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.VPVC) == 0 ||//
+                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OSTA) == 0 ||//
+                        f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.OLTA) == 0 //
+        )
+
+                && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency());
+    }
+
+    private Predicate<JournalsEntry> liabilitiesFilter() {
+        return f -> f.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.LCC) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency());
+    }
+
+    private Predicate<JournalsEntry> eqFilter() {
+        return f -> f.getAccount().getAccountType().getType().compareTo(ChartOfAccounts.EQ) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency());
+    }
+
+    private Predicate<JournalsEntry> lofeFilter() {
+        return f -> isLofe(f);
+    }
+
+    private boolean isLofe(JournalsEntry f) {
+        return f.getAccount().getSystemId() != null && f.getAccount().getSystemId().compareTo(SystemAccounts.LOFE.getId()) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency());
+    }
+
+    private Predicate<JournalsEntry> gofeFilter() {
+        return f -> isGofe(f);
+    }
+
+    private boolean isGofe(JournalsEntry f) {
+        return f.getAccount().getSystemId() != null && f.getAccount().getSystemId().compareTo(SystemAccounts.GOFE.getId()) == 0 && f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency());
+    }
+
     private Predicate<JournalsEntry> currentAssetsFilter() {
-        return f -> (f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.CAB) == 0 ||//
+        return f -> isCurrentAsset(f);
+    }
+
+    private boolean isCurrentAsset(JournalsEntry f) {
+        return (f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.CAB) == 0 ||//
                 f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.INV) == 0 ||//
                 f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.PPE) == 0 ||//
                 f.getAccount().getAccountType().getCode().compareTo(ChartOfAccountTypes.DA) == 0 ||//
@@ -392,19 +453,20 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
 //        vo.setChartOfAccounts(journalsEntry.getChartOfAccounts());
 //        PagingResult<JournalsEntry> list =
         List<JournalsEntry> result = null;
+        List<JournalsEntry> result1 = journalsEntry.values;
         if (journalsEntry.getChartOfAccounts() != null) {
-            result = this.result.stream().filter(g -> g.getAccount().getAccountType().getType().compareTo(journalsEntry.getChartOfAccounts()) == 0).toList();
+            result = result1.stream().filter(g -> g.getAccount().getAccountType().getType().compareTo(journalsEntry.getChartOfAccounts()) == 0).toList();
             Map<ChartOfAccountTypes, List<JournalsEntry>> collect = result.stream().filter(f -> f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency())).collect(Collectors.groupingBy(f -> f.getAccount().getAccountType().getCode()));
             List<Item> items = collect.entrySet().stream().map(f -> {
                 ChartOfAccountTypes key = f.getKey();
                 List<JournalsEntry> value = f.getValue();
                 BigDecimal reduce = value.stream().map(getJournalsEntryBigDecimalFunction()).reduce(BigDecimal.ZERO, BigDecimal::add);
-                return new Item("Total " + key.getCaption(), reduce, key);
+                return new Item("Total " + key.getCaption(), reduce, key, value);
             }).toList();
             second.addAll(items);
             return items;
         } else {
-            result = this.result.stream().filter(g -> g.getAccount().getAccountType().getCode().compareTo(journalsEntry.getChartOfAccountTypes()) == 0).toList();
+            result = result1.stream().filter(g -> g.getAccount().getAccountType().getCode().compareTo(journalsEntry.getChartOfAccountTypes()) == 0).toList();
             Map<Account, List<JournalsEntry>> collect = result.stream()/*.filter(f -> f.getCurrencyFrom().getCode().equalsIgnoreCase(getSelectedCurrency()))*/.collect(Collectors.groupingBy(JournalsEntry::getAccount));
             List<Item> items = collect.entrySet().stream().map(f -> {
                 Account key = f.getKey();
@@ -426,10 +488,11 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
         protected ChartOfAccountTypes chartOfAccountTypes;
         private List<JournalsEntry> values;
 
-        public Item(String caption, BigDecimal amount, ChartOfAccountTypes chartOfAccountTypes) {
+        public Item(String caption, BigDecimal amount, ChartOfAccountTypes chartOfAccountTypes, List<JournalsEntry> values) {
             this.caption = caption;
             this.amount = amount;
             this.chartOfAccountTypes = chartOfAccountTypes;
+            this.values = values;
         }
 
         public Item(String caption, BigDecimal amount, List<JournalsEntry> values) {
@@ -438,10 +501,11 @@ public class BalanceSheetView extends LitTemplate implements BeforeEnterObserver
             this.values = values;
         }
 
-        public Item(String caption, BigDecimal amount, ChartOfAccounts chartOfAccounts) {
+        public Item(String caption, BigDecimal amount, ChartOfAccounts chartOfAccounts, List<JournalsEntry> values) {
             this.caption = caption;
             this.amount = amount;
             this.chartOfAccounts = chartOfAccounts;
+            this.values = values;
         }
 
         public ChartOfAccounts getChartOfAccounts() {

@@ -14,17 +14,18 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.router.*;
 import sr.we.ContextProvider;
-import sr.we.data.controller.LoanService;
 import sr.we.data.controller.UserAccessService;
 import sr.we.demo.about.AboutView;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Loan;
 import sr.we.shekelflowcore.entity.Role;
+import sr.we.shekelflowcore.entity.helper.vo.LoanVO;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.LoanPrivilege;
+import sr.we.ui.components.GridUtil;
+import sr.we.ui.components.MySearchField;
 import sr.we.ui.components.UIUtil;
 import sr.we.ui.views.MainLayout;
-import sr.we.ui.views.finance.loans.tabs.LTabDashboard;
 
 import javax.annotation.security.RolesAllowed;
 import java.util.Optional;
@@ -48,6 +49,9 @@ public class LoanView extends LitTemplate implements AfterNavigationObserver, Ha
     @Id("add-loan-btn")
     private Button addLoanBtn;
     private boolean hasInsertAccess;
+    @Id("filter-field")
+    private MySearchField filterField;
+    private LoanVO filter;
 
 
     /**
@@ -56,9 +60,11 @@ public class LoanView extends LitTemplate implements AfterNavigationObserver, Ha
     public LoanView() {
         // You can initialise any data required for the connected UI components here.
 
-        grid.setAllRowsVisible(true);
+        grid.addSortListener(f -> GridUtil.onComponentEvent(f,filter));
+        grid.setHeightFull();
+        grid.setClassName("resonate");
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
-        grid.addComponentColumn(person -> createCard(person, business, true)).setResizable(true);
+        grid.addComponentColumn(person -> createCard(person, business, true)).setSortable(true).setResizable(true).setHeader("Loan structures").setId("l.name");
         grid.setSelectionMode(Grid.SelectionMode.SINGLE);
 //        grid.addSelectionListener(get -> {
 //            Optional<Loan> firstSelectedItem = get.getFirstSelectedItem();
@@ -73,6 +79,7 @@ public class LoanView extends LitTemplate implements AfterNavigationObserver, Ha
 //            }
 //        });
         loansGridLayout.add(grid);
+        loansGridLayout.setHeightFull();
 
         addLoanBtn.addClickListener(f -> {
             if (hasInsertAccess) {
@@ -120,8 +127,9 @@ public class LoanView extends LitTemplate implements AfterNavigationObserver, Ha
 
     @Override
     public void afterNavigation(AfterNavigationEvent event) {
-        LoanService loanService = ContextProvider.getBean(LoanService.class);
-        grid.setItems(loanService.list(AuthenticatedUser.token(), Long.valueOf(business)).getResult());
+        grid.getDataProvider().refreshAll();
+//        LoanService loanService = ContextProvider.getBean(LoanService.class);
+//        grid.setItems(loanService.list(AuthenticatedUser.token(), Long.valueOf(business)).getResult());
 
     }
 
@@ -133,6 +141,7 @@ public class LoanView extends LitTemplate implements AfterNavigationObserver, Ha
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
+        filter = new LoanVO();
         UserAccessService userAccesService = ContextProvider.getBean(UserAccessService.class);
         boolean hasAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new LoanPrivilege(), Privileges.READ);
         if (!hasAccess) {
@@ -142,7 +151,8 @@ public class LoanView extends LitTemplate implements AfterNavigationObserver, Ha
         if (business1.isPresent()) {
             business = business1.get();
         }
-
+        filter.setBusiness(Long.valueOf(business));
+        grid.setItems(LoanDataProvider.fetch(filter), LoanDataProvider.count(filter));
         hasInsertAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new LoanPrivilege(), Privileges.INSERT);
         if (!hasInsertAccess) {
             addLoanBtn.setVisible(false);

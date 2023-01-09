@@ -26,6 +26,7 @@ import sr.we.ui.views.finance.loans.LoansView;
 import javax.annotation.security.RolesAllowed;
 import java.util.Optional;
 
+@Deprecated
 @Route(value = "settings", layout = LoansView.class)
 @RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
 //@PreserveOnRefresh

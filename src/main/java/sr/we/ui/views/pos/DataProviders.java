@@ -4,12 +4,14 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
+import org.apache.commons.lang3.StringUtils;
 import sr.we.ContextProvider;
 import sr.we.data.controller.ItemsService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Items;
 import sr.we.shekelflowcore.entity.helper.vo.PageRequestImpl;
 import sr.we.shekelflowcore.entity.helper.vo.ServicesVO;
+import sr.we.shekelflowcore.entity.helper.vo.SortImpl;
 import sr.we.shekelflowcore.entity.helper.vo.SuperVO;
 
 import java.util.ArrayList;
@@ -39,29 +41,25 @@ public class DataProviders extends Div {
         return dataProvider;
     }
 
-    public static DataProvider<Items, Void> getItems(String business) {
+    public static DataProvider<Items, Void> getItems(ServicesVO vo) {
         DataProvider<Items, Void> dataProvider;
-        dataProvider = DataProvider.fromFilteringCallbacks(getItemsVoidFetchCallback(business), getItemsVoidCountCallback(business));
+        dataProvider = DataProvider.fromFilteringCallbacks(getItemsVoidFetchCallback(vo), getItemsVoidCountCallback(vo));
         return dataProvider;
     }
 
-    public static CallbackDataProvider.CountCallback<Items, Void> getItemsVoidCountCallback(String business) {
+    public static CallbackDataProvider.CountCallback<Items, Void> getItemsVoidCountCallback(ServicesVO vo) {
         return query -> {
             ItemsService productService = ContextProvider.getBean(ItemsService.class);
-            ServicesVO vo = new ServicesVO();
-            vo.setBusiness(Long.valueOf(business));
             filterVoidCount(vo);
-            return productService.list(AuthenticatedUser.token(), vo).getCount().intValue();
+            return productService.list(StringUtils.isBlank(vo.getToken())? AuthenticatedUser.token() : vo.getToken(), vo).getCount().intValue();
         };
     }
 
-    public static CallbackDataProvider.FetchCallback<Items, Void> getItemsVoidFetchCallback(String business) {
+    public static CallbackDataProvider.FetchCallback<Items, Void> getItemsVoidFetchCallback(ServicesVO vo) {
         return query -> {
-            ServicesVO vo = new ServicesVO();
-            vo.setBusiness(Long.valueOf(business));
             filterVoid(query, vo);
             ItemsService productService = ContextProvider.getBean(ItemsService.class);
-            List<Items> list1 = productService.list(AuthenticatedUser.token(), vo).getResult();
+            List<Items> list1 = productService.list(StringUtils.isBlank(vo.getToken())? AuthenticatedUser.token() : vo.getToken(), vo).getResult();
             return list1.stream();
         };
     }
@@ -87,8 +85,8 @@ public class DataProviders extends Div {
         vo.setPageRequest(pageRequest);
     }
 
-    private static void filterVoid(Query<?, Void> query, SuperVO vo) {
-        PageRequestImpl pageRequest = PageRequestImpl.of(query.getPage(), query.getPageSize());
+    private static void filterVoid(Query<?, Void> fetch, SuperVO vo) {
+        PageRequestImpl pageRequest = vo.getSort() == null ? PageRequestImpl.of(fetch.getPage(), fetch.getPageSize()) : PageRequestImpl.of(fetch.getPage(), fetch.getPageSize(), SortImpl.by(vo.getSort()));
         vo.setPageRequest(pageRequest);
     }
 

@@ -28,14 +28,15 @@ public class LoanService extends MyController {
         });
     }
 
-    public PagingResult<Loan> list(String accessToken, Long businessId) {
+    public PagingResult<Loan> list(String accessToken, LoanVO vo) {
         RestTemplate restTemplate = new RestTemplate();
+        String body = new GsonBuilder().create().toJson(vo);
         String fooResourceUrl
-                = configProperties.getRest() + Routes.LOAN_LIST + "?businessId=" + businessId;
-        HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
+                = configProperties.getRest() + Routes.LOAN_LIST;
+        HttpEntity<String> httpEntity = getAuthHttpEntity(body,accessToken);
 
         return encapsulate(() -> {
-            ResponseEntity<String> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, String.class);
+            ResponseEntity<String> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.POST, httpEntity, String.class);
             return transform(exchange,new TypeToken<PagingResult<Loan>>(){}.getType());
         });
     }

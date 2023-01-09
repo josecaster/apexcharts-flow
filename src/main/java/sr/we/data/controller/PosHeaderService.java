@@ -30,18 +30,21 @@ public class PosHeaderService extends MyController {
         });
     }
 
-    public PagingResult<PosHeader> list(Long businessId, LocalDate targetDate, String accessToken) {
+    public PagingResult<PosHeader> list(PosHeaderVO vo, String accessToken) {
         RestTemplate restTemplate = new RestTemplate();
         String fooResourceUrl
                 = configProperties.getRest() + Routes.POS_HEADER_LIST;
-        HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
+        String body = new GsonBuilder()
+                .registerTypeAdapter(LocalDate.class, new LocalDateAdapter()).create().toJson(vo);
+        HttpEntity<String> httpEntity = getAuthHttpEntity(body,accessToken);
 
         return encapsulate(() -> {
-            String url = fooResourceUrl + "?businessId=" + businessId  ;
-            if(targetDate != null){
-                url +="&targetDate=" + targetDate;
-            }
-            ResponseEntity<String> exchange = restTemplate.exchange(url, HttpMethod.GET, httpEntity, String.class);
+            String url = fooResourceUrl ;
+//                    + "?businessId=" + businessId  ;
+//            if(targetDate != null){
+//                url +="&targetDate=" + targetDate;
+//            }
+            ResponseEntity<String> exchange = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
             return transform(exchange,new TypeToken<PagingResult<PosHeader>>(){}.getType());
         });
     }

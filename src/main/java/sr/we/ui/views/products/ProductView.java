@@ -21,6 +21,7 @@ import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.LoanPrivilege;
 import sr.we.shekelflowcore.security.privileges.ProductsPrivilege;
+import sr.we.ui.components.MySearchField;
 import sr.we.ui.components.UIUtil;
 import sr.we.ui.views.MainLayout;
 
@@ -44,7 +45,7 @@ public class ProductView extends LitTemplate /*implements BeforeEnterObserver*/ 
     @Id("product-grid-layout")
     private Div productGridLayout;
     @Id("filter-field")
-    private TextField filterField;
+    private MySearchField filterField;
     @Id("export-btn")
     private Button exportBtn;
     @Id("import-btn")

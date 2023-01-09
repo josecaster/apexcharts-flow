@@ -1,13 +1,14 @@
 import { LitElement, html, css, customElement } from 'lit-element';
 import '@polymer/iron-icon/iron-icon.js';
-import '@vaadin/button/src/vaadin-button.js';
 import '@vaadin/vertical-layout/src/vaadin-vertical-layout.js';
-import '@vaadin/form-layout/src/vaadin-form-layout.js';
-import '@vaadin/select/src/vaadin-select.js';
-import '@vaadin/date-picker/src/vaadin-date-picker.js';
-import '@vaadin/horizontal-layout/src/vaadin-horizontal-layout.js';
 import '@vaadin/tabs/src/vaadin-tabs.js';
 import '@vaadin/tabs/src/vaadin-tab.js';
+import '@vaadin/form-layout/src/vaadin-form-item.js';
+import '@vaadin/form-layout/src/vaadin-form-layout.js';
+import '@vaadin/select/src/vaadin-select.js';
+import '@vaadin/horizontal-layout/src/vaadin-horizontal-layout.js';
+import '@vaadin/date-picker/src/vaadin-date-picker.js';
+import '@vaadin/button/src/vaadin-button.js';
 
 @customElement('profit-loss-view')
 export class ProfitLossView extends LitElement {
@@ -30,20 +31,40 @@ export class ProfitLossView extends LitElement {
    </vaadin-button>
   </vaadin-horizontal-layout>
   <vaadin-vertical-layout theme="spacing" class="my-cart-base" style="align-self: stretch; padding: var(--lumo-space-m);">
-   <vaadin-form-layout>
-    <vaadin-horizontal-layout theme="spacing" style="align-items: flex-end;">
-     <vaadin-select value="Item one" label="As of" id="as-of-date-select"></vaadin-select>
-     <vaadin-date-picker id="as-of-date-picker"></vaadin-date-picker>
-    </vaadin-horizontal-layout>
-    <vaadin-horizontal-layout theme="spacing" style="align-items: flex-end;">
-     <vaadin-select value="Item one" label="Report Type" id="report-type-select"></vaadin-select>
-     <vaadin-button theme="primary" style="margin-left:auto; border: solid 1px; border-radius:100px;" tabindex="0" id="update-report-btn">
+   <vaadin-form-layout id="vaadinFormLayout">
+    <vaadin-form-layout colspan="3">
+     <vaadin-form-item colspan="2">
+      <label slot="label">Date range</label>
+      <vaadin-horizontal-layout theme="spacing">
+       <vaadin-select value="Item one" id="as-of-date-select" colspan=""></vaadin-select>
+       <vaadin-date-picker id="start-from-date-picker"></vaadin-date-picker>
+       <vaadin-date-picker id="as-of-date-picker"></vaadin-date-picker>
+      </vaadin-horizontal-layout>
+     </vaadin-form-item>
+     <vaadin-form-item id="compare-item" colspan="2">
+      <label slot="label">Compare</label>
+      <vaadin-horizontal-layout theme="spacing">
+       <vaadin-select value="Item one" id="compare-date-select"></vaadin-select>
+       <vaadin-date-picker id="compare-start-from-date-picker"></vaadin-date-picker>
+       <vaadin-date-picker id="compare-as-of-date-picker"></vaadin-date-picker>
+      </vaadin-horizontal-layout>
+     </vaadin-form-item>
+     <vaadin-form-item>
+      <label slot="label">Report Type</label>
+      <vaadin-select value="Item one" id="report-type-select"></vaadin-select>
+     </vaadin-form-item>
+    </vaadin-form-layout>
+    <vaadin-vertical-layout style="padding-left: var(--lumo-space-xs);" colspan="1">
+     <vaadin-button theme="primary" style="border: solid 1px; border-radius:100px; align-self: stretch;" tabindex="0" id="update-report-btn" colspan="1">
        Update Report 
      </vaadin-button>
-    </vaadin-horizontal-layout>
+     <vaadin-button id="compare-btn" style="align-self: stretch;" tabindex="0" theme="primary">
+       Compare date range 
+     </vaadin-button>
+    </vaadin-vertical-layout>
    </vaadin-form-layout>
   </vaadin-vertical-layout>
-  <vaadin-horizontal-layout theme="spacing" style="align-self: center; align-items: flex-end; justify-content: center;">
+  <vaadin-horizontal-layout theme="spacing" style="align-self: center; align-items: flex-end; justify-content: center;" id="single-summary">
    <vaadin-vertical-layout style="align-self: flex-end; align-items: center; justify-content: center; font-weight:bold;">
     <span>Income</span>
     <h2 style="margin: 0px;" id="income-lbl">$171,393.55</h2>

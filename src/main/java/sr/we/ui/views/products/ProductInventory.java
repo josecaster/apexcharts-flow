@@ -29,6 +29,7 @@ import java.util.Optional;
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
+@Deprecated
 @Tag("product-inventory")
 @JsModule("./src/views/products/product-inventory.ts")
 public class ProductInventory extends LitTemplate {

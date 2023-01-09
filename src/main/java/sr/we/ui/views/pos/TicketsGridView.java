@@ -6,20 +6,19 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
 import sr.we.ContextProvider;
 import sr.we.data.controller.BusinessService;
-import sr.we.data.controller.PosHeaderService;
 import sr.we.data.controller.UserAccessService;
 import sr.we.demo.about.AboutView;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Business;
-import sr.we.shekelflowcore.entity.PosHeader;
 import sr.we.shekelflowcore.entity.Role;
+import sr.we.shekelflowcore.entity.helper.vo.PosHeaderVO;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.POSPrivilege;
 import sr.we.ui.components.BreadCrumb;
+import sr.we.ui.components.GridUtil;
 import sr.we.ui.views.MainLayout;
 
 import javax.annotation.security.RolesAllowed;
-import java.util.List;
 import java.util.Optional;
 
 @BreadCrumb(titleKey = "sr.we.tickets")
@@ -33,6 +32,9 @@ public class TicketsGridView extends TicketsView implements BeforeEnterObserver 
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
+        filter = new PosHeaderVO();
+        filter.setToken(AuthenticatedUser.token());
+        grid.addSortListener(f -> GridUtil.onComponentEvent(f,filter));
         UserAccessService userAccesService = ContextProvider.getBean(UserAccessService.class);
         boolean hasAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new POSPrivilege(), Privileges.READ);
         if (!hasAccess) {
@@ -42,14 +44,16 @@ public class TicketsGridView extends TicketsView implements BeforeEnterObserver 
         business1.ifPresent(s -> business = s);
         BusinessService businessService = ContextProvider.getBean(BusinessService.class);
         business2 = businessService.get(Long.valueOf(business), AuthenticatedUser.token());
-
+        filter.setBusinessId(business2.getId());
+        grid.setItems(TicketsDataProvider.fetch(filter), TicketsDataProvider.count(filter));
+        grid.setHeightFull();
         refresh();
     }
+    private PosHeaderVO filter;
 
     private void refresh() {
-        PosHeaderService posHeaderService = ContextProvider.getBean(PosHeaderService.class);
-        List<PosHeader> list = posHeaderService.list(business2.getId(), null, AuthenticatedUser.token()).getResult();
-        setTickets(list, business2, onSave != null ? onSave : () -> {
+
+        setTickets(null, business2, onSave != null ? onSave : () -> {
             refresh();
             return null;
         }, onRefresh != null ? onRefresh : () -> {

@@ -14,6 +14,7 @@ import sr.we.demo.about.AboutView;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Customer;
 import sr.we.shekelflowcore.entity.Role;
+import sr.we.shekelflowcore.entity.helper.vo.CustomerVO;
 import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.CustomerPrivilege;
@@ -25,6 +26,7 @@ import javax.annotation.security.RolesAllowed;
 import java.util.List;
 import java.util.Optional;
 
+@Deprecated
 @Route(value = "customers", layout = LoansView.class)
 @RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
 //@PreserveOnRefresh
@@ -86,7 +88,8 @@ public class LTabCustomers extends VerticalLayout implements AfterNavigationObse
     public void afterNavigation(AfterNavigationEvent event) {
         CustomerService CustomerService = ContextProvider.getBean(CustomerService.class);
         String token = AuthenticatedUser.token();
-        List<Customer> customer = CustomerService.list(Long.valueOf(business), token).getResult();
+        CustomerVO customerVO = new CustomerVO();customerVO.setBusiness(Long.valueOf(business));
+        List<Customer> customer = CustomerService.list(customerVO, token).getResult();
         grid.setItems(customer);
     }
 
