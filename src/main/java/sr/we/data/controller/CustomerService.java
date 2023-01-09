@@ -36,14 +36,15 @@ public class CustomerService extends MyController{
         });
     }
 
-    public PagingResult<Customer> list(Long businessId,String accessToken){
+    public PagingResult<Customer> list(CustomerVO vo ,String accessToken){
+        String body = new GsonBuilder().create().toJson(vo);
         RestTemplate restTemplate = new RestTemplate();
         String fooResourceUrl
                 = configProperties.getRest()+ Routes.CUSTOMER_LIST;
-        HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
+        HttpEntity<String> httpEntity = getAuthHttpEntity(body,accessToken);
 
         return encapsulate(() -> {
-            ResponseEntity<String> exchange = restTemplate.exchange(fooResourceUrl+"?businessId="+businessId, HttpMethod.GET, httpEntity, String.class);
+            ResponseEntity<String> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.POST, httpEntity, String.class);
             String content = exchange.getBody();
             Type collectionType = new TypeToken<PagingResult<Customer>>(){}.getType();
             PagingResult<Customer> myJson = new GsonBuilder().registerTypeAdapter(LocalDate.class, new LocalDateAdapter()).registerTypeAdapter(byte[].class, new ByteArrayAdapter())

@@ -7,6 +7,7 @@ import '@vaadin/tabs/src/vaadin-tabs.js';
 import '@vaadin/tabs/src/vaadin-tab.js';
 import '@polymer/iron-icon/iron-icon.js';
 import '@vaadin/text-field/src/vaadin-text-field.js';
+import '../components/my-search-field';
 
 @customElement('service-view')
 export class ServiceView extends LitElement {
@@ -33,10 +34,10 @@ export class ServiceView extends LitElement {
     Add item 
   </vaadin-button>
  </vaadin-horizontal-layout>
- <vaadin-vertical-layout theme="spacing" style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin: var(--lumo-space-s); margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m); align-self: stretch;" class="shadow-s">
+ <vaadin-vertical-layout theme="spacing" style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin: var(--lumo-space-s); margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m); align-self: stretch; height: 100%;" class="shadow-s">
   <vaadin-tabs style="align-self: stretch;" orientation="horizontal" selected="0">
    <vaadin-tab selected>
-    All items
+     All items 
    </vaadin-tab>
    <vaadin-tab>
      Active 
@@ -45,10 +46,8 @@ export class ServiceView extends LitElement {
      Inactive 
    </vaadin-tab>
   </vaadin-tabs>
-  <vaadin-text-field placeholder="Filter items" id="filter-field" style="align-self: stretch;" type="text">
-   <iron-icon icon="lumo:search" slot="prefix"></iron-icon>
-  </vaadin-text-field>
-  <div id="product-grid-layout" style="align-self: stretch;"></div>
+  <my-search-field placeholder="Filter items" id="filter-field" style="align-self: stretch;" type="text"></my-search-field>
+  <div id="product-grid-layout" style="align-self: stretch; height: 100%;"></div>
  </vaadin-vertical-layout>
 </vaadin-vertical-layout>
 `;

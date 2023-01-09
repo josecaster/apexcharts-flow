@@ -7,6 +7,7 @@ import '@vaadin/tabs/src/vaadin-tabs.js';
 import '@vaadin/tabs/src/vaadin-tab.js';
 import '@polymer/iron-icon/iron-icon.js';
 import '@vaadin/text-field/src/vaadin-text-field.js';
+import '../../components/my-search-field';
 
 @customElement('loan-view')
 export class LoanView extends LitElement {
@@ -31,10 +32,10 @@ export class LoanView extends LitElement {
     Import 
   </vaadin-button>
   <vaadin-button style="align-self: center;" id="add-loan-btn" tabindex="0" theme="primary">
-   Create loan
+    Create loan 
   </vaadin-button>
  </vaadin-horizontal-layout>
- <vaadin-vertical-layout theme="spacing" style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin: var(--lumo-space-s); margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m); align-self: stretch;">
+ <vaadin-vertical-layout theme="spacing" style="padding-left: var(--lumo-space-m); border-radius:var(--lumo-border-radius); background:white; margin: var(--lumo-space-s); margin-top: var(--lumo-space-m); margin-right: var(--lumo-space-s); margin-bottom: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding: var(--lumo-space-m); align-self: stretch; height: 100%;" class="shadow-s">
   <vaadin-tabs style="align-self: stretch;" orientation="horizontal" selected="0">
    <vaadin-tab selected>
      All 
@@ -49,10 +50,8 @@ export class LoanView extends LitElement {
      Archived 
    </vaadin-tab>
   </vaadin-tabs>
-  <vaadin-text-field placeholder="Filter loans" id="filter-field" style="align-self: stretch;" type="text">
-   <iron-icon icon="lumo:search" slot="prefix"></iron-icon>
-  </vaadin-text-field>
-  <div id="loans-grid-layout" style="align-self: stretch;"></div>
+  <my-search-field placeholder="Filter loans" id="filter-field" style="align-self: stretch;" type="text"></my-search-field>
+  <div id="loans-grid-layout" style="align-self: stretch; height: 100%;"></div>
  </vaadin-vertical-layout>
 </vaadin-vertical-layout>
 `;

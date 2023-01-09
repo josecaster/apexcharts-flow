@@ -69,6 +69,9 @@ public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
                 .requestMatchers(SecurityConfiguration::isFrameworkInternalRequest).permitAll()
                 .and().authorizeRequests().antMatchers("/forgot-password/**").permitAll()
                 .and().authorizeRequests().antMatchers("/invoice/**").permitAll()
+                .and().authorizeRequests().antMatchers("/myimages").permitAll()
+                .and().authorizeRequests().antMatchers("myimages").permitAll()
+                .and().authorizeRequests().antMatchers("/myimages/**").permitAll()
                 .and().authorizeRequests().antMatchers("/").permitAll()
 
                 // Allow all requests by logged-in users.
@@ -105,6 +108,7 @@ public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
                 "/manifest.webmanifest",
                 "/sw.js",
                 "/error",
+                "/myimages",
                 "/offline.html",
                 "/offline-stub.html",
                 "/my-lumo.html",

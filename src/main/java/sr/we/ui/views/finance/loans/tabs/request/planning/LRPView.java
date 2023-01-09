@@ -25,6 +25,7 @@ import java.util.Comparator;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Deprecated
 public class LRPView extends VerticalLayout {
 
     private final LoanRequestPlan loanRequestPlan;

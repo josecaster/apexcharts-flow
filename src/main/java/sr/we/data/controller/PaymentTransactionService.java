@@ -20,13 +20,17 @@ import java.time.LocalDateTime;
 @Controller
 public class PaymentTransactionService extends MyController {
 
-    public PagingResult<PaymentTransaction> list(String accessToken, Long businessId) {
+    public PagingResult<PaymentTransaction> list(String accessToken, PaymentTransactionVO vo) {
+        String body = new GsonBuilder()
+                .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter()).
+                create().toJson(vo);
         RestTemplate restTemplate = new RestTemplate();
-        String fooResourceUrl = configProperties.getRest() + Routes.PAYMENT_TRANSACTION_LIST + "?businessId=" + businessId;
-        HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
+        String fooResourceUrl = configProperties.getRest() + Routes.PAYMENT_TRANSACTION_LIST;
+        HttpEntity<String> httpEntity = getAuthHttpEntity(body,accessToken);
 
         return encapsulate(() -> {
-            ResponseEntity<String> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, String.class);
+            ResponseEntity<String> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.POST, httpEntity, String.class);
             return transform(exchange, new TypeToken<PagingResult<PaymentTransaction>>() {
             }.getType());
         });

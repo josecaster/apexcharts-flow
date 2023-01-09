@@ -1,22 +1,19 @@
 package sr.we;
 
 import com.vaadin.flow.server.*;
+import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.DispatcherServlet;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebInitParam;
 import javax.servlet.annotation.WebServlet;
 
-/*@WebServlet(urlPatterns = "/*", name = "app", asyncSupported = true, loadOnStartup = 1,
-        initParams = {
-                 })*/
-/*@WebServlet(urlPatterns = "/*", name = "slot", asyncSupported = true, loadOnStartup = 1, initParams = {//
-        *//*@WebInitParam(name = InitParameters.I18N_PROVIDER, value = "sr.we.TranslationProvider"),//*//*
-        @WebInitParam(name = InitParameters.SERVLET_PARAMETER_HEARTBEAT_INTERVAL, value = "10"),//
-        @WebInitParam(name = InitParameters.SERVLET_PARAMETER_CLOSE_IDLE_SESSIONS, value = "true")})*/
-public class ApplicationServlet /*extends VaadinServlet implements SessionInitListener, SessionDestroyListener */{
-/*
-    public ApplicationServlet() {
+//@Component("vaadinServlet")
+@WebServlet(urlPatterns = "/VAADIN/*", name = "MyUIServlet", asyncSupported = true)
+//@VaadinServletConfiguration(ui = VaadinUI.class, productionMode = false)
+public class ServletMain extends VaadinServlet implements SessionInitListener, SessionDestroyListener {
+
+    public ServletMain() {
         System.out.println("Here");
     }
 
@@ -25,6 +22,7 @@ public class ApplicationServlet /*extends VaadinServlet implements SessionInitLi
         super.servletInitialized();
         getService().addSessionInitListener(this);
         getService().addSessionDestroyListener(this);
+
     }
 
     @Override
@@ -40,5 +38,5 @@ public class ApplicationServlet /*extends VaadinServlet implements SessionInitLi
     @Override
     public void sessionInit(SessionInitEvent sessionInitEvent) throws ServiceException {
 
-    }*/
+    }
 }

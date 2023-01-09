@@ -4,6 +4,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -58,6 +59,13 @@ public class CustomerButton extends Button {
 
             customerLayout.add(lastNameFld,firstNameFld, mobileNumberFld, emailFld);
             Dialog dialog1 = new MyDialog();
+            dialog1.setCloseOnOutsideClick(false);
+            dialog1.setCloseOnEsc(false);
+            Button closeButton = new Button(new Icon("lumo", "cross"), (e) -> {
+                dialog1.close();
+            });
+            closeButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+            dialog1.getHeader().add(closeButton);
             dialog1.setHeaderTitle("Add new customer");
             dialog1.add(customerLayout);
             Button cancel = new Button("Cancel", (e) -> dialog1.close());
@@ -101,18 +109,28 @@ public class CustomerButton extends Button {
             existingCustomersCmb.setWidthFull();
             existingCustomersCmb.setPlaceholder("Choose existing customer");
             existingCustomersCmb.load(businessId);
-            Dialog dialog1 = new MyDialog();
+            Dialog dialog1 = new Dialog();
+            dialog1.setCloseOnOutsideClick(false);
+            dialog1.setCloseOnEsc(false);
+            Button closeButton = new Button(new Icon("lumo", "cross"), (e) -> {
+                dialog1.close();
+            });
+            closeButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+            dialog1.getHeader().add(closeButton);
             dialog1.setHeaderTitle("Select customer");
             dialog1.add(existingCustomersCmb);
-            Button cancel = new Button("Cancel", (e) -> dialog1.close());
-            cancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-            dialog1.getFooter().add(cancel);
-            Button save = new Button("Save");
-            save.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
-            dialog1.getFooter().add(save);
+//            Button cancel = new Button("Cancel", (e) -> dialog1.close());
+//            cancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+//            dialog1.getFooter().add(cancel);
+//            Button save = new Button("Save");
+//            save.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
+//            dialog1.getFooter().add(save);
             dialog1.open();
 
-            existingCustomersCmb.addValueChangeListener(f -> setCustomer(f.getValue()));
+            existingCustomersCmb.addValueChangeListener(f -> {
+                setCustomer(f.getValue());
+                dialog1.close();
+            });
         });
     }
 

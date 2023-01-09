@@ -4,7 +4,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.server.AppShellSettings;
-import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.flow.theme.Theme;
@@ -31,11 +30,27 @@ import org.springframework.context.annotation.ComponentScan;
 @Push
 @NpmPackage(value = "line-awesome", version = "1.3.0")
 @EnableConfigurationProperties(ConfigProperties.class)
-@EnableAutoConfiguration
+//@EnableAutoConfiguration
 @ComponentScan
-public class Application extends SpringBootServletInitializer implements AppShellConfigurator, VaadinServiceInitListener {
+public class Application extends SpringBootServletInitializer implements AppShellConfigurator, VaadinServiceInitListener/*, WebApplicationInitializer*/ {
 
     public static final String CUSTOM_BUNDLE_PREFIX = "custom_messages";
+
+    /*@Override
+    public void onStartup(ServletContext servletContext)
+            throws ServletException {
+        AnnotationConfigWebApplicationContext context =
+                new AnnotationConfigWebApplicationContext();
+//        registerConfiguration(context);
+        servletContext.addListener(
+                new ContextLoaderListener(context));
+
+        ServletRegistration.Dynamic registration =
+                servletContext.addServlet("myimages",
+                        new SpringServlet(context, true));
+        registration.setLoadOnStartup(1);
+        registration.addMapping("/myimages");
+    }*/
 
     public static void main(String[] args) {
 

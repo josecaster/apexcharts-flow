@@ -1,5 +1,6 @@
 package sr.we.ui.views.pos;
 
+import com.flowingcode.vaadin.addons.gridexporter.GridExporter;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.button.Button;
@@ -16,20 +17,22 @@ import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
 import sr.we.shekelflowcore.entity.Business;
+import sr.we.shekelflowcore.entity.Items;
 import sr.we.shekelflowcore.entity.PosHeader;
 import sr.we.shekelflowcore.entity.helper.Executable;
+import sr.we.shekelflowcore.entity.helper.vo.PosHeaderVO;
 import sr.we.shekelflowcore.enums.Reference;
 import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.shekelflowcore.settings.util.DateUtil;
-import sr.we.ui.components.NotYetChange;
-import sr.we.ui.components.NotYetClick;
-import sr.we.ui.components.UIUtil;
+import sr.we.ui.components.*;
 import sr.we.ui.views.LineAwesomeIcon;
 import sr.we.ui.views.finance.transactions.TransactionDialog;
 import sr.we.ui.views.finance.transactions.TransactionsCmb;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.Calendar;
 import java.util.Collection;
 
 /**
@@ -42,7 +45,7 @@ import java.util.Collection;
 @JsModule("./src/views/pos/tickets-view.ts")
 public class TicketsView extends LitTemplate {
 
-    private final Grid<PosHeader> grid;
+    protected final Grid<PosHeader> grid;
     protected Executable onSave, onRefresh;
     @Id("tickets-grid-layout")
     private Div ticketsGridLayout;
@@ -52,7 +55,8 @@ public class TicketsView extends LitTemplate {
     @Id("tv-sub")
     private VerticalLayout tvSub;
     @Id("filter-field")
-    private TextField filterField;
+    private MySearchField filterField;
+
 
     /**
      * Creates a new TicketsView.
@@ -63,23 +67,24 @@ public class TicketsView extends LitTemplate {
         filterField.addValueChangeListener(new NotYetChange<>());
 
         grid = new Grid<>();
+
         ticketsGridLayout.add(grid);
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
-        grid.addColumn(PosHeader::getId).setHeader("ID").setSortable(true);
+        grid.addColumn(PosHeader::getId).setHeader("ID").setSortable(true).setId("ph.id");
 //        grid.addColumn(f -> f.getPosStart() != null ? Constants.SIMPLE_DATE_FORMAT.format(DateUtil.convertToDateViaInstant(f.getPosStart().getTargetDate())) : null).setHeader("Date");
-        grid.addColumn(f -> f.getHeaderSeq() != null ? ("Ticket # " + f.getHeaderSeq()) : null).setHeader("Sequence").setResizable(true).setSortable(true);
-        grid.addColumn(f -> (f.getCurrencyFrom() != null ? f.getCurrencyFrom().getCode() : "") + (f.getPrice() != null ? Constants.CURRENCY_FORMAT.format(f.getPrice()) : "")).setHeader("Amount").setResizable(true).setSortable(true);
-        grid.addColumn(f -> (f.getCurrencyTo() != null ? f.getCurrencyTo().getCode() : "") + (f.getConvertedAmount() != null ? Constants.CURRENCY_FORMAT.format(f.getConvertedAmount()) : "")).setHeader("Converted Amount").setResizable(true).setSortable(true);
-        grid.addColumn(f -> f.getTransactionsAmount() != null ? Constants.CURRENCY_FORMAT.format(f.getTransactionsAmount()) : null).setHeader("Paid amount").setResizable(true).setSortable(true);
-        grid.addColumn(f -> f.getRest() != null ? Constants.CURRENCY_FORMAT.format(f.getRest()) : null).setHeader("Amount due").setResizable(true).setSortable(true);
+        grid.addColumn(f -> f.getHeaderSeq() != null ? ("Ticket # " + f.getHeaderSeq()) : null).setHeader("Sequence").setResizable(true).setSortable(true).setId("ph.headerSeq");
+        grid.addColumn(f -> (f.getCurrencyFrom() != null ? f.getCurrencyFrom().getCode() : "") + (f.getPrice() != null ? Constants.CURRENCY_FORMAT.format(f.getPrice()) : "")).setHeader("Amount").setResizable(true).setSortable(true).setId("ph.price");
+        grid.addColumn(f -> (f.getCurrencyTo() != null ? f.getCurrencyTo().getCode() : "") + (f.getConvertedAmount() != null ? Constants.CURRENCY_FORMAT.format(f.getConvertedAmount()) : "")).setHeader("Converted Amount").setResizable(true).setSortable(true).setId("ph.convertedAmount");
+        grid.addColumn(f -> f.getTransactionsAmount() != null ? Constants.CURRENCY_FORMAT.format(f.getTransactionsAmount()) : null).setHeader("Paid amount").setResizable(true);
+        grid.addColumn(f -> f.getRest() != null ? Constants.CURRENCY_FORMAT.format(f.getRest()) : null).setHeader("Amount due").setResizable(true);
         grid.setDetailsVisibleOnClick(true);
         grid.setItemDetailsRenderer(new ComponentRenderer<>(this::getDetailLayout));
-        grid.addComponentColumn(new ValueProvider<PosHeader, LineAwesomeIcon>() {
+        Grid.Column<PosHeader> record_payment = grid.addComponentColumn(new ValueProvider<PosHeader, LineAwesomeIcon>() {
             @Override
             public LineAwesomeIcon apply(PosHeader posHeader) {
                 if (posHeader.getRest().compareTo(BigDecimal.ZERO) == 0) {
                     LineAwesomeIcon lineAwesomeIcon = new LineAwesomeIcon("la la-check");
-                    lineAwesomeIcon.getElement().getThemeList().add(UIUtil.Badge.PILL+" primary success");
+                    lineAwesomeIcon.getElement().getThemeList().add(UIUtil.Badge.PILL + " primary success");
                     return lineAwesomeIcon;
                 }
                 LineAwesomeIcon lineAwesomeIcon = null;
@@ -89,16 +94,21 @@ public class TicketsView extends LitTemplate {
                     lineAwesomeIcon = new LineAwesomeIcon("la la-chevron-circle-down");
                 }
                 lineAwesomeIcon.addClickListener(f -> {
-                    TransactionDialog transactionDialog = new TransactionDialog(posHeader.getRest(), LocalDate.now(), business.getId(), business.getCurrency(), business.getCurrency(), Reference.POS, posHeader.getId(),posHeader.getCustomerId());
+                    TransactionDialog transactionDialog = new TransactionDialog(posHeader.getRest(), LocalDate.now(), business.getId(), business.getCurrency(), business.getCurrency(), Reference.POS, posHeader.getId(), posHeader.getCustomerId());
                     transactionDialog.setOnSave(onSave);
                     transactionDialog.setRefresh(onRefresh);
                     transactionDialog.open();
                 });
 
-                lineAwesomeIcon.getElement().getThemeList().add(UIUtil.Badge.PILL+" primary error");
+                lineAwesomeIcon.getElement().getThemeList().add(UIUtil.Badge.PILL + " primary error");
                 return lineAwesomeIcon;
             }
         }).setHeader("Record Payment").setResizable(true);
+        GridExporter<PosHeader> exporter = GridExporter.createFor(grid);
+        GridUtil.exportButtons(exporter, grid);
+        exporter.setExportColumn(record_payment,false);
+        exporter.setTitle("Tickets");
+        exporter.setFileName("Tickets_" + new SimpleDateFormat("yyyyddMM").format(Calendar.getInstance().getTime()));
 
     }
 
@@ -123,7 +133,9 @@ public class TicketsView extends LitTemplate {
         this.onRefresh = onRefresh;
         this.onSave = onSave;
         this.business = business;
-        grid.setItems(collection);
+        if(collection != null) {
+            grid.setItems(collection);
+        }
         grid.getDataProvider().refreshAll();
     }
 

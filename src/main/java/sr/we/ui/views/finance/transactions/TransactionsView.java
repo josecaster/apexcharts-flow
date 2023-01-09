@@ -1,5 +1,6 @@
 package sr.we.ui.views.finance.transactions;
 
+import com.flowingcode.vaadin.addons.gridexporter.GridExporter;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -32,10 +33,12 @@ import sr.we.shekelflowcore.exception.PrimaryThrowable;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.TransactionsPrivilege;
 import sr.we.ui.components.BreadCrumb;
+import sr.we.ui.components.MySearchField;
 import sr.we.ui.components.NotYetChange;
 import sr.we.ui.components.NotYetClick;
 import sr.we.ui.views.LineAwesomeIcon;
 import sr.we.ui.views.MainLayout;
+import sr.we.ui.views.customers.CustomerDataProvider;
 
 import javax.annotation.security.RolesAllowed;
 import java.time.LocalDate;
@@ -68,9 +71,11 @@ public class TransactionsView extends LitTemplate implements AfterNavigationObse
     @Id("more-btn")
     private Button moreBtn;
     @Id("filter-field")
-    private TextField filterField;
+    private MySearchField filterField;
     private Business business;
     private Set<PaymentTransaction> paymentTransactions;
+
+
 
     /**
      * Creates a new TransactionsView.
@@ -82,6 +87,8 @@ public class TransactionsView extends LitTemplate implements AfterNavigationObse
 
         transactionGrid = new TransactionGrid();
         transactionsGridLayout.add(transactionGrid);
+        transactionsGridLayout.setHeightFull();
+        transactionGrid.setHeightFull();
 
 
         moreBtn.addClickListener(f -> {
@@ -91,6 +98,8 @@ public class TransactionsView extends LitTemplate implements AfterNavigationObse
                 return null;
             });
             journalentryDialog.open();
+//            transactionGrid.export();
+
         });
         addIncomeBtn.addClickListener(f -> {
             TransactionDialog transactionDialog = new TransactionDialog(null, LocalDate.now(), Long.valueOf(businessString), business.getCurrency(), business.getCurrency(), null, null, TransactionType.DEPOSIT,null);
@@ -130,9 +139,14 @@ public class TransactionsView extends LitTemplate implements AfterNavigationObse
             UI.getCurrent().navigate(AboutView.class);
         }
         Optional<String> business1 = event.getRouteParameters().get("business");
+        PaymentTransactionVO filter = new PaymentTransactionVO();
+        filter.setToken(AuthenticatedUser.token());
+        transactionGrid.setFilter(filter);
         if (business1.isPresent()) {
             businessString = business1.get();
             transactionGrid.setBusiness(businessString);
+            transactionGrid.getFilter().setBusiness(Long.valueOf(businessString));
+            transactionGrid.setItems(TransactionDataProvider.fetch(transactionGrid.getFilter()), TransactionDataProvider.count(transactionGrid.getFilter()));
             BusinessService businessService = ContextProvider.getBean(BusinessService.class);
             business = businessService.get(Long.valueOf(businessString), AuthenticatedUser.token());
         }

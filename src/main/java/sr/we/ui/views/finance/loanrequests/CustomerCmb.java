@@ -7,6 +7,7 @@ import sr.we.data.controller.CustomerService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Customer;
 import sr.we.shekelflowcore.entity.Loan;
+import sr.we.shekelflowcore.entity.helper.vo.CustomerVO;
 
 import java.util.List;
 
@@ -21,7 +22,8 @@ public class CustomerCmb extends ComboBox<Customer> {
 
     public void load(Long businessId){
         CustomerService customerService = ContextProvider.getBean(CustomerService.class);
-        List<Customer> list = customerService.list(businessId, AuthenticatedUser.token()).getResult();
+        CustomerVO customerVO = new CustomerVO();customerVO.setBusiness(businessId);
+        List<Customer> list = customerService.list(customerVO, AuthenticatedUser.token()).getResult();
         setItems(list);
     }
 }

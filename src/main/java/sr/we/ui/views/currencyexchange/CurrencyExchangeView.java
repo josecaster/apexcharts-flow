@@ -1,17 +1,15 @@
 package sr.we.ui.views.currencyexchange;
 
+import com.flowingcode.vaadin.addons.gridexporter.GridExporter;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
-import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.littemplate.LitTemplate;
-import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.template.Id;
@@ -25,13 +23,12 @@ import sr.we.data.controller.ExchangeRateService;
 import sr.we.data.controller.UserAccessService;
 import sr.we.demo.about.AboutView;
 import sr.we.security.AuthenticatedUser;
-import sr.we.shekelflowcore.entity.Account;
 import sr.we.shekelflowcore.entity.Currency;
 import sr.we.shekelflowcore.entity.CurrencyExchange;
+import sr.we.shekelflowcore.entity.PaymentTransaction;
 import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.entity.helper.adapter.CurrencyExchangeBody;
 import sr.we.shekelflowcore.entity.helper.vo.CurrencyExchangeVO;
-import sr.we.shekelflowcore.enums.Reference;
 import sr.we.shekelflowcore.exception.SuccessThrowable;
 import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.shekelflowcore.security.Privileges;
@@ -39,16 +36,14 @@ import sr.we.shekelflowcore.security.privileges.CurrencyExchangePrivilege;
 import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.shekelflowcore.settings.util.DateUtil;
 import sr.we.ui.components.BreadCrumb;
-import sr.we.ui.components.finance.AccountSelect;
-import sr.we.ui.components.finance.PaymentMethodSelect;
+import sr.we.ui.components.GridUtil;
 import sr.we.ui.components.general.CurrencySelect;
 import sr.we.ui.views.MainLayout;
 
 import javax.annotation.security.RolesAllowed;
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDate;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Optional;
 
 /**
@@ -68,7 +63,7 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
     private final CurrencyExchangeVO filter;
     private final Tab vaadinTab;
     private final Tab vaadinTab2;
-    private final RadioButtonGroup<String> buySellGrp;
+//    private final RadioButtonGroup<String> buySellGrp;
     @Id("rate-grid-layout")
     private Div rateGridLayout;
     @Id("add-rate-btn")
@@ -94,132 +89,110 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
     private Tab vaadinTab1;
     @Id("my-form-layout")
     private FormLayout myFormLayout;
-    @Id("from-cur-fld")
-    private CurrencySelect fromCurFld;
-    @Id("to-cur-fld")
-    private CurrencySelect toCurFld;
-    @Id("fx-fld")
-    private BigDecimalField fxFld;
-    @Id("to-account-fld")
-    private AccountSelect toAccountFld;
-    @Id("from-account-fld")
-    private AccountSelect fromAccountFld;
-    @Id("radio-div")
-    private Div radioDiv;
-    @Id("amount-fld")
-    private BigDecimalField amountFld;
-    @Id("converted-amount-fld")
-    private BigDecimalField convertedAmountFld;
-    @Id("exchange-btn")
-    private Button exchangeBtn;
     private CurrencyExchangeBody exchange;
-    @Id("date-fld")
-    private DatePicker dateFld;
-    @Id("payment-method-from")
-    private PaymentMethodSelect paymentMethodFrom;
-    @Id("payment-method-to")
-    private PaymentMethodSelect paymentMethodTo;
-    @Id("flip-btn")
-    private Button flipBtn;
-    @Id("prev-fx-fld")
-    private BigDecimalField prevFxFld;
 
     /**
      * Creates a new CurrencyExchangeView.
      */
     public CurrencyExchangeView() {
+        filter = new CurrencyExchangeVO();
         // You can initialise any data required for the connected UI components here.
-        dateFld.setValue(LocalDate.now());
-        dateFld.addValueChangeListener(f -> {
-            exchange();
-        });
+//        dateFld.setValue(LocalDate.now());
+//        dateFld.addValueChangeListener(f -> {
+//            exchange();
+//        });
 
 
-        flipBtn.setText("Flip");
-        flipBtn.addClickListener(f -> {
-            fromAccountFld.setValue((Account) null);
-            toAccountFld.setValue((Account) null);
-            Currency value = fromCurFld.getValue();
-            BigDecimal value1 = amountFld.getValue();
-            Currency value2 = toCurFld.getValue();
-            BigDecimal value3 = convertedAmountFld.getValue();
-            toCurFld.setValue(value);
-            convertedAmountFld.setValue(value1);
-            fromCurFld.setValue(value2);
-            amountFld.setValue(value3);
-            exchange();
-        });
+//        flipBtn.setText("Flip");
+//        flipBtn.addClickListener(f -> {
+//            fromAccountFld.setValue((Account) null);
+//            toAccountFld.setValue((Account) null);
+//            Currency value = fromCurFld.getValue();
+//            BigDecimal value1 = amountFld.getValue();
+//            Currency value2 = toCurFld.getValue();
+//            BigDecimal value3 = convertedAmountFld.getValue();
+//            toCurFld.setValue(value);
+//            convertedAmountFld.setValue(value1);
+//            fromCurFld.setValue(value2);
+//            amountFld.setValue(value3);
+//            exchange();
+//        });
 
-        amountFld.addValueChangeListener(f -> {
-            if (f.getValue() == null) {
-                return;
-            }
-            if (f.isFromClient() && fxFld.getValue() != null) {
-                convertedAmountFld.setValue(f.getValue().divide(fxFld.getValue(), 6, RoundingMode.HALF_UP));
-            }
-        });
-        convertedAmountFld.addValueChangeListener(f -> {
-            if (f.getValue() == null) {
-                return;
-            }
-            if (f.isFromClient() && fxFld.getValue() != null) {
-                amountFld.setValue(f.getValue().multiply(fxFld.getValue()));
-            }
-        });
+//        amountFld.addValueChangeListener(f -> {
+//            if (f.getValue() == null) {
+//                return;
+//            }
+//            if (f.isFromClient() && fxFld.getValue() != null) {
+//                convertedAmountFld.setValue(f.getValue().divide(fxFld.getValue(), 6, RoundingMode.HALF_UP));
+//            }
+//        });
+//        convertedAmountFld.addValueChangeListener(f -> {
+//            if (f.getValue() == null) {
+//                return;
+//            }
+//            if (f.isFromClient() && fxFld.getValue() != null) {
+//                amountFld.setValue(f.getValue().multiply(fxFld.getValue()));
+//            }
+//        });
 
-        buySellGrp = new RadioButtonGroup<>();
-        radioDiv.add(buySellGrp);
-        buySellGrp.setItems("Buy", "Sell");
-        buySellGrp.setValue("Buy");
-        fromCurFld.addValueChangeListener(f -> {
-            if (f.getValue() == null) {
-                return;
-            }
-            fromAccountFld.setCurrency(f.getValue().getId());
-            amountFld.setPrefixComponent(new Span(f.getValue().getCode()));
-            exchange();
-        });
-        toCurFld.addValueChangeListener(f -> {
-            if (f.getValue() == null) {
-                return;
-            }
-            toAccountFld.setCurrency(f.getValue().getId());
-            convertedAmountFld.setPrefixComponent(new Span(f.getValue().getCode()));
-            exchange();
-        });
-        buySellGrp.addValueChangeListener(f -> {
-            exchange();
-        });
-        fxFld.addValueChangeListener(f -> {
-            if (f.getValue() == null) {
-                fxFld.setValue(BigDecimal.ONE);
-                return;
-            }
-            if (amountFld.getValue() != null && fxFld.getValue() != null) {
-                convertedAmountFld.setValue(amountFld.getValue().divide(fxFld.getValue(), 6, RoundingMode.HALF_UP));
-            }
-        });
+//        buySellGrp = new RadioButtonGroup<>();
+//        radioDiv.add(buySellGrp);
+//        buySellGrp.setItems("Buy", "Sell");
+//        buySellGrp.setValue("Buy");
+//        fromCurFld.addValueChangeListener(f -> {
+//            if (f.getValue() == null) {
+//                return;
+//            }
+//            fromAccountFld.setCurrency(f.getValue().getId());
+//            amountFld.setPrefixComponent(new Span(f.getValue().getCode()));
+//            exchange();
+//        });
+//        toCurFld.addValueChangeListener(f -> {
+//            if (f.getValue() == null) {
+//                return;
+//            }
+//            toAccountFld.setCurrency(f.getValue().getId());
+//            convertedAmountFld.setPrefixComponent(new Span(f.getValue().getCode()));
+//            exchange();
+//        });
+//        buySellGrp.addValueChangeListener(f -> {
+//            exchange();
+//        });
+//        fxFld.addValueChangeListener(f -> {
+//            if (f.getValue() == null) {
+//                fxFld.setValue(BigDecimal.ONE);
+//                return;
+//            }
+//            if (amountFld.getValue() != null && fxFld.getValue() != null) {
+//                convertedAmountFld.setValue(amountFld.getValue().divide(fxFld.getValue(), 6, RoundingMode.HALF_UP));
+//            }
+//        });
 
         myFormLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0px", 1), new FormLayout.ResponsiveStep("500px", 4));
 
         vaadinFormLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0px", 1, FormLayout.ResponsiveStep.LabelsPosition.TOP), new FormLayout.ResponsiveStep("500px", 3, FormLayout.ResponsiveStep.LabelsPosition.TOP));
 
         grid = new Grid<>();
+
+        grid.addSortListener(f -> GridUtil.onComponentEvent(f,filter));
         grid.addColumn(f -> {
             return getFrom(f) + "-" + getTo(f) + " fx " + Constants.CURRENCY_FORMAT.format(f.getAmountFrom());
-        }).setHeader("Buy").setResizable(true).setSortable(true);
+        }).setHeader("Buy").setResizable(true).setSortable(true).setId("c.amountFrom");
         grid.addColumn(f -> {
             return getFrom(f) + "-" + getTo(f) + " fx  " + Constants.CURRENCY_FORMAT.format(f.getAmountTo());
-        }).setHeader("Sell").setResizable(true).setSortable(true);
+        }).setHeader("Sell").setResizable(true).setSortable(true).setId("c.amountTo");
         grid.addColumn(f -> {
             return Constants.SIMPLE_DATE_TIME_FORMAT_24H.format(DateUtil.convertToDateViaInstant(f.getStartDateTime()));
-        }).setHeader("Started").setResizable(true).setSortable(true);
+        }).setHeader("Started").setResizable(true).setSortable(true).setId("c.startDateTime");
         grid.addColumn(f -> {
             return f.getEndDateTime() == null ? "Active" : (Constants.SIMPLE_DATE_TIME_FORMAT_24H.format(DateUtil.convertToDateViaInstant(f.getEndDateTime())));
-        }).setHeader("Live").setResizable(true).setSortable(true);
-        filter = new CurrencyExchangeVO();
+        }).setHeader("Live").setResizable(true).setSortable(true).setId("c.endDateTime");
         grid.setItems(CurrencyExchangeDataProvider.fetch(filter), CurrencyExchangeDataProvider.count(filter));
 
+        GridExporter<CurrencyExchange> exporter = GridExporter.createFor(grid);
+        GridUtil.exportButtons(exporter, grid);
+        exporter.setTitle("Currency Exchange");
+        exporter.setFileName("Currency_Exchange_" + new SimpleDateFormat("yyyyddMM").format(Calendar.getInstance().getTime()));
         rateGridLayout.add(grid);
 
         fromAmountFld.setRequiredIndicatorVisible(true);
@@ -270,42 +243,42 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
 
         });
 
-        exchangeBtn.addClickListener(f -> {
-            if (toCurFld.getValue() == null || fromCurFld.getValue() == null || amountFld.getValue() == null || convertedAmountFld.getValue() == null//
-                    || paymentMethodFrom.getValue() == null || paymentMethodTo.getValue() == null || dateFld.getValue() == null || fxFld.getValue() == null) {//
-                throw new ValidationException("Not all required fields are filled in");
-            }
-
-
-            ExchangeRateService productService = ContextProvider.getBean(ExchangeRateService.class);
-            CurrencyExchangeVO vo = new CurrencyExchangeVO();
-            vo.setCurrencyToId(toCurFld.getValue().getId());
-            vo.setCurrencyFromId(fromCurFld.getValue().getId());
-            vo.setAmountFrom(amountFld.getValue());
-            vo.setAmountTo(convertedAmountFld.getValue());
-            vo.setAccountTo(toAccountFld.getValue().getId());
-            vo.setAccountFrom(fromAccountFld.getValue().getId());
-            vo.setBuySell(buySellGrp.getValue().equalsIgnoreCase("Buy") ? "b" : "s");
-            vo.setRate(fxFld.getValue());
-            vo.setPrevRate(prevFxFld.getValue());
-            vo.setFxId(exchange.getId());
-            vo.setBusinessId(businessId);
-            vo.setLogDate(dateFld.getValue());
-            vo.setPaymentMethodFrom(paymentMethodFrom.getValue().getId());
-            vo.setPaymentMethodTo(paymentMethodTo.getValue().getId());
-            productService.buySell(AuthenticatedUser.token(), vo);
-
-            toCurFld.clear();
-            fromCurFld.clear();
-            amountFld.clear();
-            convertedAmountFld.clear();
-            toAccountFld.clear();
-            fromAccountFld.clear();
-            fxFld.clear();
-
-
-            CustomNotificationHandler.notify_(new SuccessThrowable());
-        });
+//        exchangeBtn.addClickListener(f -> {
+//            if (toCurFld.getValue() == null || fromCurFld.getValue() == null || amountFld.getValue() == null || convertedAmountFld.getValue() == null//
+//                    || paymentMethodFrom.getValue() == null || paymentMethodTo.getValue() == null || dateFld.getValue() == null || fxFld.getValue() == null) {//
+//                throw new ValidationException("Not all required fields are filled in");
+//            }
+//
+//
+//            ExchangeRateService productService = ContextProvider.getBean(ExchangeRateService.class);
+//            CurrencyExchangeVO vo = new CurrencyExchangeVO();
+//            vo.setCurrencyToId(toCurFld.getValue().getId());
+//            vo.setCurrencyFromId(fromCurFld.getValue().getId());
+//            vo.setAmountFrom(amountFld.getValue());
+//            vo.setAmountTo(convertedAmountFld.getValue());
+//            vo.setAccountTo(toAccountFld.getValue().getId());
+//            vo.setAccountFrom(fromAccountFld.getValue().getId());
+//            vo.setBuySell(buySellGrp.getValue().equalsIgnoreCase("Buy") ? "b" : "s");
+//            vo.setRate(fxFld.getValue());
+//            vo.setPrevRate(prevFxFld.getValue());
+//            vo.setFxId(exchange.getId());
+//            vo.setBusinessId(businessId);
+//            vo.setLogDate(dateFld.getValue());
+//            vo.setPaymentMethodFrom(paymentMethodFrom.getValue().getId());
+//            vo.setPaymentMethodTo(paymentMethodTo.getValue().getId());
+//            productService.buySell(AuthenticatedUser.token(), vo);
+//
+//            toCurFld.clear();
+//            fromCurFld.clear();
+//            amountFld.clear();
+//            convertedAmountFld.clear();
+//            toAccountFld.clear();
+//            fromAccountFld.clear();
+//            fxFld.clear();
+//
+//
+//            CustomNotificationHandler.notify_(new SuccessThrowable());
+//        });
 
         currencyFromSelect.addValueChangeListener(f -> {
             currencyToReplicaSelect.setValue(f.getValue());
@@ -326,18 +299,18 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
         });
     }
 
-    private void exchange() {
-        if (fromCurFld.getValue() != null && toCurFld.getValue() != null && dateFld.getValue() != null) {
-            ExchangeRateService exchangeRateService = ContextProvider.getBean(ExchangeRateService.class);
-            try {
-                exchange = exchangeRateService.exchangeResult(fromCurFld.getValue().getCode(), toCurFld.getValue().getCode(), businessId, buySellGrp.getValue().equalsIgnoreCase("Buy") ? "b" : "s", dateFld.getValue(), AuthenticatedUser.token());
-                fxFld.setValue(BigDecimal.valueOf(exchange.getRate()));
-                prevFxFld.setValue(BigDecimal.valueOf(exchange.getRate()));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
+//    private void exchange() {
+//        if (fromCurFld.getValue() != null && toCurFld.getValue() != null && dateFld.getValue() != null) {
+//            ExchangeRateService exchangeRateService = ContextProvider.getBean(ExchangeRateService.class);
+//            try {
+//                exchange = exchangeRateService.exchangeResult(fromCurFld.getValue().getCode(), toCurFld.getValue().getCode(), businessId, buySellGrp.getValue().equalsIgnoreCase("Buy") ? "b" : "s", dateFld.getValue(), AuthenticatedUser.token());
+//                fxFld.setValue(BigDecimal.valueOf(exchange.getRate()));
+//                prevFxFld.setValue(BigDecimal.valueOf(exchange.getRate()));
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+//        }
+//    }
 
     private void validate(CurrencyExchangeVO currencyExchangeVO) {
         boolean valid = currencyExchangeVO.getCurrencyToId() != null;
@@ -381,7 +354,8 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
 
     public void beforeEnter(BeforeEnterEvent event) {
         UserAccessService userAccesService = ContextProvider.getBean(UserAccessService.class);
-        boolean hasAccess = userAccesService.hasAccess(AuthenticatedUser.token(), new CurrencyExchangePrivilege(), Privileges.READ);
+        String token = AuthenticatedUser.token();
+        boolean hasAccess = userAccesService.hasAccess(token, new CurrencyExchangePrivilege(), Privileges.READ);
         if (!hasAccess) {
             UI.getCurrent().navigate(AboutView.class);
         }
@@ -390,9 +364,10 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
             business = business1.get();
         }
         businessId = Long.valueOf(business);
+        filter.setToken(token);
         filter.setBusinessId(businessId);
-        toAccountFld.load(businessId, Reference.EXCHANGE);
-        fromAccountFld.load(businessId, Reference.EXCHANGE);
+//        toAccountFld.load(businessId, Reference.EXCHANGE);
+//        fromAccountFld.load(businessId, Reference.EXCHANGE);
 
         refresh(AuthenticatedUser.token());
     }

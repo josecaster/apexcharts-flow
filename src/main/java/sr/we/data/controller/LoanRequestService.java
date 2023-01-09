@@ -7,21 +7,19 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.RestTemplate;
-import sr.we.shekelflowcore.entity.Business;
 import sr.we.shekelflowcore.entity.LoanRequest;
 import sr.we.shekelflowcore.entity.LoanRequestPlan;
 import sr.we.shekelflowcore.entity.helper.PagingResult;
-import sr.we.shekelflowcore.entity.helper.adapter.*;
+import sr.we.shekelflowcore.entity.helper.adapter.LoanRequestBody;
+import sr.we.shekelflowcore.entity.helper.adapter.LoanRequestPlanningGenBody;
+import sr.we.shekelflowcore.entity.helper.adapter.LoanRequestSchedulePlan;
+import sr.we.shekelflowcore.entity.helper.adapter.LocalDateAdapter;
 import sr.we.shekelflowcore.entity.helper.vo.LoanRequestVO;
 import sr.we.shekelflowcore.settings.Routes;
 
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.List;
 
 @Controller
 public class LoanRequestService extends MyController {
@@ -36,23 +34,26 @@ public class LoanRequestService extends MyController {
         });
     }
 
-    public PagingResult<LoanRequest> list(String accessToken, Long businessId, Long loanId) {
+    public PagingResult<LoanRequest> list(String accessToken, LoanRequestVO vo) {
 
 
         return encapsulate(() -> {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
-                    = configProperties.getRest() + Routes.LOAN_REQUEST_LIST + "?businessId=" + businessId;
-            if (loanId != null) {
-                fooResourceUrl += "&loanId=" + loanId;
-            }
-            HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
-            ResponseEntity<String> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, String.class);
-            PagingResult<LoanRequest> myJson = transform(exchange,new TypeToken<PagingResult<LoanRequest>>(){}.getType());
+                    = configProperties.getRest() + Routes.LOAN_REQUEST_LIST;
+//                    + "?businessId=" + businessId;
+//            if (loanId != null) {
+//                fooResourceUrl += "&loanId=" + loanId;
+//            }
+            String body = new GsonBuilder()
+                    .registerTypeAdapter(LocalDate.class, new LocalDateAdapter()).create().toJson(vo);
+            HttpEntity<String> httpEntity = getAuthHttpEntity(body, accessToken);
+            ResponseEntity<String> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.POST, httpEntity, String.class);
+            PagingResult<LoanRequest> myJson = transform(exchange, new TypeToken<PagingResult<LoanRequest>>() {
+            }.getType());
             return myJson;
         });
     }
-
 
 
     public LoanRequest create(String accessToken, LoanRequestBody vo) {
@@ -83,7 +84,7 @@ public class LoanRequestService extends MyController {
         });
     }
 
-    public LoanRequestSchedulePlan generatePlanning(LoanRequestPlan.Type type, Long freqAmount , LocalDate date, Boolean intrestFirst, Long loanRequestId, String accessToken) {
+    public LoanRequestSchedulePlan generatePlanning(LoanRequestPlan.Type type, Long freqAmount, LocalDate date, Boolean intrestFirst, Long loanRequestId, String accessToken) {
         return encapsulate(() -> {
             LoanRequestPlanningGenBody src = new LoanRequestPlanningGenBody(loanRequestId, date, type, intrestFirst);
             src.setFreqAmount(freqAmount);
@@ -117,7 +118,7 @@ public class LoanRequestService extends MyController {
         return encapsulate(() -> {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
-                    = configProperties.getRest() + Routes.LOAN_REQUEST_GET_BALANCE + "?loanRequestId=" + loanRequestId+"&initDate="+initDate.format(DateTimeFormatter.ISO_DATE);
+                    = configProperties.getRest() + Routes.LOAN_REQUEST_GET_BALANCE + "?loanRequestId=" + loanRequestId + "&initDate=" + initDate.format(DateTimeFormatter.ISO_DATE);
 
             HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
             ResponseEntity<LoanRequest> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, LoanRequest.class);
@@ -134,7 +135,8 @@ public class LoanRequestService extends MyController {
                     = configProperties.getRest() + Routes.LOAN_REQUEST_PLAN_LIST + "?loanRequestId=" + loanRequestId;
             HttpEntity<String> httpEntity = getAuthHttpEntity(accessToken);
             ResponseEntity<String> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, httpEntity, String.class);
-            return transform(exchange,new TypeToken<PagingResult<LoanRequestPlan>>(){}.getType());
+            return transform(exchange, new TypeToken<PagingResult<LoanRequestPlan>>() {
+            }.getType());
         });
     }
 
@@ -146,7 +148,7 @@ public class LoanRequestService extends MyController {
 
     }
 
-    public LoanRequest procesNextStep(String accessToken, Long loanRequestId,BigDecimal exchangeRate, LoanRequest.Status status) {
+    public LoanRequest procesNextStep(String accessToken, Long loanRequestId, BigDecimal exchangeRate, LoanRequest.Status status) {
         LoanRequestVO vo = new LoanRequestVO();
         vo.setId(loanRequestId);
         vo.setStatus(status);

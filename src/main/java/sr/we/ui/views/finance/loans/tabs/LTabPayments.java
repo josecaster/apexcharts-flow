@@ -41,14 +41,14 @@ public class LTabPayments extends PaymentsForm implements BeforeEnterObserver, A
 
     @Override
     public void afterNavigation(AfterNavigationEvent event) {
-        LoanRequestService loanService = ContextProvider.getBean(LoanRequestService.class);
-        List<LoanRequest> list = loanService.list(AuthenticatedUser.token(), Long.valueOf(businessStringId), Long.valueOf(loanId)).getResult();
-        if(list != null) {
-            list = list.stream().filter(f -> f.getStatus().compareTo(LoanRequest.Status.APPROVED) == 0).collect(Collectors.toList());
-            grid.setItems(list);
-        } else {
-
-        }
+//        LoanRequestService loanService = ContextProvider.getBean(LoanRequestService.class);TODO
+//        List<LoanRequest> list = loanService.list(AuthenticatedUser.token(), Long.valueOf(businessStringId), Long.valueOf(loanId)).getResult();
+//        if(list != null) {
+//            list = list.stream().filter(f -> f.getStatus().compareTo(LoanRequest.Status.APPROVED) == 0).collect(Collectors.toList());
+//            grid.setItems(list);
+//        } else {
+//
+//        }
 
     }
 

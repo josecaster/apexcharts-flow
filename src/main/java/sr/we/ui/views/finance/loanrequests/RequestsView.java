@@ -1,5 +1,6 @@
 package sr.we.ui.views.finance.loanrequests;
 
+import com.flowingcode.vaadin.addons.gridexporter.GridExporter;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -21,28 +22,30 @@ import org.apache.commons.lang3.StringUtils;
 import sr.we.ContextProvider;
 import sr.we.CustomNotificationHandler;
 import sr.we.data.controller.LoanRequestService;
-import sr.we.data.controller.PaymentTransactionService;
 import sr.we.data.controller.UserAccessService;
 import sr.we.demo.about.AboutView;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Customer;
 import sr.we.shekelflowcore.entity.LoanRequest;
+import sr.we.shekelflowcore.entity.PosHeader;
 import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.entity.helper.MappedSuperClass;
 import sr.we.shekelflowcore.entity.helper.vo.LoanRequestVO;
-import sr.we.shekelflowcore.entity.helper.vo.PaymentTransactionVO;
 import sr.we.shekelflowcore.exception.PrimaryThrowable;
 import sr.we.shekelflowcore.security.PrivilegeModeAbstract;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.LoanRequestPrivilege;
 import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.shekelflowcore.settings.util.DateUtil;
+import sr.we.ui.components.GridUtil;
+import sr.we.ui.components.MySearchField;
 import sr.we.ui.components.UIUtil;
 import sr.we.ui.components.buttons.DeleteButton;
 import sr.we.ui.views.MainLayout;
 
 import javax.annotation.security.RolesAllowed;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -57,13 +60,16 @@ import java.util.*;
 @RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
 public class RequestsView extends LitTemplate implements BeforeEnterObserver, AfterNavigationObserver {
 
-    private Set<LoanRequest> allSelectedItems;
     Grid<LoanRequest> grid = new Grid<>();
+    private Set<LoanRequest> allSelectedItems;
     @Id("add-request-btn")
     private Button addRequestBtn;
     @Id("requests-grid-layout")
     private Div requestsGridLayout;
     private String business;
+    @Id("filter-field")
+    private MySearchField filterField;
+    private LoanRequestVO filter;
 
     /**
      * Creates a new RequestsView.
@@ -73,13 +79,23 @@ public class RequestsView extends LitTemplate implements BeforeEnterObserver, Af
         addRequestBtn.addClickListener(f -> UI.getCurrent().navigate(AddRequestsView.class, new RouteParameters(new RouteParam("business", business))));
 
 //        grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
+        grid.addSortListener(f -> GridUtil.onComponentEvent(f,filter));
         Grid.Column<LoanRequest> customer = grid.addColumn(f -> f.getCustomer().getName() + (StringUtils.isBlank(f.getCustomer().getFirstName()) ? "" : " " + f.getCustomer().getFirstName())).setHeader("Customer").setSortable(true).setResizable(true).setSortable(true);
         Grid.Column<LoanRequest> loan_structure = grid.addColumn(f -> f.getLoan().getName()).setHeader("Loan Structure").setSortable(true).setResizable(true).setSortable(true);
         Grid.Column<LoanRequest> date = grid.addColumn(f -> Constants.SIMPLE_DATE_FORMAT.format(DateUtil.convertToDateViaInstant(f.getEstimatedDate()))).setHeader("Date").setSortable(true).setResizable(true).setSortable(true);
-        grid.addColumn(f -> f.getCurrency().getCode()).setHeader("Currency").setSortable(true).setResizable(true).setSortable(true);
-        grid.addColumn(f -> Constants.CURRENCY_FORMAT.format(f.getAmount())).setHeader("Amount").setSortable(true).setResizable(true).setSortable(true);
-        grid.addColumn(f -> Constants.CURRENCY_FORMAT.format(f.getAmountDue())).setHeader("Amount due").setSortable(true).setResizable(true).setSortable(true);
-        grid.addComponentColumn(f -> createCard(f, business, false)).setHeader("Status").setResizable(true);
+        Grid.Column<LoanRequest> currency = grid.addColumn(f -> f.getCurrency().getCode()).setHeader("Currency").setSortable(true).setResizable(true).setSortable(true);
+        Grid.Column<LoanRequest> amount = grid.addColumn(f -> Constants.CURRENCY_FORMAT.format(f.getAmount())).setHeader("Amount").setSortable(true).setResizable(true).setSortable(true);
+        Grid.Column<LoanRequest> amount_due = grid.addColumn(f -> Constants.CURRENCY_FORMAT.format(f.getAmountDue())).setHeader("Amount due")/*.setSortable(true)*/.setResizable(true)/*.setSortable(true)*/;
+
+        customer.setId("lr.customer.name");
+        loan_structure.setId("lr.loan.id");
+        date.setId("lr.estimatedDate");
+        currency.setId("lr.currency.code");
+        amount.setId("lr.amount");
+//        amount_due.setId("lr.loan.id");
+
+        Grid.Column<LoanRequest> status = grid.addComponentColumn(f -> createCard(f, business, false)).setHeader("Status").setResizable(true).setSortable(true);
+        status.setId("lr.status");
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
         grid.addItemDoubleClickListener(get -> {
             LoanRequest loanRequest = get.getItem();
@@ -94,7 +110,8 @@ public class RequestsView extends LitTemplate implements BeforeEnterObserver, Af
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
         grid.setClassName("resonate");
         requestsGridLayout.add(grid);
-        grid.setAllRowsVisible(true);
+        grid.setHeightFull();
+        requestsGridLayout.setHeightFull();
 
         HeaderRow.HeaderCell join = grid.prependHeaderRow().join(customer, loan_structure, date);
         Div transactionToolbar = new Div();
@@ -127,6 +144,12 @@ public class RequestsView extends LitTemplate implements BeforeEnterObserver, Af
             }
             img.setVisible(true);
         });
+
+        GridExporter<LoanRequest> exporter = GridExporter.createFor(grid);
+        GridUtil.exportButtons(exporter, grid);
+        exporter.setExportValue(status, f -> f.getStatus().name());
+        exporter.setTitle("Loan Requests");
+        exporter.setFileName("Loan_Requests_" + new SimpleDateFormat("yyyyddMM").format(Calendar.getInstance().getTime()));
     }
 
     public static Span createCard(LoanRequest loanRequest, String business, boolean showContext) {
@@ -182,6 +205,7 @@ public class RequestsView extends LitTemplate implements BeforeEnterObserver, Af
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
+        filter = new LoanRequestVO();
         UserAccessService userAccessService = ContextProvider.getBean(UserAccessService.class);
         String token = AuthenticatedUser.token();
         boolean hasAccess = userAccessService.hasAccess(token, PrivilegeModeAbstract.getInstance(LoanRequestPrivilege.class), Privileges.READ);
@@ -192,6 +216,9 @@ public class RequestsView extends LitTemplate implements BeforeEnterObserver, Af
         if (business1.isPresent()) {
             business = business1.get();
         }
+        filter.setBusinessId(Long.valueOf(business));
+        filter.setToken(AuthenticatedUser.token());
+        grid.setItems(LoanRequestsDataProvider.fetch(filter), LoanRequestsDataProvider.count(filter));
     }
 
     @Override
@@ -200,7 +227,8 @@ public class RequestsView extends LitTemplate implements BeforeEnterObserver, Af
     }
 
     private void extracted() {
-        LoanRequestService loanService = ContextProvider.getBean(LoanRequestService.class);
-        grid.setItems(loanService.list(AuthenticatedUser.token(), Long.valueOf(business), null).getResult());
+        grid.getDataProvider().refreshAll();
+//        LoanRequestService loanService = ContextProvider.getBean(LoanRequestService.class);
+//        grid.setItems(loanService.list(AuthenticatedUser.token(), Long.valueOf(business), null).getResult());
     }
 }

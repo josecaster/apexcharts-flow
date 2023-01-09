@@ -7,6 +7,7 @@ import '@vaadin/tabs/src/vaadin-tabs.js';
 import '@vaadin/tabs/src/vaadin-tab.js';
 import '@polymer/iron-icon/iron-icon.js';
 import '@vaadin/text-field/src/vaadin-text-field.js';
+import '../components/my-search-field';
 
 @customElement('product-view')
 export class ProductView extends LitElement {
@@ -49,9 +50,9 @@ export class ProductView extends LitElement {
     Archived
    </vaadin-tab>
   </vaadin-tabs>
-  <vaadin-text-field placeholder="Filter products" id="filter-field" style="align-self: stretch;" type="text">
-   <iron-icon icon="lumo:search" slot="prefix"></iron-icon>
-  </vaadin-text-field>
+  <my-search-field placeholder="Filter products" id="filter-field" style="align-self: stretch;" type="text">
+
+  </my-search-field>
   <div id="product-grid-layout" style="align-self: stretch;"></div>
  </vaadin-vertical-layout>
 </vaadin-vertical-layout>

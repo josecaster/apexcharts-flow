@@ -1,13 +1,21 @@
 package sr.we.ui.views.customers;
 
+import com.flowingcode.vaadin.addons.gridexporter.GridExporter;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridSortOrder;
+import com.vaadin.flow.data.event.SortEvent;
+import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.router.*;
 import sr.we.shekelflowcore.entity.Customer;
+import sr.we.shekelflowcore.entity.PaymentTransaction;
+import sr.we.ui.components.GridUtil;
 import sr.we.ui.views.TableLayout;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 //@PageTitle("Customers")
@@ -20,13 +28,18 @@ public class CustomersGrid extends TableLayout{
     public CustomersGrid() {
 
         this.grid = new Grid<>();
+
+
         this.grid.addClassNames("resonate"/*, LumoUtility.BoxShadow.SMALL, "my-cart-white", LumoUtility.Margin.MEDIUM*/);
-        this.grid.setAllRowsVisible(true);
+//        this.grid.setAllRowsVisible(true);
+        this.grid.setHeightFull();
         this.grid.setSelectionMode(Grid.SelectionMode.MULTI);
 //        this.grid.setMaxWidth("500px");
 
 //        this.grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_NO_BORDER);
         add(grid);
+        setHeightFull();
+        layout.setHeightFull();
 //        this.grid.addColumn("name");
 //
 //        this.grid.addColumn(new ValueProvider<Customer, String>() {
@@ -49,15 +62,16 @@ public class CustomersGrid extends TableLayout{
 //                return customer.getPrimaryCustomerContacts().getMobile();
 //            }
 //        }).setHeader(getTranslation("sr.we.mobile"));
-        this.grid.addComponentColumn(customer -> createCard(customer)).setResizable(true);
-        this.grid.addColumn(Customer::getName).setHeader("Name").setResizable(true).setSortable(true);
-        this.grid.addColumn(Customer::getFirstName).setHeader("Firstname").setResizable(true).setSortable(true);
-        this.grid.addColumn(f -> f.getPrimaryBillingAddress() == null ? null : (f.getPrimaryBillingAddress().getCountry() == null ? null : f.getPrimaryBillingAddress().getCountry().getName())).setHeader("Country").setResizable(true).setSortable(true);
-        this.grid.addColumn(f -> f.getPrimaryBillingAddress() == null ? null : f.getPrimaryBillingAddress().getState()).setHeader("State").setResizable(true).setSortable(true);
-        this.grid.addColumn(f -> f.getPrimaryBillingAddress() == null ? null : f.getPrimaryBillingAddress().getAddress()).setHeader("Address").setResizable(true).setSortable(true);
-        this.grid.addColumn(f -> f.getPrimaryCustomerContacts() == null ? null : f.getPrimaryCustomerContacts().getEmail()).setHeader("Email").setResizable(true).setSortable(true);
-        this.grid.addColumn(f -> f.getPrimaryCustomerContacts() == null ? null : f.getPrimaryCustomerContacts().getMobile()).setHeader("Mobile number").setResizable(true).setSortable(true);
-        this.grid.addColumn(f -> f.getPrimaryCustomerContacts() == null ? null : f.getPrimaryCustomerContacts().getPhone()).setHeader("Phone number").setResizable(true).setSortable(true);
+        Grid.Column<Customer> customerColumn = this.grid.addComponentColumn(customer -> createCard(customer)).setResizable(true);
+        customerColumn.setId("c.name");
+        this.grid.addColumn(Customer::getName).setHeader("Name").setResizable(true).setSortable(true).setId("c.name");
+        this.grid.addColumn(Customer::getFirstName).setHeader("Firstname").setResizable(true).setSortable(true).setId("c.firstName");
+        this.grid.addColumn(f -> f.getPrimaryBillingAddress() == null ? null : (f.getPrimaryBillingAddress().getCountry() == null ? null : f.getPrimaryBillingAddress().getCountry().getName())).setHeader("Country").setResizable(true).setSortable(true).setId("cun.name");
+        this.grid.addColumn(f -> f.getPrimaryBillingAddress() == null ? null : f.getPrimaryBillingAddress().getState()).setHeader("State").setResizable(true).setSortable(true).setId("ca.state");
+        this.grid.addColumn(f -> f.getPrimaryBillingAddress() == null ? null : f.getPrimaryBillingAddress().getAddress()).setHeader("Address").setResizable(true).setSortable(true).setId("ca.address");
+        this.grid.addColumn(f -> f.getPrimaryCustomerContacts() == null ? null : f.getPrimaryCustomerContacts().getEmail()).setHeader("Email").setResizable(true).setSortable(true).setId("cc.email");
+        this.grid.addColumn(f -> f.getPrimaryCustomerContacts() == null ? null : f.getPrimaryCustomerContacts().getMobile()).setHeader("Mobile number").setResizable(true).setSortable(true).setId("cc.mobile");;
+        this.grid.addColumn(f -> f.getPrimaryCustomerContacts() == null ? null : f.getPrimaryCustomerContacts().getPhone()).setHeader("Phone number").setResizable(true).setSortable(true).setId("cc.phone");;
 //        this.grid.setSelectionMode(Grid.SelectionMode.SINGLE);
         this.grid.addItemDoubleClickListener(f -> {
             Customer loanRequest = f.getItem();
@@ -70,6 +84,12 @@ public class CustomersGrid extends TableLayout{
             QueryParameters queryParameters = new QueryParameters(map);
             UI.getCurrent().navigate(CustomerViewCreate.getLocation(businessString), queryParameters);
         });
+
+        GridExporter<Customer> exporter = GridExporter.createFor(grid);
+        GridUtil.exportButtons(exporter, grid);
+        exporter.setExportColumn(customerColumn,false);
+        exporter.setTitle("Customers");
+        exporter.setFileName("Customers_" + new SimpleDateFormat("yyyyddMM").format(Calendar.getInstance().getTime()));
 //        this.grid.addComponentColumn(new ValueProvider<Customer, Button>() {
 //            @Override
 //            public Button apply(Customer Customer) {
@@ -122,6 +142,19 @@ public class CustomersGrid extends TableLayout{
 
     public void setItems(List<Customer> customer) {
         grid.setItems(customer);
+        refreshAll();
+    }
+
+
+    public void setItems(CallbackDataProvider.FetchCallback<Customer, Void> fetch, CallbackDataProvider.CountCallback<Customer, Void> count) {
+        grid.setItems(fetch,count);
+    }
+
+    public void refreshAll() {
         grid.getDataProvider().refreshAll();
+    }
+
+    public void addSortListener(ComponentEventListener<SortEvent<Grid<Customer>, GridSortOrder<Customer>>> listener) {
+        grid.addSortListener(listener);
     }
 }

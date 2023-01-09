@@ -7,6 +7,7 @@ import sr.we.data.controller.LoanService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Customer;
 import sr.we.shekelflowcore.entity.Loan;
+import sr.we.shekelflowcore.entity.helper.vo.LoanVO;
 
 import java.util.List;
 
@@ -22,7 +23,8 @@ public class LoanCmb extends ComboBox<Loan> {
 
     public void load(Long businessId) {
         LoanService loanService = ContextProvider.getBean(LoanService.class);
-        List<Loan> list = loanService.list(AuthenticatedUser.token(), businessId).getResult();
+        LoanVO loanVO = new LoanVO();loanVO.setBusiness(businessId);
+        List<Loan> list = loanService.list(AuthenticatedUser.token(), loanVO).getResult();
         setItems(list);
     }
 }
