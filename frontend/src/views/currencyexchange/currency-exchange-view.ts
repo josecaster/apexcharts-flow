@@ -8,6 +8,7 @@ import '@vaadin/vertical-layout/src/vaadin-vertical-layout.js';
 import '@vaadin/select/src/vaadin-select.js';
 import '@vaadin/flow-frontend/vaadin-big-decimal-field.js';
 import '@vaadin/button/src/vaadin-button.js';
+import '@vaadin/date-time-picker/src/vaadin-date-time-picker.js';
 
 @customElement('currency-exchange-view')
 export class CurrencyExchangeView extends LitElement {
@@ -53,7 +54,9 @@ export class CurrencyExchangeView extends LitElement {
      </vaadin-form-item>
     </vaadin-form-layout>
     <vaadin-horizontal-layout theme="spacing" style="width: 100%;" colspan="2">
-     <vaadin-button style="align-self: center;margin-left:auto;" id="add-rate-btn" tabindex="0" theme="primary">
+     <vaadin-date-time-picker id="start-picker-fld" date-placeholder="Start date" helper-text="Fill in for historic exchange rates"></vaadin-date-time-picker>
+     <vaadin-date-time-picker id="end-picker-fld" date-placeholder="End date" helper-text="Fill in for historic exchange rates"></vaadin-date-time-picker>
+     <vaadin-button style="align-self: flex-end; margin-left:auto;" id="add-rate-btn" tabindex="0" theme="primary">
        Add rate 
      </vaadin-button>
     </vaadin-horizontal-layout>

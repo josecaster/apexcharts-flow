@@ -66,7 +66,9 @@ public class IntroView extends VerticalLayout implements BeforeEnterObserver {
 
         EmailAddress emailField = new EmailAddress();
         emailField.setWidthFull();
+        emailField.setMaxLength(128);
         PasswordField passwordField = new PasswordField();
+        passwordField.setMaxLength(48);
         passwordField.setWidthFull();
         passwordField.setLabel("Password");
         passwordField.setPlaceholder("Password");

@@ -7,6 +7,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import sr.we.ContextProvider;
+import sr.we.CustomNotificationHandler;
 import sr.we.data.controller.UserService;
 import sr.we.shekelflowcore.entity.ThisUser;
 
@@ -26,6 +27,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         try {
             byUsername = userService.authenticate(name, password);
         } catch (Exception e) {
+
             throw new AuthenticationServiceException("Invalid Login");
         }
         Authentication auth = new UsernamePasswordAuthenticationToken(byUsername,
