@@ -5,6 +5,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
@@ -25,7 +26,6 @@ import sr.we.demo.about.AboutView;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Currency;
 import sr.we.shekelflowcore.entity.CurrencyExchange;
-import sr.we.shekelflowcore.entity.PaymentTransaction;
 import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.entity.helper.adapter.CurrencyExchangeBody;
 import sr.we.shekelflowcore.entity.helper.vo.CurrencyExchangeVO;
@@ -63,7 +63,7 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
     private final CurrencyExchangeVO filter;
     private final Tab vaadinTab;
     private final Tab vaadinTab2;
-//    private final RadioButtonGroup<String> buySellGrp;
+    //    private final RadioButtonGroup<String> buySellGrp;
     @Id("rate-grid-layout")
     private Div rateGridLayout;
     @Id("add-rate-btn")
@@ -90,11 +90,23 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
     @Id("my-form-layout")
     private FormLayout myFormLayout;
     private CurrencyExchangeBody exchange;
+    @Id("start-picker-fld")
+    private DateTimePicker startPickerFld;
+    @Id("end-picker-fld")
+    private DateTimePicker endPickerFld;
 
     /**
      * Creates a new CurrencyExchangeView.
      */
     public CurrencyExchangeView() {
+        startPickerFld.addValueChangeListener(f -> {
+            if (f.getValue() != null) {
+                endPickerFld.setMin(f.getValue());
+                endPickerFld.setValue(f.getValue().plusDays(1));
+            }
+        });
+        startPickerFld.setLabel("Start date");
+        endPickerFld.setLabel("End date");
         filter = new CurrencyExchangeVO();
         // You can initialise any data required for the connected UI components here.
 //        dateFld.setValue(LocalDate.now());
@@ -174,7 +186,7 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
 
         grid = new Grid<>();
 
-        grid.addSortListener(f -> GridUtil.onComponentEvent(f,filter));
+        grid.addSortListener(f -> GridUtil.onComponentEvent(f, filter));
         grid.addColumn(f -> {
             return getFrom(f) + "-" + getTo(f) + " fx " + Constants.CURRENCY_FORMAT.format(f.getAmountFrom());
         }).setHeader("Buy").setResizable(true).setSortable(true).setId("c.amountFrom");
@@ -218,8 +230,8 @@ public class CurrencyExchangeView extends LitTemplate implements BeforeEnterObse
                 currencyExchangeVO.setNew(true);
                 currencyExchangeVO.setCurrencyToId(currencyToSelect.getValue() == null ? null : currencyToSelect.getValue().getId());
                 currencyExchangeVO.setCurrencyFromId(currencyFromSelect.getValue() == null ? null : currencyFromSelect.getValue().getId());
-
-
+                currencyExchangeVO.setStartDateTime(startPickerFld.getValue());
+                currencyExchangeVO.setEndDateTime(endPickerFld.getValue());
                 currencyExchangeVO.setAmountFrom(fromAmountFld.getValue());
                 currencyExchangeVO.setAmountTo(toAmountFld.getValue());
                 currencyExchangeVO.setBusinessId(businessId);

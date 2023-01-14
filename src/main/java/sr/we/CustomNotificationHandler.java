@@ -3,10 +3,11 @@ package sr.we;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.client.HttpStatusCodeException;
-import sr.we.shekelflowcore.exception.*;
 import sr.we.shekelflowcore.exception.SecurityException;
+import sr.we.shekelflowcore.exception.*;
 import sr.we.ui.views.login.LoginView;
 
 public class CustomNotificationHandler {
@@ -21,7 +22,10 @@ public class CustomNotificationHandler {
 
 
                 // errors
-                if (throwable instanceof AuthenticationException exception) {
+                if (throwable instanceof AuthenticationServiceException exception) {
+                    notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+                    notification.setText("Invalid Login Credentials");
+                } else if (throwable instanceof AuthenticationException exception) {
                     notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
                     notification.setText("Could not Authenticate");
                 } else if (throwable instanceof FrameworkException exception) {
@@ -47,7 +51,7 @@ public class CustomNotificationHandler {
                     notification.setText(exception.getMessage());
                     notification.setDuration(5000);
                     notification.setPosition(Notification.Position.TOP_STRETCH);
-                } else if(throwable instanceof PrimaryThrowable exception){
+                } else if (throwable instanceof PrimaryThrowable exception) {
                     notification.addThemeVariants(NotificationVariant.LUMO_PRIMARY);
                     notification.setText(exception.getMessage());
                     notification.setDuration(5000);

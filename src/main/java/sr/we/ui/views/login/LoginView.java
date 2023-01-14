@@ -9,10 +9,12 @@ import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.SpringVaadinSession;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.WebAttributes;
 import sr.we.ContextProvider;
 import sr.we.CustomErrorHandler;
+import sr.we.CustomNotificationHandler;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.ThisUser;
 import sr.we.shekelflowcore.entity.helper.Token;
@@ -86,8 +88,9 @@ public class LoginView extends LoginOverlay implements BeforeLeaveObserver, Afte
             AuthenticationException ex = (AuthenticationException) sess.getAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
             if (ex == null) {
             } else {
+                CustomNotificationHandler.notify_(new AuthenticationServiceException("Invalid Login"));
                 sess.removeAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);// already reported so clear
-                throw ex;
+//                throw ex;
             }
         }
 

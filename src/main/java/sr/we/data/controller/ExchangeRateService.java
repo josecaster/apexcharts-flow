@@ -12,12 +12,14 @@ import sr.we.shekelflowcore.entity.CurrencyExchange;
 import sr.we.shekelflowcore.entity.helper.PagingResult;
 import sr.we.shekelflowcore.entity.helper.adapter.CurrencyExchangeBody;
 import sr.we.shekelflowcore.entity.helper.adapter.LocalDateAdapter;
+import sr.we.shekelflowcore.entity.helper.adapter.LocalDateTimeAdapter;
 import sr.we.shekelflowcore.entity.helper.vo.CurrencyExchangeVO;
 import sr.we.shekelflowcore.settings.Routes;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Controller
 public class ExchangeRateService extends MyController {
@@ -80,7 +82,7 @@ public class ExchangeRateService extends MyController {
 
 
         return encapsulate(() -> {
-            String body = new GsonBuilder().create().toJson(vo);
+            String body = new GsonBuilder().registerTypeAdapter(LocalDate.class, new LocalDateAdapter()).registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter()).create().toJson(vo);
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl = configProperties.getRest() + Routes.CURRENCY_EXCHANGE_CREATE;
             HttpEntity<String> httpEntity = getAuthHttpEntity(body, accessToken);
