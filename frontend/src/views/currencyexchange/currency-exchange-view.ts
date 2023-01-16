@@ -52,10 +52,10 @@ export class CurrencyExchangeView extends LitElement {
       <label slot="label">fx-rate</label>
       <vaadin-big-decimal-field id="to-amount-fld" style="width: 100%;"></vaadin-big-decimal-field>
      </vaadin-form-item>
-    </vaadin-form-layout>
-    <vaadin-horizontal-layout theme="spacing" style="width: 100%;" colspan="2">
      <vaadin-date-time-picker id="start-picker-fld" date-placeholder="Start date" helper-text="Fill in for historic exchange rates"></vaadin-date-time-picker>
      <vaadin-date-time-picker id="end-picker-fld" date-placeholder="End date" helper-text="Fill in for historic exchange rates"></vaadin-date-time-picker>
+    </vaadin-form-layout>
+    <vaadin-horizontal-layout theme="spacing" style="width: 100%;" colspan="2">
      <vaadin-button style="align-self: flex-end; margin-left:auto;" id="add-rate-btn" tabindex="0" theme="primary">
        Add rate 
      </vaadin-button>
