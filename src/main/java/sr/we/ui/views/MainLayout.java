@@ -181,6 +181,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
             businessId = businessId1;
         }
 
+
         if (!constructed) {
 //            UI current = UI.getCurrent();
 //            new Thread(() -> {
@@ -188,6 +189,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
 //            }).start();
             construct();
         }
+
 
 
         if (genMenu) {
@@ -222,7 +224,21 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
                 }
             }
         }
+        if ((StringUtils.isBlank(businessId) || businessId.equalsIgnoreCase("0")) ) {
+            if(!dialog.isOpened()) {
+                userCompanyProfile.click();
+            }
+            dialog.setModal(true);
+            dialog.setCloseOnEsc(false);
+            dialog.setCloseOnOutsideClick(false);
+            userCompanyProfile.cancel(false);
+            return;
+        }
 
+        dialog.setModal(false);
+        dialog.setCloseOnEsc(false);
+        dialog.setCloseOnOutsideClick(false);
+        userCompanyProfile.cancel(true);
     }
 
     @Override
@@ -381,21 +397,21 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
 
     @Override
     public void afterNavigation(AfterNavigationEvent event) {
+        if (StringUtils.isBlank(businessId) || businessId.equalsIgnoreCase("0")) {
+            return;
+        }
         breadCrumbLayout.removeAll();
         breadCrumbLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        BreadCrumb breadCrumb = event.getLocationChangeEvent().getRouteTargetChain().get(0).getClass()
-                .getAnnotation(BreadCrumb.class);
+        BreadCrumb breadCrumb = event.getLocationChangeEvent().getRouteTargetChain().get(0).getClass().getAnnotation(BreadCrumb.class);
         if (breadCrumb != null) {
             // get parent route and title
             Class<? extends Component> parentNavigationTarget = breadCrumb.parentNavigationTarget();
             if (parentNavigationTarget != BreadCrumb.NONE.class) {
                 List<RouteData> routes = RouteConfiguration.forSessionScope().getAvailableRoutes();
-                Optional<RouteData> optional = routes.stream()
-                        .filter(p -> p.getNavigationTarget() == parentNavigationTarget).findFirst();
+                Optional<RouteData> optional = routes.stream().filter(p -> p.getNavigationTarget() == parentNavigationTarget).findFirst();
                 BreadCrumb parentBreadcrumb = breadCrumb.parentNavigationTarget().getAnnotation(BreadCrumb.class);
                 String titleKey = parentBreadcrumb.titleKey();
-                Anchor anchor = new Anchor(optional.get().getTemplate(),
-                        getTranslation(titleKey));
+                Anchor anchor = new Anchor(optional.get().getTemplate(), getTranslation(titleKey));
 //                UIUtils.setTextColor("white", anchor);
                 Button back = new Button("Go Back");
                 back.addClickListener(f -> {

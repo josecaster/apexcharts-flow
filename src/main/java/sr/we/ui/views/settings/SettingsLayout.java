@@ -144,9 +144,9 @@ public class SettingsLayout extends AppLayout implements BeforeEnterObserver {
         return new MainLayout.MenuItemInfo[]{ //
                 new MainLayout.MenuItemInfo(getTranslation("sr.we.business"), "icons/menus/icons8_business_48px.png", BusinessView.class, false),
 
-                new MainLayout.MenuItemInfo(getTranslation("sr.we.general"), "icons/menus/icons8_contact_48px.png", GeneralView.class, false), //
-
-                new MainLayout.MenuItemInfo(getTranslation("sr.we.info"), "icons/menus/icons8_contact_details_48px.png", InfoFormView.class, false),
+//                new MainLayout.MenuItemInfo(getTranslation("sr.we.general"), "icons/menus/icons8_contact_48px.png", GeneralView.class, false), //
+//
+//                new MainLayout.MenuItemInfo(getTranslation("sr.we.info"), "icons/menus/icons8_contact_details_48px.png", InfoFormView.class, false),
                 new MainLayout.MenuItemInfo("Users and permissions", "icons/menus/icons8_users_48px.png", UsersAndPermissions.class, false)
 
 
