@@ -13,16 +13,14 @@ import sr.we.shekelflowcore.entity.helper.Token;
 import sr.we.shekelflowcore.security.PrivilegeModeAbstract;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.TransactionsPrivilege;
+import sr.we.ui.views.business.BusinessViewCreate;
 import sr.we.ui.views.dashboard.MainDashboardView;
 import sr.we.ui.views.login.NotActiveDialog;
 import sr.we.ui.views.person.PersonView;
 import sr.we.ui.views.personform.PersonFormView;
 
 import javax.annotation.security.RolesAllowed;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Route("u")
 @RolesAllowed({Role.user, Role.staff, Role.owner, Role.admin})
@@ -107,12 +105,14 @@ public class ReRouteLayout extends VerticalLayout implements BeforeEnterObserver
                 event.forwardTo(MainDashboardView.class, new RouteParameters(new RouteParam("business", business.getId().toString())));
             } else {
                 event.forwardTo(MainDashboardView.class, new RouteParameters(new RouteParam("business", "0")));
+//                event.forwardTo(BusinessViewCreate.class);
             }
         } else {
             if (business != null) {
                 event.forwardTo(MainLayout.class, new RouteParameters(new RouteParam("business", business.getId().toString())));
             } else {
                 event.forwardTo(MainLayout.class, new RouteParameters(new RouteParam("business", "0")));
+//                event.forwardTo(BusinessViewCreate.class);
             }
         }
 

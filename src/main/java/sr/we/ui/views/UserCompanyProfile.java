@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 public class UserCompanyProfile extends Button {
 
     private final ListBox<Long> listBox;
+    private final Button cancelButton;
     private List<Business> businesses;
     private boolean clear, clicked;
 
@@ -95,14 +96,14 @@ public class UserCompanyProfile extends Button {
         businessLayout.setWidthFull();
         dialog.add(businessLayout);
 
-        dialog.add(new Hr());
-
-        new Text("You are singed in as ");
-
-        RouterLink manageProfileLink = new RouterLink("Manage your profile", GeneralView.class);
-        HorizontalLayout profileLayout = new HorizontalLayout(new LineAwesomeIcon("la la-user-circle"), manageProfileLink);
-        profileLayout.setWidthFull();
-        dialog.add(profileLayout);
+//        dialog.add(new Hr());
+//
+//        new Text("You are singed in as ");
+//
+//        RouterLink manageProfileLink = new RouterLink("Manage your profile", GeneralView.class);
+//        HorizontalLayout profileLayout = new HorizontalLayout(new LineAwesomeIcon("la la-user-circle"), manageProfileLink);
+//        profileLayout.setWidthFull();
+//        dialog.add(profileLayout);
 
         AuthenticatedUser authenticatedUser = ContextProvider.getBean(AuthenticatedUser.class);
         Optional<ThisUser> maybeUser = authenticatedUser.get();
@@ -132,7 +133,7 @@ public class UserCompanyProfile extends Button {
 
         dialog.add(new Hr());
 
-        com.vaadin.flow.component.button.Button cancelButton = new com.vaadin.flow.component.button.Button("Cancel", e -> dialog.close());
+        cancelButton = new Button("Cancel", e -> dialog.close());
         dialog.getFooter().add(cancelButton);
         clear = false;
         addClickListener(e -> {
@@ -194,14 +195,14 @@ public class UserCompanyProfile extends Button {
             businesses = new ArrayList<>();
         }
         List<Long> collect = businesses.stream().map(MappedSuperClass::getId).collect(Collectors.toList());
-        collect.add(0, 0L);
+//        collect.add(0, 0L);
         listBox.setItems(collect);
         Business business = businessService.get(null, AuthenticatedUser.token());
 //        Optional<Business> max = businesses.stream().filter(f -> f.getCounter().compareTo(0L) != 0).max(Comparator.comparingLong(Business::getCounter));
         if (business != null) {
             listBox.setValue(business.getId());
         } else {
-            listBox.setValue(0L);
+//            listBox.setValue(0L);
         }
         listBox.addValueChangeListener(f -> {
             if(!clicked) {
@@ -212,5 +213,9 @@ public class UserCompanyProfile extends Button {
 
     public Long getListBox() {
         return listBox.getValue();
+    }
+
+    public void cancel(boolean b) {
+        cancelButton.setVisible(b);
     }
 }
