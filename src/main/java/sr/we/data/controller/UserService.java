@@ -2,10 +2,10 @@ package sr.we.data.controller;
 
 import com.google.gson.GsonBuilder;
 import org.springframework.http.*;
-import org.springframework.http.client.support.BasicAuthorizationInterceptor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.RestTemplate;
 import sr.we.shekelflowcore.entity.*;
+import sr.we.shekelflowcore.entity.helper.AuthRequest;
 import sr.we.shekelflowcore.entity.helper.adapter.InviteStaffVO;
 import sr.we.shekelflowcore.entity.helper.adapter.UsersRolesBody;
 import sr.we.shekelflowcore.entity.helper.vo.UserVO;
@@ -20,15 +20,19 @@ public class UserService extends MyController {
 
 
     public ThisUser authenticate(String username, String password) {
+        AuthRequest authRequest = new AuthRequest();
+        authRequest.setUsername(username);
+        authRequest.setPassword(password);
+        String body = new GsonBuilder().create().toJson(authRequest);
         RestTemplate restTemplate = new RestTemplate();
         //noinspection deprecation
-        restTemplate.getInterceptors().add(
-                new BasicAuthorizationInterceptor(username, password));
+//        restTemplate.getInterceptors().add(
+//                new BasicAuthorizationInterceptor(username, password));
         String fooResourceUrl
                 = configProperties.getRest() + Routes.USER_ME;
 
         return encapsulate(() -> {
-            ResponseEntity<ThisUser> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.GET, getHttpEntity(), ThisUser.class);
+            ResponseEntity<ThisUser> exchange = restTemplate.exchange(fooResourceUrl, HttpMethod.POST, getHttpEntity(body), ThisUser.class);
             return exchange.getBody();
         });
     }

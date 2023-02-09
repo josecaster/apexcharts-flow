@@ -18,7 +18,6 @@ import sr.we.shekelflowcore.entity.helper.vo.CustomerVO;
 import sr.we.shekelflowcore.exception.ValidationException;
 import sr.we.shekelflowcore.security.Privileges;
 import sr.we.shekelflowcore.security.privileges.CustomerPrivilege;
-import sr.we.shekelflowcore.security.privileges.TransactionsPrivilege;
 import sr.we.ui.views.business.BusinessView;
 import sr.we.ui.views.finance.loans.LoansView;
 
@@ -53,7 +52,7 @@ public class LTabCustomers extends VerticalLayout implements AfterNavigationObse
             if (firstSelectedItem.isPresent()) {
                 Customer loan = firstSelectedItem.get();
                 QueryParameters queryParameters = QueryParameters.fromString("id=" + loan.getId());
-                UI.getCurrent().navigate(LTabDashboard.getLocation(business, loan.getId().toString()), queryParameters);
+//                UI.getCurrent().navigate(LTabDashboard.getLocation(business, loan.getId().toString()), queryParameters);
             }
         });
         add(grid);

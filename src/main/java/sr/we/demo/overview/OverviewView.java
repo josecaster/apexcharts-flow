@@ -1,27 +1,14 @@
 package sr.we.demo.overview;
 
 
-import com.storedobject.chart.SOChart;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.grid.ColumnTextAlign;
-import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.select.Select;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
+//import com.storedobject.chart.SOChart;
 
 //@PageTitle("Overview")
 //@Route(value = "overview", layout = MainLayout.class)
 //@RolesAllowed({Role.user,Role.staff,Role.owner,Role.admin})
 public class OverviewView /*extends Main*/ {
 
-    public OverviewView() {
+    /*public OverviewView() {
         //addClassName("overview-view");
 
 //        Board board = new Board();
@@ -207,5 +194,5 @@ public class OverviewView /*extends Main*/ {
         }
         return theme;
     }
-
+*/
 }

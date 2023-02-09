@@ -157,6 +157,9 @@ public class Item {
     }
 
     private BigDecimal price() {
+        if(overridePrice && price != null){
+            return price;
+        }
         Items items = productOrService == null ? (posHeaderDetail == null ? null : posHeaderDetail.getServices()) : productOrService.getServices();
         if (posHeaderDetail != null && posHeaderDetail.getPrice() != null) {
             return posHeaderDetail.getPrice();
@@ -244,5 +247,14 @@ public class Item {
 
     public void setLocalDate(LocalDate localDate) {
         this.localDate = localDate;
+    }
+
+    public void setResult(BigDecimal result) {
+        this.result = result;
+    }
+private boolean overridePrice = false;
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+        overridePrice = true;
     }
 }

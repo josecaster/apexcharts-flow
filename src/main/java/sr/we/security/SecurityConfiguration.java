@@ -2,23 +2,21 @@ package sr.we.security;
 
 import com.vaadin.flow.server.HandlerHelper;
 import com.vaadin.flow.shared.ApplicationConstants;
-import com.vaadin.flow.spring.security.VaadinWebSecurityConfigurerAdapter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.stream.Stream;
 
 @EnableWebSecurity
 @Configuration
-public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
+public class SecurityConfiguration  {
 
     public static final String LOGOUT_URL = "/";
 
@@ -42,8 +40,10 @@ public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+
+//    @Override
+    @Bean
+    protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 //        SecurityContextHolder.setStrategyName(VaadinAwareSecurityContextHolderStrategy.class.getName());
 //        CsrfConfigurer var3 = http.csrf();
 //        var3.disable();
@@ -75,10 +75,10 @@ public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
                 .and().authorizeRequests().antMatchers("/").permitAll()
 
                 // Allow all requests by logged-in users.
-                .anyRequest().authenticated()
+                .anyRequest().authenticated().and().authenticationProvider(new CustomAuthenticationProvider()).formLogin()
 
                 // Configure the login page.
-                .and().formLogin()
+//                .and().formLogin()
                 .loginPage("/login").permitAll()
 //                .loginProcessingUrl("/login")
                 .defaultSuccessUrl("/u")
@@ -89,12 +89,13 @@ public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
 //
 //        super.configure(http);
 //        setLoginView(http, LoginView.class);
-
+return http.build();
     }
 
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers(
+//    @Override
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring().antMatchers(
                 // Client-side JS
                 "/VAADIN/**",
 
@@ -124,9 +125,9 @@ public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
 //        web.ignoring().antMatchers("/images/*.png");
     }
 
-    @Override
-    @Autowired
-    public void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(new CustomAuthenticationProvider());
-    }
+//    @Override
+//    @Autowired
+//    public void configure(AuthenticationManagerBuilder auth) throws Exception {
+//        auth.authenticationProvider(new CustomAuthenticationProvider());
+//    }
 }

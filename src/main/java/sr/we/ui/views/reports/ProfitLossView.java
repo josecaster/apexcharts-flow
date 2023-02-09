@@ -6,14 +6,16 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.formlayout.FormLayout.FormItem;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.FooterRow;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -27,7 +29,6 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.apache.commons.lang3.StringUtils;
-import org.vaadin.HTMLtoCANVAS.HTML2CANVAS;
 import sr.we.ContextProvider;
 import sr.we.data.controller.BusinessService;
 import sr.we.data.controller.JournalEntryService;
@@ -56,8 +57,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -142,27 +141,27 @@ public class ProfitLossView extends LitTemplate implements BeforeEnterObserver {
 
         UI current = UI.getCurrent();
         exportBtn.addClickListener(f -> {
-            CompletableFuture<String> completableFuture = HTML2CANVAS.takeScreenShot(ProfitLossView.this.tableLayout.getElement());
-            completableFuture.thenRun(() -> {
-                try {
-                    String src = completableFuture.get();
-//                    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(src.getBytes());
-                    current.access(() -> {
-
-                        Image image = new Image(src, "adfs");
-                        image.setWidth("1000px");
-                        Anchor docLink = new Anchor(/*new StreamResource("screenshot.png", () -> {
-                            return byteArrayInputStream;
-                        })*/src, "Download");
-                        docLink.getElement().setAttribute("download", "Screenshot_Profit_Loss_" + dateHeaderLbl.getText());
-
-                        Dialog dialog = new Dialog(image, docLink);
-//                        dialog.setSizeFull();
-                        dialog.open();
-                    });
-                } catch (InterruptedException | ExecutionException ignored) {
-                }
-            });
+//            CompletableFuture<String> completableFuture = HTML2CANVAS.takeScreenShot(ProfitLossView.this.tableLayout.getElement());
+//            completableFuture.thenRun(() -> {
+//                try {
+//                    String src = completableFuture.get();
+////                    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(src.getBytes());
+//                    current.access(() -> {
+//
+//                        Image image = new Image(src, "adfs");
+//                        image.setWidth("1000px");
+//                        Anchor docLink = new Anchor(/*new StreamResource("screenshot.png", () -> {
+//                            return byteArrayInputStream;
+//                        })*/src, "Download");
+//                        docLink.getElement().setAttribute("download", "Screenshot_Profit_Loss_" + dateHeaderLbl.getText());
+//
+//                        Dialog dialog = new Dialog(image, docLink);
+////                        dialog.setSizeFull();
+//                        dialog.open();
+//                    });
+//                } catch (InterruptedException | ExecutionException ignored) {
+//                }
+//            });
         });
 
         reportTab.removeAll();

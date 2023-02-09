@@ -1,7 +1,5 @@
 package sr.we.security;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -11,6 +9,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import sr.we.data.controller.UserService;
 import sr.we.shekelflowcore.entity.ThisUser;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -24,17 +26,19 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        ThisUser user = null;
-        try {
-            user = userService.authenticate(username, "");
-        } catch (Exception e) {
-            throw new UsernameNotFoundException("Invalid login");
-        }
-        if (user == null) {
-            throw new UsernameNotFoundException("No user present with username: " + username);
-        } else {
-            return user;
-        }
+        Optional<ThisUser> thisUser = AuthenticatedUser.get();
+        return thisUser.orElse(null);
+//        ThisUser user = null;
+//        try {
+//            user = userService.authenticate(username, "");
+//        } catch (Exception e) {
+//            throw new UsernameNotFoundException("Invalid login");
+//        }
+//        if (user == null) {
+//            throw new UsernameNotFoundException("No user present with username: " + username);
+//        } else {
+//            return user;
+//        }
     }
 
     public static List<GrantedAuthority> getAuthorities(ThisUser user) {

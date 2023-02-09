@@ -64,7 +64,7 @@ public class ExchangeRateService extends MyController {
     }
 
     public PagingResult<CurrencyExchange> list(String accessToken, CurrencyExchangeVO vo) {
-        Gson gson = new GsonBuilder().create();
+        Gson gson = new GsonBuilder().registerTypeAdapter(LocalDate.class, new LocalDateAdapter()).registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter()).create();
         String body = gson.toJson(vo);
         RestTemplate restTemplate = new RestTemplate();
         String fooResourceUrl = configProperties.getRest() + Routes.CURRENCY_EXCHANGE_LIST;

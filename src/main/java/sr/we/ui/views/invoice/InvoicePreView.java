@@ -4,7 +4,6 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.*;
@@ -21,12 +20,10 @@ import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import net.sf.jasperreports.engine.JRException;
 import org.apache.commons.lang3.StringUtils;
-import org.vaadin.HTMLtoCANVAS.HTML2CANVAS;
 import sr.we.ContextProvider;
 import sr.we.data.controller.InvoiceService;
 import sr.we.data.report.MyReportEngine;
 import sr.we.shekelflowcore.entity.Invoice;
-import sr.we.shekelflowcore.entity.InvoiceSetting;
 import sr.we.shekelflowcore.entity.PosHeader;
 import sr.we.shekelflowcore.settings.util.Constants;
 import sr.we.shekelflowcore.settings.util.DateUtil;
@@ -39,8 +36,6 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 /**
  * A Designer generated component for the invoice-pre-view template.

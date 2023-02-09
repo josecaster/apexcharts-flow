@@ -5,15 +5,13 @@ import com.github.appreciated.apexcharts.ApexChartsBuilder;
 import com.github.appreciated.apexcharts.config.DataLabels;
 import com.github.appreciated.apexcharts.config.NoData;
 import com.github.appreciated.apexcharts.config.XAxis;
-import com.github.appreciated.apexcharts.config.builder.*;
+import com.github.appreciated.apexcharts.config.builder.ChartBuilder;
+import com.github.appreciated.apexcharts.config.builder.GridBuilder;
+import com.github.appreciated.apexcharts.config.builder.StrokeBuilder;
+import com.github.appreciated.apexcharts.config.builder.XAxisBuilder;
 import com.github.appreciated.apexcharts.config.chart.Type;
 import com.github.appreciated.apexcharts.config.chart.builder.ZoomBuilder;
 import com.github.appreciated.apexcharts.config.grid.builder.RowBuilder;
-import com.github.appreciated.apexcharts.config.plotoptions.builder.PieBuilder;
-import com.github.appreciated.apexcharts.config.plotoptions.pie.builder.DonutBuilder;
-import com.github.appreciated.apexcharts.config.plotoptions.pie.builder.LabelsBuilder;
-import com.github.appreciated.apexcharts.config.plotoptions.pie.builder.NameBuilder;
-import com.github.appreciated.apexcharts.config.plotoptions.pie.builder.ValueBuilder;
 import com.github.appreciated.apexcharts.config.stroke.Curve;
 import com.github.appreciated.apexcharts.config.xaxis.Title;
 import com.github.appreciated.apexcharts.helper.Series;
@@ -80,11 +78,11 @@ public class MainDashboardView extends Main implements BeforeEnterObserver, Befo
     private static Div divProfitLoss;
     private final BsLayout board;
     private Long businessId;
-    private ApexChartsBuilder cashFlowChartsBuilder, profitLossChartBuilder,breakDownChartBuilder;
+    private ApexChartsBuilder cashFlowChartsBuilder, profitLossChartBuilder, breakDownChartBuilder;
     private Div div;
     private Business business;
     private Select<Year> year;
-    private Future<?> submit, submit1, submit2, submit3, submit4, submit5,submit6,submit7,submit8;
+    private Future<?> submit, submit1, submit2, submit3, submit4, submit5, submit6, submit7, submit8;
     private ExecutorService executorService;
     private Select<Year> yearProfitLoss;
     private Div divBreakDown;
@@ -426,13 +424,10 @@ public class MainDashboardView extends Main implements BeforeEnterObserver, Befo
             });
 
 
-
-
-
             submit8 = current.access(() -> {
                 breakDownChartBuilder = breakDownChartBuilder.withSeries(listSeries).withLabels(listLabels);
                 divBreakDown.removeAll();
-                if(listSeries.length== 0){
+                if (listSeries.length == 0) {
                     H2 h2 = new H2("No data present at the moment");
                     h2.setClassName(LumoUtility.TextColor.HEADER);
                     divBreakDown.add(h2);
@@ -541,7 +536,7 @@ public class MainDashboardView extends Main implements BeforeEnterObserver, Befo
 
     private Function<JournalsEntry, BigDecimal> getJournalsEntryBigDecimalFunction() {
         return g -> Objects.requireNonNull(g.getAccount().getAccountType().getType().getPlusMin(g.getDebCred())).compareTo(TransactionType.WITHDRAWAL) == 0//
-                        ? g.getAmount().multiply(BigDecimal.valueOf(-1)) : g.getAmount();
+                ? g.getAmount().multiply(BigDecimal.valueOf(-1)) : g.getAmount();
     }
 
 //    public Component createPayableAndOwingReport() {
@@ -609,7 +604,6 @@ public class MainDashboardView extends Main implements BeforeEnterObserver, Befo
             businessId = Long.valueOf(businessString);
             BusinessService businessService = ContextProvider.getBean(BusinessService.class);
             business = businessService.get(businessId, AuthenticatedUser.token());
-        
 
 
             String format = Constants.CURRENCY_FORMAT.format(BigDecimal.ZERO);

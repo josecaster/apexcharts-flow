@@ -93,14 +93,46 @@ public class ItemGrid extends Grid<Item> {
             });
             return numberField;
         }).setHeader("Quantity").setFlexGrow(0).setResizable(true);
-        Column<Item> price = addColumn(item -> {
+        Column<Item> price = addComponentColumn(item -> {
             BigDecimal calcPrice = item.getPrice();
-            return Constants.CURRENCY_FORMAT.format(calcPrice == null ? BigDecimal.ZERO : calcPrice);
+//            return Constants.CURRENCY_FORMAT.format(calcPrice == null ? BigDecimal.ZERO : calcPrice);
+            BigDecimalField numberField = new BigDecimalField();
+            numberField.setValue(calcPrice == null ? BigDecimal.ZERO : calcPrice);
+            numberField.setWidthFull();
+            numberField.setTooltipText(item.getProductOrService().getServices().getCurrency().getCode() + " "+Constants.CURRENCY_FORMAT.format(calcPrice == null ? BigDecimal.ZERO : calcPrice));
+            numberField.addValueChangeListener(event -> {
+                if (event.getValue() != null && event.getValue().compareTo(BigDecimal.ZERO) == 0)  {
+                    itemList.remove(item);
+                } else {
+                    item.setPrice(event.getValue() == null ? BigDecimal.ZERO : event.getValue());
+                }
+                execute.build(itemList);
+                getDataProvider().refreshAll();
+//                feeGrid.getDataProvider().refreshAll();//TODO
+            });
+            return numberField;
         }).setHeader("Price").setFlexGrow(0).setResizable(true).setSortable(true);
+        price.setWidth("150px");
         Column<Item> amount = addColumn(item -> {
             BigDecimal calcPrice = item.getResult();
             return Constants.CURRENCY_FORMAT.format(calcPrice == null ? BigDecimal.ZERO : calcPrice);
+//            BigDecimalField numberField = new BigDecimalField();
+//            numberField.setValue(calcPrice == null ? BigDecimal.ZERO : calcPrice);
+////            numberField.setMin(1);
+//            numberField.setWidth("150px");
+//            numberField.addValueChangeListener(event -> {
+//                if (event.getValue() != null && event.getValue().compareTo(BigDecimal.ZERO) == 0) {
+//                    itemList.remove(item);
+//                } else {
+//                    item.setResult(event.getValue() == null ? BigDecimal.ZERO : event.getValue());
+//                }
+//                execute.build(itemList);
+//                getDataProvider().refreshAll();
+////                feeGrid.getDataProvider().refreshAll();//TODO
+//            });
+//            return numberField;
         }).setHeader("Amount").setFlexGrow(0).setResizable(true).setSortable(true);
+        amount.setWidth("150px");
         addComponentColumn(item -> {
             LineAwesomeIcon lineAwesomeIcon = new LineAwesomeIcon("la la-times");
             lineAwesomeIcon.addClickListener(clickEvent -> {
