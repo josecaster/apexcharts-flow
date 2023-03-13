@@ -111,7 +111,7 @@ public class AccountView extends LitTemplate {
             if (!SystemAccounts.isSystemAccount(f.getSystemId())) {
                 lineAwesomeIcon.addClassName(LumoUtility.TextColor.PRIMARY);
                 lineAwesomeIcon.addClickListener(g -> {
-                    accountCreateEditView.setValue(f);
+                    accountCreateEditView.setValue(accountCodes,f);
                     dialog.open();
                 });
             } else {

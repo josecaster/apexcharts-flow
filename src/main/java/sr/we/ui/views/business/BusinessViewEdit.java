@@ -4,6 +4,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.router.*;
@@ -16,6 +17,7 @@ import sr.we.shekelflowcore.entity.Business;
 import sr.we.shekelflowcore.entity.Role;
 import sr.we.shekelflowcore.entity.helper.vo.BusinessVO;
 import sr.we.shekelflowcore.exception.ValidationException;
+import sr.we.ui.components.EmailAddress;
 import sr.we.ui.components.business.BusinessOrganisationTypeSelect;
 import sr.we.ui.components.business.BusinessTypeSelect;
 import sr.we.ui.components.general.BusinessCurrencySelect;
@@ -37,6 +39,7 @@ import java.util.concurrent.Executors;
 public class BusinessViewEdit extends StateListenerLayout implements HasDynamicTitle, BeforeEnterObserver {
 
     private final TextField companyName;
+    private final EmailField emailField;
     private final BusinessTypeSelect typeOfBusiness;
     private final CountrySelect country;
     private final BusinessCurrencySelect businessCurrency;
@@ -50,6 +53,9 @@ public class BusinessViewEdit extends StateListenerLayout implements HasDynamicT
         companyName = new TextField(getTranslation("sr.we.company.name"));
         companyName.setRequired(true);
         companyName.setRequiredIndicatorVisible(true);
+
+        emailField = new EmailAddress();
+        emailField.setRequiredIndicatorVisible(true);
 
         typeOfBusiness = new BusinessTypeSelect();
         typeOfBusiness.setRequiredIndicatorVisible(true);
@@ -80,8 +86,8 @@ public class BusinessViewEdit extends StateListenerLayout implements HasDynamicT
 
 
         FormLayout formLayout = new FormLayout();
-        formLayout.add(companyName, typeOfBusiness, country, businessCurrency, typeOfOrganization, upload, image);
-        state(companyName, typeOfBusiness, country, businessCurrency, typeOfOrganization);
+        formLayout.add(companyName,emailField, typeOfBusiness, country, businessCurrency, typeOfOrganization, upload, image);
+        state(companyName,typeOfBusiness,emailField, country, businessCurrency, typeOfOrganization);
         formLayout.getElement().getStyle().set("align-self", "center");
 
         formLayout.setWidth("500px");
@@ -105,6 +111,7 @@ public class BusinessViewEdit extends StateListenerLayout implements HasDynamicT
         vo.setCountry(country.getValue().getId());
         vo.setCurrency(businessCurrency.getValue().getId());
         vo.setName(companyName.getValue());
+        vo.setEmailAddress(emailField.getValue());
         vo.setId(business.getId());
 //        for (String filename : multiFileMemoryBuffer.getFiles()) {
 //            FileData fileData = multiFileMemoryBuffer.getFileData(filename);
@@ -150,6 +157,9 @@ public class BusinessViewEdit extends StateListenerLayout implements HasDynamicT
         if (companyName.isEmpty()) {
             return false;
         }
+        if (emailField.isEmpty()) {
+            return false;
+        }
         if (typeOfBusiness.getOptionalValue().isEmpty()) {
             return false;
         }
@@ -187,6 +197,7 @@ public class BusinessViewEdit extends StateListenerLayout implements HasDynamicT
                 typeOfOrganization.setValue(business.getBusinessOrganisationType());
                 country.setValue(business.getCountry());
                 businessCurrency.setValue(business.getCurrency());
+                emailField.setValue(business.getEmailAddress());
                 companyName.setValue(business.getName());
                 if (business.getImage() != null) {
                     image.setVisible(true);

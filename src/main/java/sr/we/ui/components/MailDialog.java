@@ -10,12 +10,12 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import org.apache.commons.lang3.StringUtils;
 import sr.we.security.AuthenticatedUser;
+import sr.we.shekelflowcore.entity.Business;
 import sr.we.shekelflowcore.entity.ThisUser;
-import sr.we.shekelflowcore.entity.helper.Executable;
 import sr.we.shekelflowcore.entity.helper.InterExecutable;
 import sr.we.shekelflowcore.entity.helper.vo.ApplicationMailQueueVO;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,7 +29,7 @@ public class MailDialog extends MyDialog {
     private final Checkbox sendCopyChk;
     private String username = "N.A";
 
-    public MailDialog(String header, InterExecutable<Object, ApplicationMailQueueVO> executable) {
+    public MailDialog(String header, InterExecutable<Object, ApplicationMailQueueVO> executable, Business business) {
 
         setMaxWidth("500px");
 
@@ -52,12 +52,12 @@ public class MailDialog extends MyDialog {
         messageFld.setWidthFull();
 
         replyToCmb.addValueChangeListener(f -> {
-           if(f.getValue() == null){
-               if(StringUtils.isNotBlank(username)) {
-                   replyToCmb.setValue(username);
-               }
-               return;
-           }
+            if (f.getValue() == null) {
+                if (StringUtils.isNotBlank(username)) {
+                    replyToCmb.setValue(username);
+                }
+                return;
+            }
             sendCopyChk.setLabel("Send a copy to myself at " + f.getValue());
         });
 
@@ -66,14 +66,22 @@ public class MailDialog extends MyDialog {
         sendCopyChk.setVisible(present);
         if (present) {
             ThisUser thisUser = thisUserOptional.get();
+            List<String> items = new ArrayList<>();
             username = thisUser.getUsername();
-            replyToCmb.setItems((thisUser.getPerson() == null || //
+            String base = username;
+
+            if (business != null && StringUtils.isNotBlank(business.getEmailAddress()) && !items.contains(business.getEmailAddress())) {
+                items.add(business.getEmailAddress());
+                base = business.getEmailAddress();
+            }
+            items.addAll((thisUser.getPerson() == null || //
                     thisUser.getPerson().getDefaultForms() == null || //
                     StringUtils.isBlank(thisUser.getPerson().getDefaultForms().getEmailAddress())) //
-                    ? List.of(username, thisUser.getPerson().getDefaultForms().getEmailAddress()) : List.of(username));
-            replyToCmb.setValue(username);
-        }
+                    ? List.of(username) : List.of(username, thisUser.getPerson().getDefaultForms().getEmailAddress()));
 
+            replyToCmb.setItems(items);
+            replyToCmb.setValue(base);
+        }
 
 
         FormLayout formLayout = new FormLayout();
@@ -82,7 +90,7 @@ public class MailDialog extends MyDialog {
         formLayout.addFormItem(subjectFld, "Subject");
         formLayout.addFormItem(messageFld, "Message");
         formLayout.addFormItem(sendCopyChk, "");
-        formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0px",1));
+        formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0px", 1));
         add(formLayout);
 
         Button closeButton = new Button(new Icon("lumo", "cross"), (e) -> {
@@ -106,17 +114,17 @@ public class MailDialog extends MyDialog {
 
     }
 
-    public ApplicationMailQueueVO getVO(){
+    public ApplicationMailQueueVO getVO() {
         ApplicationMailQueueVO applicationMailQueueVO = new ApplicationMailQueueVO();
         applicationMailQueueVO.setMailReplyTo(replyToCmb.getValue());
         applicationMailQueueVO.setMailTo(toFld.getValue());
         applicationMailQueueVO.setMailSubj(subjectFld.getValue());
         applicationMailQueueVO.setMailBody(messageFld.getValue());
-        applicationMailQueueVO.setMailToSelf(sendCopyChk.getValue() ? replyToCmb.getValue(): null);
+        applicationMailQueueVO.setMailToSelf(sendCopyChk.getValue() ? replyToCmb.getValue() : null);
         return applicationMailQueueVO;
     }
 
-    public void setValues(String to, String subj, String message){
+    public void setValues(String to, String subj, String message) {
         toFld.setValue(to);
         subjectFld.setValue(subj);
         messageFld.setValue(message);

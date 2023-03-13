@@ -9,13 +9,20 @@ import sr.we.ContextProvider;
 import sr.we.data.controller.AccountService;
 import sr.we.security.AuthenticatedUser;
 import sr.we.shekelflowcore.entity.Account;
+import sr.we.shekelflowcore.entity.AccountPaymentMethod;
+import sr.we.shekelflowcore.entity.PaymentMethod;
 import sr.we.shekelflowcore.entity.helper.Executable;
 import sr.we.shekelflowcore.entity.helper.vo.AccountVO;
 import sr.we.shekelflowcore.enums.ChartOfAccountTypes;
 import sr.we.ui.components.general.BankSelect;
 import sr.we.ui.components.general.BusinessCurrencySelect;
+import sr.we.ui.components.general.PaymentMethodGroup;
 import sr.we.ui.views.ReRouteLayout;
 import sr.we.ui.views.StateListenerLayout;
+
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class AccountNewLayout extends StateListenerLayout {
 
@@ -26,12 +33,16 @@ public class AccountNewLayout extends StateListenerLayout {
     private final BusinessCurrencySelect currencyFld;
     private final BankSelect bankSelect;
 
+    private final PaymentMethodGroup paymentMethodGroup;
+
     private final FormLayout layout;
+    private final FormLayout.FormItem paymentMethodItem;
 
     private String business;
 
     private String accountType;
     private Executable executable;
+    private Account account;
 
     public AccountNewLayout() {
         layout = new FormLayout();
@@ -43,9 +54,11 @@ public class AccountNewLayout extends StateListenerLayout {
         accountId = new TextField();
         currencyFld = new BusinessCurrencySelect();
         bankSelect = new BankSelect(null);
+        paymentMethodGroup = new PaymentMethodGroup();
         descriptionFld = new TextArea();
 
         bankSelect.setWidthFull();
+        paymentMethodGroup.setWidthFull();
         nameFld.setWidthFull();
         accountId.setWidthFull();
         currencyFld.setWidthFull();
@@ -53,6 +66,9 @@ public class AccountNewLayout extends StateListenerLayout {
 
         bankSelect.setLabel(null);
         bankSelect.setHelperText(null);
+
+        paymentMethodGroup.setLabel(null);
+        paymentMethodGroup.setHelperText(null);
 
         currencyFld.setLabel(null);
         currencyFld.setHelperText(null);
@@ -65,6 +81,7 @@ public class AccountNewLayout extends StateListenerLayout {
         // amount
 //        layout.addFormItem(bankSelect, getTranslation("sr.we.bank"));
         layout.addFormItem(currencyFld, getTranslation("sr.we.currency"));
+        paymentMethodItem = layout.addFormItem(paymentMethodGroup, getTranslation("sr.we.payment.methods"));
         layout.addFormItem(accountId, getTranslation("sr.we.account.id"));
         layout.addFormItem(descriptionFld, getTranslation("sr.we.account.description"));
 
@@ -73,9 +90,7 @@ public class AccountNewLayout extends StateListenerLayout {
         nameFld.setRequiredIndicatorVisible(true);
 
 
-
-
-        state(nameFld, accountId, currencyFld, bankSelect);
+        state(nameFld, accountId, currencyFld, bankSelect, paymentMethodItem);
 
         layout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
     }
@@ -92,6 +107,10 @@ public class AccountNewLayout extends StateListenerLayout {
         accountVO.setAccountTypeCode(accountType);
         accountVO.setBusiness(Long.valueOf(business));
         accountVO.setDescription(descriptionFld.getValue());
+        if (paymentMethodGroup.getValue() != null && !paymentMethodGroup.getValue().isEmpty()) {
+            List<Long> longs = paymentMethodGroup.getValue().stream().map(PaymentMethod::getId).toList();
+            accountVO.setPaymentMethods(longs);
+        }
 //        accountVO.setBank(bankSelect.getValue() == null ? null : bankSelect.getValue().getId());
 
         AccountService bean = ContextProvider.getBean(AccountService.class);
@@ -120,6 +139,7 @@ public class AccountNewLayout extends StateListenerLayout {
         currencyFld.clear();
         bankSelect.clear();
         descriptionFld.clear();
+        paymentMethodGroup.clear();
     }
 
     @Override
@@ -145,15 +165,11 @@ public class AccountNewLayout extends StateListenerLayout {
 
     public void setAccountTypeCode(String accountType) {
         this.accountType = accountType;
-        if (accountType.equalsIgnoreCase(ChartOfAccountTypes.CAB.name()) || accountType.equalsIgnoreCase(ChartOfAccountTypes.MIT.name())) {
-            currencyFld.setRequiredIndicatorVisible(true);
-        } else {
-            currencyFld.setRequiredIndicatorVisible(false);
-        }
+        currencyFld.setRequiredIndicatorVisible(accountType.equalsIgnoreCase(ChartOfAccountTypes.CAB.name()) || accountType.equalsIgnoreCase(ChartOfAccountTypes.MIT.name()));
+        paymentMethodItem.setVisible(accountType.equalsIgnoreCase(ChartOfAccountTypes.CAB.name()));
     }
 
-    private Account account;
-    public void setValue(Account account) {
+    public void setValue(ChartOfAccountTypes accountCodes, Account account) {
         this.account = account;
         nameFld.setValue(account.getName());
         accountId.setValue(StringUtils.isBlank(account.getAccountId()) ? "" : account.getAccountId());
@@ -161,6 +177,11 @@ public class AccountNewLayout extends StateListenerLayout {
         bankSelect.setValue(account.getBank());
         descriptionFld.setValue(StringUtils.isBlank(account.getDescription()) ? "" : account.getDescription());
         accountType = account.getAccountType().getCode().name();
+        paymentMethodGroup.clear();
+        if (account.getAccountPaymentMethods() != null && !account.getAccountPaymentMethods().isEmpty()) {
+            Set<PaymentMethod> collect = account.getAccountPaymentMethods().stream().map(AccountPaymentMethod::getPaymentMethod).collect(Collectors.toSet());
+            paymentMethodGroup.setValue(collect);
+        }
     }
 
     //    public void setLoanRequest(LoanRequest loanRequest) {

@@ -5,7 +5,6 @@ import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.textfield.BigDecimalField;
-import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -36,7 +35,6 @@ import sr.we.ui.components.general.CurrencySelect;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -281,6 +279,16 @@ public class TransactionForm extends FormLayout {
             }
         });
 
+        accountSelect.addValueChangeListener(f -> {
+           if(f.getValue() != null){
+               if(f.getValue().getAccountPaymentMethods() != null && !f.getValue().getAccountPaymentMethods().isEmpty()){
+                   paymentMethodSelect.barrier(f.getValue().getAccountPaymentMethods());
+                   return;
+               }
+           }
+            paymentMethodSelect.normal();
+        });
+
         // build
         FormItem payment_date = addFormItem(dateFld, "Payment date");
         FormItem memo = addFormItem(memoFld, "Description");
@@ -289,12 +297,12 @@ public class TransactionForm extends FormLayout {
 //        addFormItem(amountFld, "Amount");
         exchanged_amount = addFormItem(currencyAmountFld, "Amount");
         FormItem exchange_rate = addFormItem(exchangeRate, "Exchange rate");
-        addFormItem(paymentMethodSelect, "Payment method");
 //        VerticalLayout field = new VerticalLayout(accountSelect, convertedAmountLbl, receivedFld, changeLbl);
 //        field.setSpacing(false);
 //        field.setMargin(false);
 //        field.setPadding(false);
         addFormItem(accountSelect, "Account");
+        addFormItem(paymentMethodSelect, "Payment method");
         if (reference == null || referenceId == null) {
             category = addFormItem(categorySelect, "Category");
         }

@@ -233,7 +233,7 @@ public class InvoiceSummaryView extends LitTemplate implements BeforeEnterObserv
                     }
                 });
                 return null;
-            });
+            }, business2);
             String subj = "Invoice #" + invoice.getInvoiceNumber() + " From " + invoice.getBusiness().getName();
             String message = subj + " <br> " + invoice.getCurrencyTo().getCode() + " " + Constants.CURRENCY_FORMAT.format(invoice.getConvertedAmount());
             String emailTo = invoice.getCustomer() == null ? "" : //
